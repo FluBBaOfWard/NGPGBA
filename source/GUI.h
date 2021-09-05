@@ -1,0 +1,42 @@
+#ifndef GUI_HEADER
+#define GUI_HEADER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int emuSettings;
+extern u8 g_gammaValue;
+
+void setupGUI(void);
+void enterGUI(void);
+void exitGUI(void);
+void quickSelectGame(void);
+void nullUINormal(int key);
+void nullUIDebug(int key);
+void resetGame(void);
+
+void uiNullNormal(void);
+void uiMainMenu(void);
+void uiFile(void);
+void uiSettings(void);
+void uiController(void);
+void uiDisplay(void);
+void uiDipswitches(void);
+void uiAbout(void);
+void uiLoadGame(void);
+
+void controllerSet(void);
+void swapABSet(void);
+
+void scalingSet(void);
+void gammaSet(void);
+void fgrLayerSet(void);
+void bgrLayerSet(void);
+void sprLayerSet(void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // GUI_HEADER

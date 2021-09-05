@@ -1,0 +1,49 @@
+NGPGBA revision history
+-=-=-=-=-=-=-=-=-=-=-=-
+
+
+V0.5.0 - 2021-09-05 (FluBBa)
+	Started porting back to GBA DevkitPro.
+
+V0.4.8 - 2021-08-31 (FluBBa)
+	Added stereo sound.
+	Optimized VRAM transfers a bit.
+
+V0.4.7 - 2021-08-29 (FluBBa)
+	Various cpu fixes.
+	Fixed auto power on/off.
+
+V0.4.6 - 2021-08-22 (FluBBa)
+	Added a new border on game screen.
+	Added new setting to lower emulated cpu speed.
+	Tweaked cpu register usage.
+	Fixed MULA opcode.
+
+V0.4.5 - 2021-06-28 (FluBBa)
+	CPU working.
+	Memory working.
+	Graphics working.
+	Sound working.
+
+V0.4.0 - 2021-05-18 (FluBBa)
+	Started port to Nintendo DS.
+
+V0.3.0 - 2008-10-01 (FluBBa)
+	Fixed copy protection in "Metal Slug 2" (SNK logo in VRAM).
+	Fixed control problem in "Rockman Battle & Fighters" (MIRR opcode).
+	Fixed background glitch in "Memories of Pure" (HCount register).
+	Fixed problems with DMA probably affecting many games.
+
+V0.2.0 - 2008-09-04 (FluBBa)
+	Added speedhacks for a lot of games.
+	Added emulation of batteries & sub battery.
+	Added RTC alarm.
+	Added power button (SELECT).
+	Added D button (R) (check "Doko Demo Mahjong").
+	Fixed a couple of cpu bugs affecting "Metal Slug 1" and a couple of other games.
+
+V0.1.0 - 2008-07-04 (FluBBa)
+	Initial GBA release (NGPAdvance).
+
+V0.0.0 - 2008-04-02 (FluBBa)
+	Started Coding.

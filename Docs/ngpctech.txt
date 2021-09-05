@@ -1,0 +1,1057 @@
+
+-----------------------------------------------------------------------------
+NeoGeo Pocket Color Hardware Reference - This file is not 100% complete
+-----------------------------------------------------------------------------
+
+Specs :
+-----
+- 16-bit CPU TOSHIBA TLCS-900h at 6.144 Mhz
+- 8-bit CPU Z80 for sound at 3.072 Mhz
+- Screen size is 160x152 pixels
+- Two backgrounds with scrolling
+- 64 sprites
+- 4 colors/sprite and 4 colors/tile (including transparency color)
+- 48 palettes (16 for sprites, 16 for first screen and 16 for second screen)
+- There are 146 colors possible out of 4096 (colors in 444 RGB format)
+- 16kB WorkRAM, top 4kB for the Z80.
+- 12kB VRAM plus palettes and HW regs.
+- 4 Timers.
+- 4 DMA channels.
+- RTC?
+- Everything seem to be included in one chip, the SNK K2-Chip.
+
+
+My K2-CHIP has the designation T3W31AF-001, I've also seen T3W26AF-0103.
+- Is it a TMP95C063F ?
+
+
+
+
+Memory Map Summary:
+-------------------
+
+000000 -> 0000FF	CPU Internal RAM (Timers / DMA / RTC / IO / etc.)
+004000 -> 006BFF	Work RAM
+006C00 -> 006FFF	Bios work RAM
+007000 -> 007FFF	Z80 Shared RAM
+008000 -> 008FFF	Video registers
+009000 -> 00BFFF	Video RAM
+
+200000 -> 3FFFFF	ROM (GAME CARTRIDGE)
+800000 -> 9FFFFF	Extra ROM (for 32 Mbit games)
+FF0000 -> FFFFFF	BIOS
+
+-----------------------------------------------------------------------------
+
+=============================================================================
+000000 -> 000100	CPU Internal Registers (Timers/DMA/Z80)
+=====================================================
+
+			: Port control registers?
+0001 B		: ???	0x00 Written by Bios at reset?
+0004 B		: ???	0x00 Written by Bios at reset?
+0006 B		: ???	0xFF Written by Bios at reset?
+0009 B		: ???	0xFF Written by Bios at reset?
+000D B		: ???	0x08 Written by Bios at reset?
+0010 B		: ???	0x34 Written by Bios at reset?
+0011 B		: ???	0x3C Written by Bios at reset?
+0013 B		: ???	0xFF Written by Bios at reset?
+0015 B		: ???	0x3F Written by Bios at reset?
+0016 B		: ???	0x00 Written by Bios at reset?
+0017 B		: ???	0x00 Written by Bios at reset?
+0018 B	R/W	: ??? Port 8 (Serial) Register			0x3F Written by Bios at reset?
+001A B	W	: ??? Port 8 (Serial) Control Register	0x2D Written by Bios at reset?
+001B B	W	: ??? Port 8 (Serial) Function Register	0x01 Written by Bios at reset?
+001E B		: ???	0x03 Written by Bios at reset?
+001F B		: ???	0xB2 Written by Bios at reset?
+
+0020 B		: TRUN - Timer Operation Control Register
+				Bit 0 = Timer0 on/off
+				Bit 1 = Timer1 on/off
+				Bit 2 = Timer2 on/off
+				Bit 3 = Timer3 on/off
+				Bit 4 = ?
+				Bit 5 = ?
+				Bit 6 = ?
+				Bit 7 = Prescaler on/off
+0022 B		: TREG0 - Time Register 0 (Write only)
+0023 B		: TREG1 - Time Register 1 (Write only)
+0024 B		: T01MOD - Timer 0,1 Mode Register
+				Bit 0-1 = Timer0 source clock.
+					00 = External input.
+					01 = T1 Prescaler.
+					10 = T4 Prescaler.
+					11 = T16 Prescaler.
+				Bit 2-3 = Timer1 source clock.
+					00 = Input from timer0.
+					01 = T1 Prescaler.
+					10 = T16 Prescaler.
+					11 = T256 Prescaler.
+				Bit 4-5 = PWM cycle?
+					00 = Reserved?
+					01 = 2^6 Clock source?
+					10 = 2^7 Clock source?
+					11 = 2^8 Clock source?
+				Bit 6-7 = Operation mode?
+					00 = 2 8-bit timers.
+					01 = 16-bit timer?
+					10 =  8-bit PPG?
+					11 =  8-bit PWM (Timer0), 8-bit timer (Timer1).
+0025 B		: TFFCFR - 8 Bit Timer Flip-Flop Control Register
+		R/W		Bit 0 = Flip signal select, 0 = Flipped by Timer0, 1 = Flipped by Timer1.
+		R/W		Bit 1 = Invert on/off.
+		W		Bit 2-3 = TFF1 Control
+					00 = Invert TFF1.
+					01 = Set TFF1 to "1".
+					10 = Set TFF1 to "0".
+					11 = Don't care/change.
+		R/W		Bit 4 = Flip signal select, 0 = Flipped by Timer2, 1 = Flipped by Timer3.
+		R/W		Bit 5 = Invert on/off.
+		W		Bit 6-7 = TFF3 Control
+0026 B		: TREG2 - Time Register 2 (Write only)
+0027 B		: TREG3 - Time Register 3 (Write only)
+0028 B		: T23MOD - Timer 2,3 Mode Register
+				Bit 0-1 = Timer2 source clock.
+				Bit 2-3 = Timer3 source clock.
+				Bit 4-5 = PWM cycle? Preserved by bios.
+				Bit 6-7 = Operation mode?
+0029 B		: TRDC - Timer Register Double Buffer Control Register
+				Bit 0 = Timer0 double buffer on/off.
+				Bit 1 = Timer2 double buffer on/off.
+				Bit 2-7 = -
+
+002C B		: ???	0x0C Written by Bios at shutdown.
+002D B		: ???	0x0C Written by Bios at shutdown.
+002E B		: ???	0x4C Written by Bios at shutdown.
+002F B		: ???	0x4C Written by Bios at shutdown.
+
+003C B		: ??? MSAR0?	0x20 ChipSelect0 adr, 0x200000 ROM address?
+003D B		: ??? MAMR0?	0xFF ChipSelect0 mask, 2MB size?
+003E B		: ??? MSAR1?	0x80 ChipSelect1 adr, 0x800000 start address?
+003F B		: ??? MAMR1?	0x7F ChipSelect1 mask, 2MB size?
+
+0048 B		:
+
+0050 B		: Serial Buffer Data
+0051 B		: Serial Control (details ?)
+				Bit 0 = IO interface input clock selection, 0=Baud rate generator 1=SCLK0 pin input?
+				Bit 1 = Edge selection for SCLK0 pin (IO mode), 0=rising edge 1=falling edge?
+				Bit 2 = Error? Framing?
+				Bit 3 = Error? Parity?
+				Bit 4 = Error? Overrun?
+				Bit 5 = Parity addition, enable/disable?
+				Bit 6 = Parity, 0=odd 1=even?
+				Bit 7 = Received data bit8?
+0052 B		: Serial Mode Control 0 (details ?)
+				Bit 0-1 = Serial transmission clock (UART)?
+					00 = Timer 0 trigger?
+					01 = Baut rate generator?
+					10 = Internal clock f-sys?
+					11 = External clock (SCLK0 input)?
+				Bit 2-3 = Serial transmission mode?
+					00 = IO interface mode?
+					01 = 7-bit mode (UART)?
+					10 = 8-bit mode (UART)?
+					11 = 9-bit mode (UART)?
+				Bit 4 = Wakeup function (9-bit UART), enable/disable?
+				Bit 5 = Receive control, receive enable/disable?
+				Bit 6 = CTS on/off?
+				Bit 7 = Transfer data bit8?
+
+0053 B		: Baud Rate Generator 1 Control Register?
+				Bit 0-3 = Divisor for Baud rate generator?
+					0000 = Divide by 16?
+					0001 = Divide by 1 (no division, only in UART mode)?
+					 to
+					1111 = Divide by 15?
+				Bit 4-5 = Baud Rate Generator 1 input clock selection?
+					00 = T0 (4/fc)?
+					01 = T2 (16/fc)?
+					10 = T8 (64/fc)?
+					11 = T32 (256/fc)?
+				Bit 6 = -?
+				Bit 7 = 0?
+
+005C B		: ??? MSAR2?	0xFF ChipSelect2 adr?
+005D B		: ??? MAMR2?	0xFF ChipSelect2 mask?
+005E B		: ??? MSAR3?	0xFF ChipSelect3 adr?
+005F B		: ??? MAMR3?	0xFF ChipSelect3 mask?
+
+0060 W	R	: Battery status (AD), this is shifted down 6 steps by the bios before written to 6F80.
+				Bit 0    = A/D conversion data storage flag, 1=conversion result stored?
+				Bit 1-5  = 1?
+				Bit 6-15 = A/D conversion result.
+
+0068 B		: B0CS	0x17 Written by Bios at reset?
+				Bit 0-1 = timing
+				Bit 2 = width Byte / Word
+				Bit 4 = enable
+0069 B		: B1CS	0x17 Written by Bios at reset?
+				Bit 0-1 = timing
+				Bit 2 = width Byte / Word
+				Bit 4 = enable
+006A B		: B2CS	0x03 Written by Bios at reset?
+				Bit 0-1 = timing
+				Bit 2 = width Byte / Word
+				Bit 3 = mode
+				Bit 4 = enable
+006B B		: B3CS	0x03 Written by Bios at reset?
+				Bit 0-1 = timing
+				Bit 2 = width Byte / Word
+				Bit 3 = cas
+				Bit 4 = enable
+006C B		: BEXCS	0x02 Written by Bios at reset?
+				Bit 0-1 = timing
+				Bit 2 = width Byte / Word
+
+006D B		: ADMOD 0x04 Written by Bios in VBlank, battery measure/AD/INTAD.
+				Bit 0-1 = channel
+				Bit 2 = start, reads 0
+				Bit 3 = speed
+				Bit 4 = scan
+				Bit 5 = repeat
+				Bit 6 = busy
+				Bit 7 = end
+006E B		: Watchdog timer control?
+				Bit 0 = Pin control at STOP mode, 1 drives pin even during STOP mode?
+				Bit 1 = Internal reset on runaway?
+				Bit 2-3 = Selects HALT mode?
+					00 = RUN mode?
+					01 = STOP mode?
+					10 = IDLE1 mode?
+					11 = IDEL2 mode?
+				Bit 4 = Warmup time, 0=2^14/fc, 1=2^16/fc?
+				Bit 5-6 = Selects watchdog timer detection time?
+					00 = 2^16/fc?
+					01 = 2^18/fc?
+					10 = 2^20/fc?
+					11 = 2^22/fc?
+				Bit 7 = Watchdog enable/disable?
+				0xF0 Written by Bios at game bootup?
+				0x14 Written by Bios at startup.
+				0x04 Written by Bios at reset?
+				AND 0xF2, OR 0x14...
+				Bit 4 = Tested by vector 0x08 IRQ.
+
+006F B		: Watch Dog Timer.
+				Requires 0x4E to be written every 100ms otherwise the NGPC will reset.
+				0xB1   = Disable code.
+				0x4E   = Clear code.
+				Others = Dont care.
+
+0070 B		: RTC alarm/INTAD interrupt level
+				Bit 0-3 = RTC
+				Bit 4-7 = INTAD AD conversion (battery level) finished.
+0071 B		: VBL/Z80 interrupt level
+				Bit 0-3 = Vertical Blanking
+				Bit 4-7 = Z80
+0072 B		: INT7??? interrupt level
+				Bit 0-3 = ??? Not used.
+				Bit 4-7 = INT 0x0E? Used by "Auto clock speed regeneration with button presses", (Clock Gear Set).
+0073 B		: Timer 01 interrupt level:
+				Bit 0-3 = Timer 0
+				Bit 4-7 = Timer 1
+0074 B		: Timer 23 interrupt level:
+				Bit 0-3 = Timer 2
+				Bit 4-7 = Timer 3
+0075 B		: Timer 45 interrupt level?:
+				Bit 0-3 = Timer R 4?
+				Bit 4-7 = Timer R 5?
+0076 B		: Timer 67 interrupt level?:
+				Bit 0-3 = Timer R 6?
+				Bit 4-7 = Timer R 7?
+0077 B		: Serial0 interrupt level:
+				Bit 0-3 = Serial0 Transmit
+				Bit 4-7 = Serial0 Receive
+0078 B		: Serial1 interrupt level?:
+				Bit 0-3 = Serial1 Transmit?
+				Bit 4-7 = Serial1 Receive?
+0079 B		: DMA end interrupt level:
+				Bit 0-3 = Channel 0
+				Bit 4-7 = Channel 1
+007A B		: DMA end interrupt level:
+				Bit 0-3 = Channel 2
+				Bit 4-7 = Channel 3
+007B B		: Power button interrupt control	0x04 Written by Bios at reset/powerdown/illegal instr.?
+				Bit 0 = nmi.edge.rising
+				Bit 1 = int0.level.high
+				Bit 2 = int0.enable
+
+007C B		: Micro DMA0 start vector
+007D B		: Micro DMA1 start vector
+007E B		: Micro DMA2 start vector
+007F B		: Micro DMA3 start vector
+
+0080 B		: CPU Speed. Value 0-4 = 6.144MHz - 384KHz.
+
+0090 B		: RTC Control:
+				Bit 0 = Enable?
+				Bit 1 = Preserved during time set.
+				Bit 5-7 = Set after time set.
+0091 B		: RTC: Years (BCD)
+0092 B/W	: RTC: Months (BCD), Bios reads word, writes byte
+0093 B		: RTC: Days (BCD)
+0094 B/W	: RTC: Hours (BCD)
+0095 B		: RTC: Minutes (BCD)
+0096 B/W	: RTC: Seconds (BCD)
+0097 B		: RTC: Weekday / Leap Year
+				Bit 0-2 = Weekday (0=sunday, 6=saturday)
+				Bit 3	= -
+				Bit 4-5 = (Years % 4)
+				Bit 6-7 = -
+0098 B		: ALARM: Day (BCD)
+0099 B		: ALARM: Hour (BCD)
+009A B		: ALARM: Minute (BCD)
+009B B		: ALARM: Weekday / Leap Year?
+
+00A0 B		: Noise Channel (in direct mode)
+00A1 B		: Tone Channel (in direct mode)
+00A2 B		: Left DAC output
+00A3 B		: Right DAC output
+
+00B0 B		: Controller Status, 1 = pressed?
+				Bit 0 = "Up"
+				Bit 1 = "Down"
+				Bit 2 = "Left"
+				Bit 3 = "Right"
+				Bit 4 = "A"
+				Bit 5 = "B"
+				Bit 6 = "Option" (C button NeoGeo controller when connected)
+				Bit 7 = - (D button NeoGeo controller when connected)
+
+00B1 B		: Power Button?
+				Bit 0	= Power Button? 1=normal, 0=pushed
+				Bit 1	= Sub battery ok? 1=ok, 0=fail.
+				Bit 2-7 = ???
+
+00B2 B		: COMM status
+				Bit 0	= RTS: 1 = OFF, 0 = ON
+				Bit 1-7 = -
+
+00B3 B 		: ???
+				Bit 0-1	= ???
+				Bit 2	= Power button NMI on/off.
+				Bit 3-7 = ???
+
+00B4 W 		: ???	0x000A Written by Bios at startup.
+					0x00A0 written at Shutdown.
+
+00B6 W 		: ???	0x0050 compared, 0x0050 and 0x0005 set by Bios.
+
+00B8 B		: Sound Chip Activation, 
+				0x55 = ON,
+				0xAA = OFF
+
+00B9 B		: Z80 Activation, 
+				0x55 = ON,
+				0xAA = OFF
+
+00BA B		: Z80 NMI. When written to causes a NMI on the Z80.
+
+00BC B		: Z80 <-> TLCS-900h Communication Interface (See Z80 - 0x8000)
+
+
+=============================================================================
+004000 -> 006C00	Work RAM
+============================
+
+<== 6C00 : Top of stack, initial value of XSP
+
+
+
+=============================================================================
+006C00 -> 006FFF	BIOS Workspace
+==================================
+
+6C00 L		: Game's entrypoint / 0x00FF970A for bios menu.
+6C04 W		: Game's catalogue id / 0xFFFF for bios menu.
+6C06 B		: Game's sub-catalogue id / 0x00 for bios menu.
+6C08->6C13	: Game's name / "NEOGEOPocket" for bios menu.
+
+6C14 W		: Addition of 6C25-6C2B, 6F87 & 6F94. Check to see if setup is needed
+6C16 W		: Frame counter for "inactive" shutdown.
+6C18 W		: Frame counter for battery measure.
+6C1A W		: Frame compare for battery measure.
+6C1C W		: Counter for shutdown?
+6C1E W		: ?
+
+6C20 B		: Allow PowerButton shutdown? 0 = disallow.
+6C21 B		: Power Button last value?
+				Bit 0	= Power Button? 1=normal, 0=pushed
+				Bit 1	= Sub battery ok? 1= ok, 0=fail.
+				Bit 2-7 = ???
+6C22 B		: Sub battery counter?
+6C23 B		: ?
+
+6C24 B		: Readable copy of 0070.
+6C25 B		: Readable copy of 0071.
+6C26 B		: Readable copy of 0072.
+6C27 B		: Readable copy of 0073.
+6C28 B		: Readable copy of 0074.
+6C29 B		: Readable copy of 0077.
+6C2A B		: Readable copy of 0079.
+6C2B B		: Readable copy of 007A.
+
+6C2C B		: ??? 0x00 written everytime CPU speed (0x0080) is set.
+
+6C2D B		: 0x60?
+6C34 B		: RTC Alarm hour, BCD, used during setting.
+6C35 B		: RTC Alarm minute, BCD, used during setting.
+6C36 B		: RTC Alarm day of week
+
+6C3D B		: Tomorows day of month. Last day for alarm?
+6C3E B		: Tomorows day of month. Last day for alarm?
+6C3F B		: RTC Alarm hour, BCD, used when alarm on.
+6C40 B		: RTC Alarm minute, BCD, used when alarm on.
+6C41 B		: RTC Alarm day of week
+
+6C42 B		: Tomorows day of month. Last day for alarm?
+6C43 B		: RTC Alarm hour, BCD, used when alarm on (user/game?).
+6C44 B		: RTC Alarm minute, BCD, used when alarm on (user/game?).
+6C45 B		: RTC Alarm day of week
+
+6C46 B		: Enable RTC user IRQ, 0xFF = disable.
+6C47 B		: Alarm status internal?
+				00 = Alarm off.
+				01 = Alarm is setting/ongoing?
+				02 = Alarm is set/on.
+6C48 B		: Alarm status user/game?
+				00 = Alarm off.
+				01 = Alarm is setting/ongoing?
+				02 = Alarm is set/on.
+
+6C49-6C4C	: SWI 1 function pointer.
+
+6C55 B		: Game Type 
+				00 = Bios Menu (Catalogue == 0xFFFF)
+				01 = Game
+				02 = Developer mode? (Catalogue == 0xFFFE)
+
+6C57 B		: Copy of CPU Speed?
+				Bit 0-2 = Value 0-4 = 6.144MHz - 384KHz
+				Bit 3-5 = - ?
+				Bit 6-7 = !0 = Auto clock speed regeneration with panel switch input
+
+6C58 B		: EEPROM(LO) 'size' 
+				0x00 = Not present EEPROM(LO)
+				0x01 = 4Mbit
+				0x02 = 8Mbit
+				0x03 = 16Mbit
+6C59 B		: EEPROM(HI) 'size' 
+				0x00 = Not present EEPROM(HI)
+				0x01 = 4Mbit?
+				0x02 = 8Mbit?
+				0x03 = 16Mbit
+6C5A B		: Copy of byte 0x02 of the EEPROM(LO) manf.id.
+6C5B B		: Copy of byte 0x02 of the EEPROM(HI) manf.id. (bad == 01)
+6C5C B		: Copy of byte from 0x9FFFF7, compared to 0xCC
+6C5D B		: Copy of byte from 0x9FFFF8, compared to 0x33
+
+6C5F B		: Used by joypad reading routine (last value?).
+
+6C62 B		: Something during alarm set.
+6C63 B		: RTC month during alarm set.
+6C64 B		: RTC day of month during alarm set.
+6C65 B		: RTC hour during alarm set.
+6C66 B		: RTC minute during alarm set.
+6C67 B		: RTC second during alarm set.
+
+6C69 W		: Copy of catalogue id (0x6C04) (Last run game?).
+6C6B B		: Copy of sub-catalogue id (0x6C06) (Last run game?).
+6C6C->6C77	: Copy of Game's name (Last run game?).
+
+6C7A W		: ? Set to 0xA5A5 just before HALT, also set/compared to 0x5A5A
+6C7C W		: System running or halt? 0xA55A = Halt, 0x5AA5 = Running.
+
+6C7E B		: EEPROM valid?
+
+6C80-6CBF	: Serial Comms Transmit buffer?
+6CC0-6CFF	: Serial Comms Receive buffer?
+
+6D00 B		: Serial Comms flag?
+6D01 B		: Serial Comms flag?
+6D02 B		: Serial Comms flag?
+6D03 B		: Serial Comms flag?
+6D04 B		: Serial Comms flag?
+6D05 B		: Serial Comms status flag? 0xFF is Error?
+6D06 B		: Serial Comms flag?
+
+6D80-6D9F	: Z80 communication buffer.
+6DA0 B		: Z80 com buffer pointer, 0x00-0x1F.
+6DA1 B		: Z80 com buffer pointer compare?
+6DA2 B		: Z80 com buffer control?
+				Bit 0-4 = ???
+				Bit 5 = Use buffer? : 1 = yes, 0 = no
+				Bit 6 = ???
+				Bit 7 = Timer3 setup? : 1 = yes, 0 = no
+6DA3 B		: ??? not used?
+6DA4 B		: Inverted value of command sent to Z80?
+
+6E80 B		: ??? Watchdog running? Something to do with Gametype & Watchdog?
+
+6E82 W		: Copy of catalogue id (0x6C04)
+6E84 B		: Copy of sub-catalogue id (0x6C06)
+
+6E85 B		: Copy of COMM status (0xB2)
+
+6E86 B		: Flash Device ID / Size?
+				0x0A = 4Mbit?
+				0x12 = 8Mbit?
+				0x22 = 16Mbit?
+6E87 B		: Flash Manufacturer ID.
+				0x00 = Not present
+				0x01 = Toshiba
+				0x02 = Samsung
+				0x03 = Sharp
+
+6E88 B		: ???	0x01 Written at reset?
+
+6E8B B		: ???	Function pointer for System VBlank 7?
+				00 - 07 = Function
+
+6E95 W		: Reset RTC and more if not 0x4E50(/"NP"?)
+
+
+
+6F80 W		: Battery Voltage, Maximum value 0x3FF, see 0x0060.
+
+6F82 B		: Joypad Status
+				Bit 0 = "Up"
+				Bit 1 = "Down"
+				Bit 2 = "Left"
+				Bit 3 = "Right"
+				Bit 4 = "A"
+				Bit 5 = "B"
+				Bit 6 = "Option" (C button NeoGeo controller when connected)
+				Bit 7 = -  (D button NeoGeo controller when connected)
+
+6F83 B		: Boot something? 0x00 Bios UI running.
+				Bit 3 = ??? Set at shutdown, tested in Bios VBlank.
+				Bit 4 = Bios setup.
+				Bit 6 = Game playing.
+6F84 B		: User Boot
+				Bit 0-4 = 0
+				Bit 5 = "Resume" startup: 1 = yes, 0 = no
+				Bit 6 = "Power On" startup: 1 = yes, 0 = no
+				Bit 7 = "Alarm" startup: 1 = yes, 0 = no
+6F85 B		: User Shutdown
+				Bit 0-4 = 0
+				Bit 5 = "Battery" shutdown request: 1 = yes, 0 = no
+				Bit 6 = "Inactive" shutdown request: 1 = yes, 0 = no
+				Bit 7 = "Power Off" shutdown request: 1 = yes, 0 = no
+6F86 B		: User Answer
+				Bit 0-4 = 0
+				Bit 5 = ??? Tested in Bios VBlank regarding Serial transmission.
+				Bit 6 = "Inactive" shutdown operation: 1 = exists, 0 = doesn't
+				Bit 7 = "Resume" operation: 1 = exists, 0 = doesn't
+
+6F87 B		: User setting - Language
+				0x00 = Japanese
+				0x01 = English
+
+6F88 B		: CPU Speed.
+				Bit 0-2 = Value 0-4 = 6.144MHz - 384KHz
+				Bit 3-5 = - ?
+				Bit 6-7 = !0 = Auto clock speed regeneration with panel switch input
+
+6F89 B		: Battery bits?
+				Bit 0-5	= ???
+				Bit 6	= Battery going low?: 1 = yes, 0 = no
+				Bit 7	= Battery measurement ongoing?: 1 = yes, 0 = no
+
+6F8A B		: Sub Battery Status?
+				Bit 0-6	= ???
+				Bit 7	= Sub battery status?: 1 = fail, 0 = ok.
+
+6F8B B		: User birth day - Year (in hex)
+6F8C B		: User birth day - Month (in hex)
+6F8D B		: User birth day - Day (in hex)
+
+6F8E B		: User setting - Daylight saving time
+				Bit 1	= DST: 1 = yes, 0 = no.
+				Bit 2-7	= ???
+
+6F8F B		: User setting - Time zone
+				0x00 = LONDON
+				0x01 = RIO
+				0x02 = NY
+				0x03 = MEXICO
+				0x04 = LA
+				0x05 = HAWAII
+				0x06 = TOKYO
+				0x07 = HONG KONG
+				0x08 = BANGKOK
+				0x09 = MOSCOW
+				0x0A = ATHENS
+				0x0B = PARIS
+
+6F90 B		: Game Display Mode ?
+				0x00 = Mono mode
+				0x10 = Color mode
+
+6F91 B		: Operating System Version
+				0x00 = Neogeo Pocket Classic (Black & White)
+				0x10 = Neogeo Pocket Color
+
+6F92 B		: Copy of EEPROM(LO) size (0x6C58)
+6F93 B		: Copy of EEPROM(HI) size (0x6C59)
+
+6F94 B		: User setting - Palette for mono games.
+				0x00 = Black & White
+				0x01 = Red
+				0x02 = Green
+				0x03 = Blue
+				0x04 = Classic
+
+6F95 B		: Current Display Mode (see 0x87E2)
+				0x00 = Mono mode
+				0x10 = Color mode
+
+6FB8 L		: 00:Software Interrupt (SWI 3)
+6FBC L		: 01:Software Interrupt (SWI 4)
+6FC0 L		: 02:Software Interrupt (SWI 5)
+6FC4 L		: 03:Software Interrupt (SWI 6)
+6FC8 L		: 04:RTC Alarm Interrupt					(uDMA start = 0x0A)
+6FCC L		: 05:Vertical Blanking Interrupt			(uDMA start = 0x0B)
+6FD0 L		: 06:Interrupt from Z80						(uDMA start = 0x0C)
+6FD4 L		: 07:Timer Interrupt (8 bit timer 0)		(uDMA start = 0x10)
+6FD8 L		: 08:Timer Interrupt (8 bit timer 1)		(uDMA start = 0x11)
+6FDC L		: 09:Timer Interrupt (8 bit timer 2)		(uDMA start = 0x12)
+6FE0 L		: 10:Timer Interrupt (8 bit timer 3)		(uDMA start = 0x13)
+6FE4 L		: 11:Serial Transmission Interrupt			(uDMA start = 0x18)
+6FE8 L		: 12:Serial Reception Interrupt				(uDMA start = 0x19)
+6FEC L		: 13:(reserved)
+6FF0 L		: 14:End Micro DMA Int (MicroDMA 0)
+6FF4 L		: 15:End Micro DMA Int (MicroDMA 1)
+6FF8 L		: 16:End Micro DMA Int (MicroDMA 2)
+6FFC L		: 17:End Micro DMA Int (MicroDMA 3)
+
+
+
+
+=============================================================================
+007000 -> 007FFF	Sound RAM
+=============================
+
+< Z80 ADDRESSES >
+
+0000 -> 0FFF : Shared RAM, mapped to 0x7000 - 0x7FFF in TLCS-900h space
+
+4000 B	: Noise Channel & Right Volume.
+4001 B	: Tone Channel & Left Volume.
+
+8000 B	: Z80 <-> TLCS-900h Communication Interface (See TLCS900h - 0x00BC)
+
+C000 B	: Write any value to this address to start the Z80 interrupt
+			in the TLCS-900h code.
+
+
+
+=============================================================================
+008000 -> 00BFFF	Video registers
+=============================
+
+8000 B		: Interrupt Control Register
+				Bit 0-5 = 0
+				Bit 6 = H.Int permitted? set = yes
+				Bit 7 = V.Int permitted? set = yes
+
+8002 B		: Window Horizontal Origin
+8003 B		: Window Vertical Origin
+8004 B		: Window X Size (0xA0 at reset)
+8005 B		: Window Y Size (0x98 at reset)
+
+8006 B		: Frame Rate Register (0xC6 at reset, readonly)
+
+8008 B		: Raster Position Horizontal
+8009 B		: Raster Position Vertical
+8010 B		: Character Over / Vblank Status
+				Bit 0-5 = 0
+				Bit 6 = VBlank Status 
+						0 = displaying
+						1 = V.Blanking
+				Bit 7 = Character Over
+						0 = false
+						1 = C.Ovr has occured
+
+8012 B		: NEG / OOWC Setting
+				Bit 0-2 = Outside Window Colour (0 at reset)
+				Bit 3-6 = - (Exists as reserved RAM)
+				Bit 7 = Negative & Positive Switched 
+						0 = Normal (default)
+						1 = Switched
+
+8020 B		: Sprite Plane Scroll X (0 at reset)
+8021 B		: Sprite Plane Scroll Y (0 at reset)
+
+8030 B		: Scroll Priority Register
+				Bit 0-6 = -
+				Bit 7 = 0 = Scroll 1 in front (default)
+						1 = Scroll 2 in front
+
+8032 B		: Scroll 1 Scroll X (0 at reset)
+8033 B		: Scroll 1 Scroll Y (0 at reset)
+8034 B		: Scroll 2 Scroll X (0 at reset)
+8035 B		: Scroll 2 Scroll Y (0 at reset)
+
+8100->8107	: Sprite Palette Table (Mono, 2 x 4 entry palettes (Shade = bit 0-2 of byte))
+8108->810F	: Scroll 1 Palette Table (Mono, 2 x 4 entry palettes (Shade = bit 0-2 of byte))
+8110->8117	: Scroll 2 Palette Table (Mono, 2 x 4 entry palettes (Shade = bit 0-2 of byte))
+
+8118 B		: Background Colour Register
+				Bit 0-2 = Background colour (0 at reset)
+				Bit 3-5 = - (Exists as reserved RAM)
+				Bit 6-7 = Background On 
+							= 0/0 at reset
+							= 0/1 sets Background Colour valid (0x80 + x),
+								other combinations are invalid.
+
+8200->827F	: Sprite Palette Table (Colour, 16 x 4 entry palettes)
+8280->82FF	: Scroll 1 Palette Table (Colour, 16 x 4 entry palettes)
+8300->837F	: Scroll 2 Palette Table (Colour, 16 x 4 entry palettes)
+8380->839F	: Mono Sprite Colour Palette (2 x 8 entry palettes)
+83A0->83BF	: Mono Scroll 1 Colour Palette (2 x 8 entry palettes)
+83C0->83DF	: Mono Scroll 2 Colour Palette (2 x 8 entry palettes)
+83E0->83EF	: Background Colour Palette (1 x 8 entry palettes)
+83F0->83FF	: Window Colour Palette (1 x 8 entry palettes)
+				Bit 0-3 = Red
+				Bit 4-7 = Green
+				Bit 8-11 = Blue
+				Bit 12-15 = 0
+
+8400 B		: LED Control Register
+				Bit 0-2 = Always 1 (so LED is not disabled by program crash)
+				Bit 3-7 = Value 0x07 ~ 0xFE = LED Flash (See below)
+						Value 0xFF = LED Allways On?
+						Battery fail writes 0x17
+						SubBattery fail writes 0x07
+
+8402 B		: LED Flash Cycle - Value * 10.6ms is the flash cycle.
+				Default = 0x80 at reset (1.3S).
+						Battery fail writes 0x30
+						SubBattery fail writes 0x10
+
+
+87E0 B		: 2D software reset - Write 0x52 to reset?, otherwise ignored.
+				Reset writes 0x53 & 0x47.
+				Bios compares with 0x01.
+
+87E2 B		: Mode Selection Register
+				Bit 0-6 = 0
+				Bit 7 = Mode
+						0 = K2GE Colour mode
+						1 = K1GE upper palette compatible mode
+
+87F0 B		: Extra Register Write access.
+				0xAA = Allowed,
+				0x55 = Denied
+
+87F2 B		: ??? 0x00 written at shutdown.
+
+87F4 B		: ??? 0x80 written at shutdown.
+
+87FE B		: Input Port Register (Reserved)
+				Bit 0-5 = 1
+				Bit 6 = input hi/lo
+				Bit 7 = 0
+
+8800->88FF	: Sprites (64 x 4 bytes)
+
+				Byte[0] = Tile number (lower 8 bits of 9)
+
+				Byte[1]:
+				--------
+				Bit 0 = Tile number (9th bit)
+				Bit 1 = Vertical postion chain (0 = Normal, 1 = Offset)
+				Bit 2 = Horizontal position chain (0 = Normal, 1 = Offset)
+				Bit 3-4 = Priority (00 = Hide, 01 = Far, 10 = Mid, 11 = Top)
+				Bit 5 = Palette code (K1GE upper palette comp. mode)
+				Bit 6 = Vertical Flip (0 = Normal, 1 = Flipped)
+				Bit 7 = Horizontal Flip (0 = Normal, 1 = Flipped)
+
+				Byte[2] = X position / (offset in chain mode)
+				Byte[3] = Y position / (offset in chain mode)
+
+8C00->8C3F	: Sprite Palette Numbers (64 sprites x 1 byte)
+
+				Bit 0-3 = Sprite palette selection (0 - 15)
+				Bit 4-7 = 0
+
+9000->9800	: Scroll 1 Map
+				32 x 32 tiles
+					1 tile = 2 bytes
+					1st byte TTTTTTTT
+					2nd byte HVBPPPPT
+						H=horizontal flipping (1 bit)
+						V=vertical flipping (1 bit)
+						B=palette selection for Black&White games
+						P=palette number (0..15) (4 bits)
+						T=tile number into Pattern Table (9 bits)
+
+9800->A000	: Scroll 2 Map, see Scroll 1 Map
+
+A000->BFFF	: Pattern Table
+				512 tiles
+					1 tile = 8 x 8 pixels (= 16 bytes)
+					4 pixels @ 2BPP = 1 byte (Pixel:Bit ordering: 10 32 54 76)
+
+=============================================================================
+Cart ROM Header Info
+=============================
+ ADDRESS   LENGTH     CONTENT
+ 0x200000  28 Bytes   Software cassette recognition code *
+ 0x20001C   4 Bytes   Software cassette startup address (Specify in little endian)
+ 0x200020   2 Bytes   Software cassette ID code **(Specify in little endian BCD)
+ 0x200022   1 Byte    Software cassette ID sub-code (version)
+ 0x200023   1 Byte    Compatible system code (Monochrome = 0x00 / Color = 0x10)
+ 0x200024  12 Bytes   Software cassette title name (Specify in ASCII)
+ 0x200030  16 Bytes   (Reserved: please write in 0)
+
+ * Software recognition code
+  " COPYRIGHT BY SNK CORPORATION" (SNK use) or
+  "  LICENSED BY SNK CORPORATION" (Third party use)
+ ** Software provisional development ID code = 0x0000
+
+  The last 1 block (16KB) of the software cassette is reserved
+ for the system program.  Please DO NOT use this area for
+ program code, data or backup area.
+
+=============================================================================
+CPU notes
+=============================
+
+Interrupt sources:
+	SWI 0,				vector 0x00,	address 0xFFFF00, Reset vector.
+	SWI 1,				vector 0x01,	address 0xFFFF04, default vector interrupt.
+	SWI 2,				vector 0x02,	address 0xFFFF08, illegal instruction interrupt.
+	SWI 3,				vector 0x03,	address 0xFFFF0C
+	SWI 4,				vector 0x04,	address 0xFFFF10
+	SWI 5,				vector 0x05,	address 0xFFFF14
+	SWI 6,				vector 0x06,	address 0xFFFF18
+	SWI 7,				vector 0x07,	address 0xFFFF1C
+
+	PowerButton,		vector 0x08,	address 0xFFFF20, NMI
+	INTWD?,				vector 0x09,	address 0xFFFF24, watch dog timer (NMI)?
+	RTC Alarm,			vector 0x0A,	address 0xFFFF28
+	Vertical Blanking,	vector 0x0B,	address 0xFFFF2C
+	Z80,				vector 0x0C,	address 0xFFFF30
+	INT6? unused,		vector 0x0D,	address 0xFFFF34
+	INT7?,				vector 0x0E,	address 0xFFFF38, joypad interrupt?
+	??? unused,			vector 0x0F,	address 0xFFFF3C
+	Timer 0,			vector 0x10,	address 0xFFFF40
+	Timer 1,			vector 0x11,	address 0xFFFF44
+	Timer 2,			vector 0x12,	address 0xFFFF48
+	Timer 3,			vector 0x13,	address 0xFFFF4C
+	INTTR4? unused,		vector 0x14,	address 0xFFFF50
+	INTTR5? unused,		vector 0x15,	address 0xFFFF54
+	INTTR6? unused,		vector 0x16,	address 0xFFFF58
+	INTTR7? unused,		vector 0x17,	address 0xFFFF5C
+	Serial TX0,			vector 0x18,	address 0xFFFF60
+	Serial RX0,			vector 0x19,	address 0xFFFF64
+	Serial TX1 unused,	vector 0x1A,	address 0xFFFF68
+	Serial RX1 unused,	vector 0x1B,	address 0xFFFF6C
+	INTAD,				vector 0x1C,	address 0xFFFF70, battery AD interrupt.
+	DMA0 End,			vector 0x1D,	address 0xFFFF74
+	DMA1 End,			vector 0x1E,	address 0xFFFF78
+	DMA2 End,			vector 0x1F,	address 0xFFFF7C
+	DMA3 End,			vector 0x20,	address 0xFFFF80
+
+NEOGEO POCKET SYSTEM CALL (BIOS CALL)
+=====================================
+
+  NEOGEO POCKET system calls are subroutines prepared to
+ allow changes to settings managed by the system program, allow
+ access to flash memory (for NEOGEO POCKET), allow serial
+ communication and other special tasks.
+
+
+ VECT_SHUTDOWN         :       0x00 Shutdown (Power OFF)
+ VECT_CLOCKGEARSET     :       0x01 CPU operation clock setting
+ VECT_RTCGET           :       0x02 Real time clock - obtain time
+ VECT_RTCSET           :       0x03 Real time clock - set time
+ VECT_INTLVSET         :       0x04 Interrupt level setting
+ VECT_SYSFONTSET       :       0x05 System font setting
+ VECT_FLASHWRITE       :       0x06 Flash memory - data write
+ VECT_FLASHALLERS      :       0x07 Flash memory - erase all blocks
+ VECT_FLASHERS         :       0x08 Flash memory - erase specified blocks
+ VECT_ALARMSET         :       0x09 Real time clock - alarm setting during game operation
+ VECT_RESERVED0        :       0x0A 
+ VECT_ALARMDOWNSET     :       0x0B Real time clock - unit start up alarm setting
+ VECT_UNKNOWN          :       0x0C 
+ VECT_FLASHPROTECT     :       0x0D Flash memory - protect specified blocks
+ VECT_GEMODESET        :       0x0E Color LCD color mode setting (color version only)
+ VECT_RESERVED1        :       0x0F 
+
+ (Serial Communication)
+ VECT_COMINIT          :       0x10 Initialize serial communication BIOS
+ VECT_COMSENDSTART     :       0x11 Communication start send BIOS
+ VECT_COMRECEIVESTART  :       0x12 Communication start reception BIOS
+ VECT_COMCREATEDATA    :       0x13 Communication create send data BIOS
+ VECT_COMGETDATA       :       0x14 Communication obtain reception data BIOS
+ VECT_COMONRTS         :       0x15 Communication allow RTS signal send BIOS
+ VECT_COMOFFRTS        :       0x16 Communication prohibit RTS signal send BIOS
+ VECT_COMSENDSTATUS    :       0x17 Communication obtain send status BIOS
+ VECT_COMRECEIVESTATUS :       0x18 Communication obtain reception status BIOS
+ VECT_COMCREATEBUFDATA :       0x19 Communication obtain create data buffer BIOS
+ VECT_COMGETBUFDATA    :       0x1A Communication write reception obtaining buffer BIOS
+
+=============================================================================
+
+INT_CLR_BIT            equ     7       ; Interrupt request clear bit
+
+;User Boot defines
+
+BOOTB_ALARM            equ     7       ; 0:no alarm startup   1:alarm startup
+BOOTB_POWER            equ     6       ; 0:no power startup   1:power startup
+BOOTB_RESUME           equ     5       ; 0:no resume startup  1:resume startup
+
+BOOTF_ALARM            equ     80h     ; 0:no alarm startup   1:alarm startup
+BOOTF_POWER            equ     40h     ; 0:no power startup   1:power startup
+BOOTF_RESUME           equ     20h     ; 0:no resume startup  1:resume startup
+
+;User Shutdown defines
+
+SHUTDOWNB_MP           equ     7       ; power off shutdown request (0= no request, 1 = requested)
+SHUTDOWNB_TIME         equ     6       ; long time no use shutdown request (0= no request, 1 = requested)
+SHUTDOWNB_BAT          equ     5       ; main power use shutdown (0= no request, 1 = requested)
+
+SHUTDOWNF_MP           equ     80h     ; power off shutdown request (0= no request, 1 = requested)
+SHUTDOWNF_TIME         equ     40h     ; long time no use shutdown request (0= no request, 1 = requested)
+SHUTDOWNF_BAT          equ     20h     ; main power use shutdown (0= no request, 1 = requested)
+
+;User Answer defines
+
+ANSWERB_RESUME         equ     7       ; resume operation (0=none, 1=exists)
+ANSWERB_TIME           equ     6       ; long time no use shutdown operation (0=none, 1=exists)
+
+ANSWERF_RESUME         equ     80h     ; resume operation (0=none, 1=exists)
+ANSWERF_TIME           equ     40h     ; long time no use shutdown operation (0=none, 1=exists)
+
+; *** Shutdown (Power OFF) ***
+; Entry:
+;    rw3 = VECT_SHUTDOWN
+; Exit:
+;    NGP is powered off.
+;
+
+
+; *** CPU operation clock setting ***
+; Entry:
+;    rw3 = VECT_CLOCKGEARSET
+;    rb3 = CPU Speed Setting (0=6.144MHz, 1=3.072MHz, 2=1.536MHz, 3=768KHz, 4 = 384KHz)
+;    rc3 = Auto Clock Speed Regeneration with button presses (0=no, >0=yes)
+; Exit:
+;    CPU speed is changed.
+;
+
+
+; *** Sets the interrupt level ***
+; Entry:
+;    rw3 = VECT_INTLVSET
+;    rb3 = Interrupt Level (0-5)
+;    rc3 = Interrupt # to be set (0-9)
+;
+
+
+; *** Real time clock - obtain time ***
+; Entry:
+;    rw3 = VECT_RTCGET
+;    xhl3 = Pointer to RAM to return time.
+; Exit:
+;    Values returned in Binary Coded Decimal (BCD).
+;    (Ptr+0) = Year  (00-90=2000~2090, 91-99=1991~1999)
+;    (Ptr+1) = Month (1-12)
+;    (Ptr+2) = Day   (1-31)
+;    (Ptr+3) = Hours (0-23)
+;    (Ptr+4) = Mins  (0-59)
+;    (Ptr+5) = Secs  (0-59)
+;    (Ptr+6) = Upper 4 bits: leap year (0-3) (0=leap year, 1 = 1 year after, etc)
+;              Lower 4 bits: DayOfWeek (0-6) (0=Sun, 1=Mon, 2=Tue, 3=Wed, etc)
+;
+
+
+; *** Real time clock - Set Alarm ***
+; Entry:
+;    rw3 = VECT_ALARMSET
+;    qc3 = Day    (Error if other than 1-31 or 0ffh)
+;    rb3 = Hour   (Error if other than 0-23 or 0ffh)
+;    rc3 = Minute (Error if other than 0-59 or 0ffh)
+; Exit:
+;    ra3 = SYS_SUCCESS or SYS_FAILURE
+;
+
+
+; *** Real time clock - Set Power ON Alarm ***
+; Entry:
+;    rw3 = VECT_ALARMDOWNSET
+;    qc3 = Day    (Error if other than 1-31 or 0ffh)
+;    rb3 = Hour   (Error if other than 0-23 or 0ffh)
+;    rc3 = Minute (Error if other than 0-59 or 0ffh)
+; Exit:
+;    ra3 = SYS_SUCCESS or SYS_FAILURE
+;
+
+
+; *** System font setting ***
+; Entry:
+;    rw3 = VECT_SYSFONTSET
+;    ra3 = Upper 4 bits: Specify palette code for transparency (0-3)
+;          Lower 4 bits: Specify palette for font (0-3)
+; Exit:
+;    Copy 256 system font characters to Character RAM from $A000-$AFFF.
+;
+
+
+; *** Write data to flash memory ***
+; Entry:
+;    rw3 = VECT_FLASHWRITE
+;    ra3 = Flash Memory Address (0=$200000, 1=$800000)
+;    rbc3 = Transfer byte number (transfer in multiples of 256: 1=256, 2=512, etc)
+;    xhl3 = Transfer from Address
+;    xde3 = Transfer to Address
+; Exit:
+;    ra3 = SYS_SUCCESS if ok, other values are an error.
+;
+
+
+; *** Erase all blocks of flash memory (except protected areas) ***
+; Entry:
+;    rw3 = VECT_FLASHALLERS
+;    ra3 = Flash Memory Address (0=$200000, 1=$800000)
+; Exit:
+;    ra3 = SYS_SUCCESS if ok, other values are an error.
+;
+
+
+; *** Erase block of flash memory (except protected areas) ***
+; Entry:
+;    rw3 = VECT_FLASHERS
+;    ra3 = Flash Memory Address (0=$200000, 1=$800000)
+;    rb3 = Block Number
+; Exit:
+;    ra3 = SYS_SUCCESS if ok, other values are an error.
+;
+
+
+; *** Protect blocks of flash memory ***
+; Entry:
+;    rw3 = VECT_FLASHPROTECT
+;    ra3 = 1
+;    rb3 = Start block number for protect
+;    rc3 = Flash memory type (0=4MBit, 1=8MBit, 2=16MBit)
+;    rd3 = Number of blocks to protect
+; Exit:
+;    ra3 = SYS_SUCCESS if ok, other values are an error.
+;
+
+
+; *** Set the display mode ***
+; Entry:
+;    rw3 = VECT_GEMODESET
+;    ra3 = Mode setting (0=K1GE, 10h=K2GE)
+; Exit:
+;    Display mode is set.
+;
+
+
+=============================================================================

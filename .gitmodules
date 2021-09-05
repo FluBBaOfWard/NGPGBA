@@ -1,0 +1,12 @@
+[submodule "source/TLCS900H"]
+	path = source/TLCS900H
+	url = https://github.com/FluBBaOfWard/TLCS900H.git
+[submodule "source/ARMZ80"]
+	path = source/ARMZ80
+	url = https://github.com/FluBBaOfWard/ARMZ80.git
+[submodule "source/Shared"]
+	path = source/Shared
+	url = https://github.com/FluBBaOfWard/GBA_Shared.git
+[submodule "source/K2GE"]
+	path = source/K2GE
+	url = https://github.com/FluBBaOfWard/K2GE.git

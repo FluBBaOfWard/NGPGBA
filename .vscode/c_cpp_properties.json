@@ -1,0 +1,84 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/local/include",
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/build",
+                "/opt/devkitpro/libgba/include",
+                "/opt/devkitpro/devkitARM/arm-none-eabi/include",
+                "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/10.2.0/include"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/local/include",
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/include",
+                    "${workspaceFolder}/build",
+                    "/opt/devkitpro/libgba/include",
+                    "/opt/devkitpro/devkitARM/arm-none-eabi/include",
+                    "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/10.2.0/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceFolder}/include"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceFolder}/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "E:/devkitPro/devkitARM/arm-none-eabi/include",
+                "E:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/10.2.0/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "ARM7",
+                "WIN32"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/include",
+                    "E:/devkitPro/devkitARM/arm-none-eabi/include",
+                    "E:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/10.2.0/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

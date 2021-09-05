@@ -1,0 +1,93 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "stop emulation",
+            "type": "shell",
+            "windows": {
+                "command": "taskkill /im mGBA.exe /F"
+            },
+            "osx": {
+                "command": "killall mGBA"
+            }
+        },
+        {
+            "label": "make debug",
+            "type": "process",
+            "command": "make",
+            "args": [
+                "DEBUG=1"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "make release",
+            "type": "process",
+            "command": "make",
+            "args": [
+                "DEBUG=0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean"
+        },
+        {
+            "label": "gdb-debug",
+            "type": "shell",
+            "dependsOn": [
+                "make debug"
+            ],
+            "isBackground": false,
+            "windows": {
+                "command": "C:/mGBA/mGBA.exe -g ${workspaceFolder}/${workspaceFolderBasename}.gba;sleep 5;echo debuggerReady"
+            },
+            "osx": {
+                "command": "open /Applications/mGBA.app --args -g ${workspaceFolder}/${workspaceFolderBasename}.gba;sleep 3;echo debuggerReady;echo debuggerReady"
+            },
+            "presentation": {
+                "clear": true,
+                "reveal": "always",
+                "panel": "new"
+            },
+            "command": "debuggerReady",
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^.*debuggerReady.*$",
+                        "endsPattern": "^.*debuggerReady.*$"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "run",
+            "type": "shell",
+            "isBackground": true,
+            "windows": {
+                "command": "C:/NO$GBADebugger/NO$GBA.exe  ${workspaceFolder}/${workspaceFolderBasename}.elf",
+            },
+            "osx": {
+                "command": "open /Applications/mGBA.app --args ${workspaceFolder}/${workspaceFolderBasename}.gba"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
