@@ -29,7 +29,7 @@
 	.syntax unified
 	.arm
 
-	.section .text
+	.section .ewram,"ax"
 	.align 2
 ;@----------------------------------------------------------------------------
 ioReset:

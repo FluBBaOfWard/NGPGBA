@@ -13,7 +13,7 @@
 	.syntax unified
 	.arm
 
-	.section .text
+	.section .ewram
 	.align 2
 ;@----------------------------------------------------------------------------
 ngpFlashInit:			;@ Only need to be called once
@@ -248,7 +248,7 @@ FlashEraseBlock:
 	add r0,r0,r2
 	mov r2,r1			;@ Length
 	mov r1,#-1
-	bl memset
+	bl memset_
 	b FlashSetRead
 
 FlashEraseChip:

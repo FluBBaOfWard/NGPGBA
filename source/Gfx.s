@@ -74,7 +74,7 @@ gfxReset:					;@ Called with CPU reset
 	mov r1,#REG_BASE
 	ldr r0,=0x30D0				;@ start-end
 	strh r0,[r1,#REG_WIN0H]
-	ldr r0,=0x1400+(SCREEN_HEIGHT+GAME_HEIGHT)/2	;@ start-end
+	ldr r0,=0x0800+(SCREEN_HEIGHT+GAME_HEIGHT)/2	;@ start-end
 	strh r0,[r1,#REG_WIN0V]
 
 	mov r0,#0x003F				;@ WinIN0, Everything enabled inside Win0
@@ -105,6 +105,11 @@ gfxReset:					;@ Called with CPU reset
 
 	ldmfd sp!,{pc}
 
+;@----------------------------------------------------------------------------
+k2GEReset0:			;@ r0=periodicIrqFunc, r1=frameIrqFunc, r2=frame2IrqFunc, r3=model
+;@----------------------------------------------------------------------------
+	ldr geptr,=k2GE_0
+	b k2GEReset
 ;@----------------------------------------------------------------------------
 monoPalInit:
 	.type monoPalInit STT_FUNC
@@ -195,12 +200,14 @@ gammaConvert:	;@ Takes value in r0(0-0xFF), gamma in r1(0-4),returns new value i
 	mov r0,r0,lsr#13
 
 	bx lr
+
+	.section .ewram,"ax"
 ;@----------------------------------------------------------------------------
 paletteTxAll:				;@ Called from ui.c
 	.type paletteTxAll STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
-	adr geptr,k2GE_0
+	ldr geptr,=k2GE_0
 	ldr r2,=0x1FFE
 	ldr r3,[geptr,#paletteRAM]	;@ Colour palette
 	ldr r7,[geptr,#paletteMonoRAM]	;@ Mono palette
@@ -319,10 +326,13 @@ updateLED:
 	bx lr
 
 ;@----------------------------------------------------------------------------
+	.section .iwram, "ax", %progbits	;@ For the GBA
+;@----------------------------------------------------------------------------
 vblIrqHandler:
 	.type vblIrqHandler STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r8,lr}
+//	bl vblSound1
 	bl calculateFPS
 
 	mov r6,#REG_BASE
@@ -333,7 +343,7 @@ vblIrqHandler:
 	ldmia r2!,{r4-r5}			;@ Read
 	add r3,r6,#REG_BG0HOFS		;@ DMA0 always goes here
 	stmia r3,{r4-r5}			;@ Set 1st value manually, HBL is AFTER 1st line
-	ldr r4,=0x96600002			;@ noIRQ hblank 32bit repeat incsrc inc_reloaddst, 2 word
+	ldr r4,=0xA6600002			;@ noIRQ hblank 32bit repeat incsrc inc_reloaddst, 2 word
 	stmia r1,{r2-r4}			;@ DMA0 go
 
 	add r1,r6,#REG_DMA3SAD
@@ -353,7 +363,8 @@ vblIrqHandler:
 	adr geptr,k2GE_0
 	ldrb r0,[geptr,#kgeBGPrio]
 	tst r0,#0x80
-	ldr r0,GFX_BG0CNT
+	ldr r0,=GFX_BG0CNT
+	ldr r0,[r0]
 	orrne r0,r0,#0x00001
 	orreq r0,r0,#0x10000
 	str r0,[r6,#REG_BG0CNT]
@@ -374,7 +385,9 @@ vblIrqHandler:
 nothingNew:
 
 	bl scanKeys
-	ldmfd sp!,{r4-r8,pc}
+//	bl vblSound2
+	ldmfd sp!,{r4-r8,lr}
+	bx lr
 
 
 ;@----------------------------------------------------------------------------
@@ -434,11 +447,6 @@ dmaScroll:		.long SCROLLBUFF2
 
 frameDone:		.long 0
 ;@----------------------------------------------------------------------------
-k2GEReset0:			;@ r0=periodicIrqFunc, r1=frameIrqFunc, r2=frame2IrqFunc, r3=model
-;@----------------------------------------------------------------------------
-	adr geptr,k2GE_0
-	b k2GEReset
-;@----------------------------------------------------------------------------
 k2GE_0R:					;@ K2GE read, 0x8000-0x8FFF
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{geptr,lr}
@@ -459,6 +467,7 @@ k2GE_0W:					;@ K2GE write, 0x8000-0x8FFF
 k2GE_0:
 	.space k2GESize
 ;@----------------------------------------------------------------------------
+	.section .ewram, "ax"
 
 gfxState:
 adjustBlend:

@@ -4,6 +4,7 @@
 #include "Shared/EmuMenu.h"
 #include "Shared/AsmExtra.h"
 #include "GUI.h"
+#include "bios.h"
 #include "EmuFont.h"
 #include "Cart.h"
 #include "cpu.h"
@@ -53,9 +54,13 @@ int main(int argc, char **argv) {
 	irqEnable(IRQ_VBLANK);
 
 	setupGraphics();
-	machineInit();
 	setupGUI();
 	getInput();
+
+	if ( g_BIOSBASE_COLOR == NULL ) {
+		installHleBios(biosSpace);
+	}
+	machineInit();
 	loadCart(0);
 
 	while (1) {
@@ -129,8 +134,10 @@ static void setupGraphics() {
 			| WIN0_ON
 			);
 
-	REG_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(2) | BG_TILE_BASE(1) | BG_PRIORITY(1);
-	REG_BG1CNT = TEXTBG_SIZE_512x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(2);
+	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(1);
+	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(1);
+	REG_BG0CNT = GFX_BG0CNT;
+	REG_BG1CNT = GFX_BG1CNT;
 
 	REG_WIN0H = 0x0000+SCREEN_WIDTH;		// Horizontal start-end
 	REG_WIN0V = 0x0000+SCREEN_HEIGHT;		// Vertical start-end

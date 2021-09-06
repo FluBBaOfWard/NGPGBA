@@ -12,22 +12,22 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2021-09-05"
+#define EMUVERSION "V0.5.0 2021-09-06"
 
 const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
 
 const fptr fnList0[] = {uiDummy};
-const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, gbaSleep, resetGame};
+const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, gbaSleep, resetGame};
 const fptr fnList2[] = {ui8, loadState, saveState, saveSettings, resetGame};
 const fptr fnList3[] = {autoBSet, autoASet, controllerSet, swapABSet};
 const fptr fnList4[] = {scalingSet, flickSet, gammaSet, fgrLayerSet, bgrLayerSet, sprLayerSet};
 const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, debugTextSet, sleepSet};
-const fptr fnList7[] = {uiDummy};
-const fptr fnList8[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
-const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList7, fnList8};
-const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList7), ARRSIZE(fnList8)};
+const fptr fnList6[] = {uiDummy};
+const fptr fnList7[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
+const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7};
+const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7)};
 const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiAbout, uiLoadGame};
-const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
+const u8 menuXback[] = {0,0,1,1,1,1,1,2};
 
 int emuSettings = 1;
 u8 g_gammaValue = 0;
@@ -52,17 +52,10 @@ void setupGUI() {
 
 /// This is called when going from emu to ui.
 void enterGUI() {
-//	setPaletteCount(14);
 }
 
 /// This is called going from ui to emu.
 void exitGUI() {
-//	if (g_debugSet) {
-//		setPaletteCount(15);
-//	}
-//	else {
-//		setPaletteCount(16);
-//	}
 }
 
 void quickSelectGame() {
@@ -92,7 +85,6 @@ void uiMainMenu() {
 	drawMenuItem("Controller->");
 	drawMenuItem("Display->");
 	drawMenuItem("Settings->");
-	drawMenuItem("DipSwitches->");
 	drawMenuItem("Help->");
 	drawMenuItem("Sleep");
 	drawMenuItem("Restart");
@@ -103,13 +95,11 @@ void uiMainMenu() {
 
 void uiAbout() {
 	setupSubMenu("Help");
-	drawText("Select:   Insert coin",3);
-	drawText("Start:    Start button",4);
-	drawText("DPad:     Move character",5);
-	drawText("Up:       Climb up",6);
-	drawText("Down:     Crouch/climb down",7);
-	drawText("B:        Attack",8);
-	drawText("A:        Jump",9);
+	drawText("Select:   Power Button",3);
+	drawText("Start:    Option Button",4);
+	drawText("DPad:     Joystick",5);
+	drawText("B:        A Button",6);
+	drawText("A:        B Button",7);
 
 	drawText(" NGPDS        " EMUVERSION, 15);
 	drawText(" ARMZ80       " ARMZ80VERSION, 16);

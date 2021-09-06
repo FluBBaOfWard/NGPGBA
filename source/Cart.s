@@ -35,9 +35,9 @@
 	.section .rodata
 	.align 2
 
-//ROM_Space:
+ROM_Space:
 //	.incbin "ngproms/Bust-A-Move Pocket (U).ngc"
-//	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
+	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
 //	.incbin "ngproms/Evolution - Eternal Dungeons (E).ngc"
 //	.incbin "ngproms/Fantastic Night Dreams Cotton (E).ngc"
 //	.incbin "ngproms/Fatal Fury F-Contact (JUE) (M2).ngc"
@@ -59,9 +59,9 @@ machineInit: 	;@ Called from C
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
 
-//	ldr r7,=ROM_Space
 	ldr r0,=romSpacePtr
-	ldr r7,[r0]
+	ldr r7,=ROM_Space
+	str r7,[r0]
 							;@ r7=rombase til end of loadcart
 	ldr t9optbl,=tlcs900HState
 	str r7,[t9optbl,#romBaseLo]
