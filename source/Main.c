@@ -1,4 +1,5 @@
 #include <gba.h>
+#include <string.h>
 
 #include "Main.h"
 #include "Shared/EmuMenu.h"
@@ -6,6 +7,7 @@
 #include "GUI.h"
 #include "bios.h"
 #include "EmuFont.h"
+#include "NGPBorder.h"
 #include "Cart.h"
 #include "cpu.h"
 #include "Gfx.h"
@@ -129,15 +131,18 @@ static void setupGraphics() {
 			| OBJ_1D_MAP
 			| BG0_ON
 			| BG1_ON
+			| BG2_ON
 			| BG3_ON
 			| OBJ_ON
 			| WIN0_ON
+			| WIN1_ON
 			);
 
-	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(1);
-	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(1);
+	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(2);
+	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(2);
 	REG_BG0CNT = GFX_BG0CNT;
 	REG_BG1CNT = GFX_BG1CNT;
+	REG_BG2CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(2) | BG_256_COLOR | BG_TILE_BASE(1) | BG_PRIORITY(3);
 
 	REG_WIN0H = 0x0000+SCREEN_WIDTH;		// Horizontal start-end
 	REG_WIN0V = 0x0000+SCREEN_HEIGHT;		// Vertical start-end
@@ -147,10 +152,17 @@ static void setupGraphics() {
 	REG_BG3CNT = TEXTBG_SIZE_512x256 | BG_MAP_BASE(6) | BG_TILE_BASE(0) | BG_PRIORITY(0);
 	menuMap = (u16 *)SCREEN_BASE_BLOCK(6);
 
+	LZ77UnCompVram(NGPBorderTiles, CHAR_BASE_ADR(1));
+	LZ77UnCompVram(NGPBorderMap, MAP_BASE_ADR(2));
 	LZ77UnCompVram(EmuFontTiles, (void *)VRAM+0x2400);
 	setupMenuPalette();
+	setupBorderPalette();
 }
 
 void setupMenuPalette() {
 	convertPalette(&EMUPALBUFF[0xE0], guiPalette, 32, g_gammaValue);
+}
+
+void setupBorderPalette() {
+	memcpy(EMUPALBUFF, NGPBorderPal, NGPBorderPalLen);
 }

@@ -56,6 +56,7 @@ void enterGUI() {
 
 /// This is called going from ui to emu.
 void exitGUI() {
+	setupBorderPalette();
 }
 
 void quickSelectGame() {

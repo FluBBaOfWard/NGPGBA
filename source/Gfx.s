@@ -72,9 +72,9 @@ gfxReset:					;@ Called with CPU reset
 	bl memclr_					;@ Clear GFX regs
 
 	mov r1,#REG_BASE
-	ldr r0,=0x30D0				;@ start-end
+	ldr r0,=0x28C8				;@ start-end
 	strh r0,[r1,#REG_WIN0H]
-	ldr r0,=0x0800+(SCREEN_HEIGHT+GAME_HEIGHT)/2	;@ start-end
+	ldr r0,=0x0400+(SCREEN_HEIGHT+GAME_HEIGHT)/2	;@ start-end
 	strh r0,[r1,#REG_WIN0V]
 
 	mov r0,#0x003F				;@ WinIN0, Everything enabled inside Win0
@@ -82,7 +82,7 @@ gfxReset:					;@ Called with CPU reset
 	strh r0,[r1,#REG_WININ]
 	mov r0,#0x002C				;@ WinOUT, BG2, BG3 & COL enabled outside Windows.
 	strh r0,[r1,#REG_WINOUT]
-	ldr r0,=0x14AC30D0
+	ldr r0,=0x049C28C8
 	strh r0,[r1,#REG_WIN1H]
 	mov r0,r0,lsr#16
 	strh r0,[r1,#REG_WIN1V]
@@ -319,9 +319,9 @@ updateLED:
 	ldrb r0,[geptr,#kgeLedOnOff]
 	tst r0,#0x01
 	ldr r0,=BG_GFX+0x1000
-	ldr r1,[r0,#64*24]
+	ldr r1,[r0,#64*20]
 	movne r1,r1,ror#16
-	add r0,r0,#0x104
+	add r0,r0,#0x84
 	strh r1,[r0]
 	bx lr
 
@@ -332,7 +332,7 @@ vblIrqHandler:
 	.type vblIrqHandler STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r8,lr}
-//	bl vblSound1
+	bl vblSound1
 	bl calculateFPS
 
 	mov r6,#REG_BASE
@@ -385,7 +385,7 @@ vblIrqHandler:
 nothingNew:
 
 	bl scanKeys
-//	bl vblSound2
+	bl vblSound2
 	ldmfd sp!,{r4-r8,lr}
 	bx lr
 
