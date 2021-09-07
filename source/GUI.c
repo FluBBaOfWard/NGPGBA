@@ -2,34 +2,48 @@
 
 #include "GUI.h"
 #include "Shared/EmuMenu.h"
+#include "Shared/EmuSettings.h"
 #include "Shared/AsmExtra.h"
 #include "Main.h"
 #include "FileHandling.h"
 #include "Cart.h"
 #include "Gfx.h"
 #include "io.h"
+#include "cpu.h"
+#include "bios.h"
 #include "TLCS900H/Version.h"
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2021-09-06"
+#define EMUVERSION "V0.5.0 2021-09-07"
+
+#define HALF_CPU_SPEED		(1<<16)
+
+static void paletteChange(void);
+static void languageSet(void);
+static void cpuHalfSet(void);
+static void machineSet(void);
+static void batteryChange(void);
+static void subBatteryChange(void);
+static void uiMachine(void);
 
 const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
 
 const fptr fnList0[] = {uiDummy};
-const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, gbaSleep, resetGame};
+const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, gbaSleep, resetGame};
 const fptr fnList2[] = {ui8, loadState, saveState, saveSettings, resetGame};
 const fptr fnList3[] = {autoBSet, autoASet, controllerSet, swapABSet};
-const fptr fnList4[] = {scalingSet, flickSet, gammaSet, fgrLayerSet, bgrLayerSet, sprLayerSet};
+const fptr fnList4[] = {/*scalingSet, flickSet,*/ gammaSet, paletteChange, fgrLayerSet, bgrLayerSet, sprLayerSet};
 const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, debugTextSet, sleepSet};
-const fptr fnList6[] = {uiDummy};
-const fptr fnList7[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
-const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7};
-const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7)};
-const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiAbout, uiLoadGame};
-const u8 menuXback[] = {0,0,1,1,1,1,1,2};
+const fptr fnList6[] = {languageSet, machineSet, cpuHalfSet, batteryChange, subBatteryChange};
+const fptr fnList7[] = {uiDummy};
+const fptr fnList8[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
+const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8};
+const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8)};
+const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
+const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
 
-int emuSettings = 1;
+int emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM;
 u8 g_gammaValue = 0;
 
 const char *const autoTxt[]  = {"Off","On","With R"};
@@ -86,6 +100,7 @@ void uiMainMenu() {
 	drawMenuItem("Controller->");
 	drawMenuItem("Display->");
 	drawMenuItem("Settings->");
+	drawMenuItem("Machine->");
 	drawMenuItem("Help->");
 	drawMenuItem("Sleep");
 	drawMenuItem("Restart");
@@ -102,11 +117,11 @@ void uiAbout() {
 	drawText("B:        A Button",6);
 	drawText("A:        B Button",7);
 
-	drawText(" NGPDS        " EMUVERSION, 15);
-	drawText(" ARMZ80       " ARMZ80VERSION, 16);
-	drawText(" ARMTLCS-900H " TLCS900VERSION, 17);
-	drawText(" ARMK2GE      " K2GEVERSION, 18);
-	drawText(" ARMK2Audio   2" , 19);
+	drawText("NGPGBA      " EMUVERSION, 15);
+	drawText("ARMZ80      " ARMZ80VERSION, 16);
+	drawText("ARMTLCS900H " TLCS900VERSION, 17);
+	drawText("ARMK2GE     " K2GEVERSION, 18);
+	drawText("ARMK2Audio  2" , 19);
 }
 
 void uiController() {
@@ -119,12 +134,20 @@ void uiController() {
 
 void uiDisplay() {
 	setupSubMenu("Display Settings");
-	drawSubItem("Display: ", dispTxt[g_scaling]);
-	drawSubItem("Scaling: ", flickTxt[g_flicker]);
 	drawSubItem("Gamma: ", brighTxt[g_gammaValue]);
+	drawSubItem("B&W Palette: ", palTxt[g_paletteBank]);
 	drawSubItem("Disable Foreground: ", autoTxt[g_gfxMask&1]);
 	drawSubItem("Disable Background: ", autoTxt[(g_gfxMask>>1)&1]);
 	drawSubItem("Disable Sprites: ", autoTxt[(g_gfxMask>>4)&1]);
+}
+
+static void uiMachine() {
+	setupSubMenu("Machine Settings");
+	drawSubItem("Language: ",langTxt[g_lang]);
+	drawSubItem("Machine: ",machTxt[g_machine]);
+	drawSubItem("Half cpu speed: ",autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
+	drawMenuItem(" Change Batteries");
+	drawMenuItem(" Change Sub Battery");
 }
 
 void uiSettings() {
@@ -189,4 +212,45 @@ void bgrLayerSet() {
 /// Turn on/off rendering of sprites
 void sprLayerSet() {
 	g_gfxMask ^= 0x10;
+}
+
+void paletteChange() {
+	g_paletteBank++;
+	if (g_paletteBank > 4) {
+		g_paletteBank = 0;
+	}
+	settingsChanged = true;
+	monoPalInit();
+	paletteTxAll();
+	fixBiosSettings();
+}
+/*
+void borderSet() {
+	bcolor++;
+	if (bcolor > 2) {
+		bcolor = 0;
+	}
+	makeborder();
+}
+*/
+void languageSet() {
+	g_lang ^= 0x01;
+	fixBiosSettings();
+}
+
+void machineSet() {
+	g_machine ^= 0x01;
+}
+
+void cpuHalfSet() {
+	emuSettings ^= HALF_CPU_SPEED;
+	tweakCpuSpeed(emuSettings & HALF_CPU_SPEED);
+}
+
+void batteryChange() {
+	batteryLevel = 0xFFFF;				// 0xFFFF for 2 days battery?
+}
+
+void subBatteryChange() {
+	g_subBatteryLevel = 0x3FFFFFF;		// 0x3FFFFFF for 2 years battery?
 }

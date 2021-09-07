@@ -187,6 +187,9 @@ tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 	ldr r0,=T9_HINT_RATE				;@ 515
 	movne r0,r0,lsr#1
 	str r0,tlcs900hCyclesPerScanline
+;@---Speed - 3.072MHz / 60Hz / 256 lines	;NGP Z80.
+	mov r0,r0,lsr#1
+	str r0,z80CyclesPerScanline
 	bx lr
 ;@----------------------------------------------------------------------------
 cpuReset:					;@ Called by loadCart/resetGame
@@ -201,12 +204,8 @@ cpuReset:					;@ Called by loadCart/resetGame
 	bl tlcs900HReset
 
 
-;@---Speed - 3.072MHz / 60Hz / 256 lines	;NGP Z80.
-	ldr r0,=T9_HINT_RATE/2
-	str r0,z80CyclesPerScanline
 ;@--------------------------------------
 	ldr z80optbl,=Z80OpTable
-
 	adr r0,ngpZ80End
 	str r0,[z80optbl,#z80NextTimeout]
 	str r0,[z80optbl,#z80NextTimeout_]
