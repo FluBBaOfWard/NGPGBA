@@ -10,6 +10,7 @@
 #include "Emubase.h"
 #include "Main.h"
 #include "Shared/EmuMenu.h"
+#include "Shared/EmuSettings.h"
 #include "GUI.h"
 #include "Cart.h"
 #include "Gfx.h"
@@ -20,23 +21,15 @@ static const char *const settingName = "settings.cfg";
 
 ConfigData cfg;
 
-#define GAMECOUNT (6)
-static const char *const gameNames[GAMECOUNT] = {"blktiger","blktigera","blktigerb1","blktigerb2","blkdrgon","blkdrgonb"};
-static const char *const gameZipNames[GAMECOUNT] = {"blktiger.zip","blktigera.zip","blktigerb1.zip","blktigerb2.zip","blkdrgon.zip","blkdrgonb.zip"};
-static const int fileCount[GAMECOUNT] = {11,11,10,10,10,10};
+#define GAMECOUNT (1)
+static const char *const gameNames[GAMECOUNT] = {"blktiger"};
+static const char *const gameZipNames[GAMECOUNT] = {"blktiger.zip"};
+static const int fileCount[GAMECOUNT] = {11};
 static const char *const romFilenames[GAMECOUNT][11] = {
-	{"577l03.10c","577l02.8c","577l01.7c","577l06.5e","577l05.4e","577l08.4f","577l04.3e","577l07.3f","577h09.2f","577h10.5f","577h11.6f"},
-	{"577h03.10c","577h02.8c","577h01.7c","577l06.5e","577h05.4e","577l08.4f","577l04.3e","577h07.3f","577h09.2f","577h10.5f","577h11.6f"},
-	{"2-ic82.10g","3-ic81.10f","7-1c8.2b","6-ic9.2c","5-ic10.2d","4-ic11.2e","1-ic92.12c","577h09","577h10","577h11"},
-	{"621d01.10c","621d02.12c","621d03.4d","621d04.5d","621a05.6d","621a06.5f","621a07.6f","621a08.7f"}
+	{"577l03.10c","577l02.8c","577l01.7c","577l06.5e","577l05.4e","577l08.4f","577l04.3e","577l07.3f","577h09.2f","577h10.5f","577h11.6f"}
 };
 static const int romFilesizes[GAMECOUNT][11] = {
-	{0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100},
-	{0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100},
-	{0x8000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100},
-	{0x8000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100},
-	{0x8000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100},
-	{0x8000,0x8000,0x8000,0x8000,0x4000,0x20,0x100,0x100}
+	{0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100}
 };
 
 //---------------------------------------------------------------------------------
@@ -60,7 +53,7 @@ int loadSettings() {
 	}
 */
 	g_gammaValue = cfg.gammaValue;
-	emuSettings  = cfg.emuSettings &~ 0xC0;			// Clear speed setting.
+	emuSettings  = cfg.emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
 	sleepTime    = cfg.sleepTime;
 	joyCfg       = (joyCfg&~0x400)|((cfg.controller&1)<<10);
 //	strlcpy(currentDir, cfg.currentPath, sizeof(currentDir));
@@ -73,7 +66,7 @@ void saveSettings() {
 
 	strcpy(cfg.magic,"cfg");
 	cfg.gammaValue  = g_gammaValue;
-	cfg.emuSettings = emuSettings &~ 0xC0;			// Clear speed setting.
+	cfg.emuSettings = emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
 	cfg.sleepTime   = sleepTime;
 	cfg.controller  = (joyCfg>>10)&1;
 //	strlcpy(cfg.currentPath, currentDir, sizeof(currentDir));
@@ -165,7 +158,7 @@ bool loadGame() {
 	loadRoms(selectedGame, true);
 	setEmuSpeed(0);
 	loadCart(selectedGame);
-	if (emuSettings & 4) {
+	if (emuSettings & AUTOLOAD_STATE) {
 		loadState();
 	}
 	return false;

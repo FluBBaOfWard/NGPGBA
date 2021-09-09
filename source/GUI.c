@@ -18,6 +18,7 @@
 #define EMUVERSION "V0.5.0 2021-09-07"
 
 #define HALF_CPU_SPEED		(1<<16)
+#define ALLOW_SPEED_HACKS	(1<<17)
 
 static void paletteChange(void);
 static void languageSet(void);
@@ -152,12 +153,12 @@ static void uiMachine() {
 
 void uiSettings() {
 	setupSubMenu("Other Settings");
-	drawSubItem("Speed: ", speedTxt[(emuSettings>>6)&3]);
-	drawSubItem("Autoload State: ", autoTxt[(emuSettings>>2)&1]);
-	drawSubItem("Autosave Settings: ", autoTxt[(emuSettings>>9)&1]);
+	drawSubItem("Speed: ", speedTxt[(emuSettings>>5)&3]);
+	drawSubItem("Autoload State: ", autoTxt[(emuSettings>>1)&1]);
+	drawSubItem("Autosave Settings: ", autoTxt[(emuSettings>>4)&1]);
 	drawSubItem("Autopause Game: ", autoTxt[emuSettings&1]);
 	drawSubItem("Debug Output: ", autoTxt[g_debugSet&1]);
-	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>4)&3]);
+	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>7)&3]);
 }
 
 void uiLoadGame() {

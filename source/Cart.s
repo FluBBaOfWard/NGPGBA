@@ -113,6 +113,7 @@ loadCart: 		;@ Called from C:  r0=emuflags
 	ldr r0,g_romSize
 	ldr r1,romSpacePtr
 	bl ngpFlashReset
+	bl hacksInit
 
 	ldr r0,g_BIOSBASE_COLOR
 	cmp r0,#0

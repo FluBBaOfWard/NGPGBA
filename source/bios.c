@@ -13,6 +13,7 @@
 //---------------------------------------------------------------------------
 
 #include <gba.h>
+#include <string.h>
 #include "Memory.h"
 #include "bios.h"
 #include "K2GE/K2GE.h"
