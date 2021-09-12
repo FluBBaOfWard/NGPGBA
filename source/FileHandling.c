@@ -16,21 +16,8 @@
 #include "Gfx.h"
 #include "io.h"
 
-static const char *const folderName = "acds";
-static const char *const settingName = "settings.cfg";
-
+static int selectedGame = 0;
 ConfigData cfg;
-
-#define GAMECOUNT (1)
-static const char *const gameNames[GAMECOUNT] = {"blktiger"};
-static const char *const gameZipNames[GAMECOUNT] = {"blktiger.zip"};
-static const int fileCount[GAMECOUNT] = {11};
-static const char *const romFilenames[GAMECOUNT][11] = {
-	{"577l03.10c","577l02.8c","577l01.7c","577l06.5e","577l05.4e","577l08.4f","577l04.3e","577l07.3f","577h09.2f","577h10.5f","577h11.6f"}
-};
-static const int romFilesizes[GAMECOUNT][11] = {
-	{0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x4000,0x20,0x100,0x100}
-};
 
 //---------------------------------------------------------------------------------
 int loadSettings() {

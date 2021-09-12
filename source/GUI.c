@@ -3,7 +3,6 @@
 #include "GUI.h"
 #include "Shared/EmuMenu.h"
 #include "Shared/EmuSettings.h"
-#include "Shared/AsmExtra.h"
 #include "Main.h"
 #include "FileHandling.h"
 #include "Cart.h"
@@ -15,17 +14,20 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2021-09-07"
+#define EMUVERSION "V0.5.0 2021-09-12"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
 
+void hacksInit(void);
+
 static void paletteChange(void);
 static void languageSet(void);
-static void cpuHalfSet(void);
 static void machineSet(void);
 static void batteryChange(void);
 static void subBatteryChange(void);
+static void speedHackSet(void);
+static void cpuHalfSet(void);
 static void uiMachine(void);
 
 const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
@@ -36,7 +38,7 @@ const fptr fnList2[] = {ui8, loadState, saveState, saveSettings, resetGame};
 const fptr fnList3[] = {autoBSet, autoASet, controllerSet, swapABSet};
 const fptr fnList4[] = {/*scalingSet, flickSet,*/ gammaSet, paletteChange, fgrLayerSet, bgrLayerSet, sprLayerSet};
 const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, debugTextSet, sleepSet};
-const fptr fnList6[] = {languageSet, machineSet, cpuHalfSet, batteryChange, subBatteryChange};
+const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange, speedHackSet, cpuHalfSet};
 const fptr fnList7[] = {uiDummy};
 const fptr fnList8[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
 const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8};
@@ -44,7 +46,6 @@ const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), A
 const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
 const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
 
-int emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM;
 u8 g_gammaValue = 0;
 
 const char *const autoTxt[]  = {"Off","On","With R"};
@@ -61,6 +62,7 @@ const char *const machTxt[]  = {"NeoGeo Pocket Color", "NeoGeo Pocket"};
 
 /// This is called at the start of the emulator
 void setupGUI() {
+	emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM | ALLOW_SPEED_HACKS;
 //	keysSetRepeat(25, 4);	// Delay, repeat.
 	closeMenu();
 }
@@ -146,19 +148,20 @@ static void uiMachine() {
 	setupSubMenu("Machine Settings");
 	drawSubItem("Language: ",langTxt[g_lang]);
 	drawSubItem("Machine: ",machTxt[g_machine]);
-	drawSubItem("Half cpu speed: ",autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
 	drawMenuItem(" Change Batteries");
 	drawMenuItem(" Change Sub Battery");
+	drawSubItem("Cpu speed hacks: ",autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
+	drawSubItem("Half cpu speed: ",autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
 }
 
 void uiSettings() {
 	setupSubMenu("Other Settings");
-	drawSubItem("Speed: ", speedTxt[(emuSettings>>5)&3]);
+	drawSubItem("Speed: ", speedTxt[(emuSettings>>6)&3]);
 	drawSubItem("Autoload State: ", autoTxt[(emuSettings>>1)&1]);
 	drawSubItem("Autosave Settings: ", autoTxt[(emuSettings>>4)&1]);
 	drawSubItem("Autopause Game: ", autoTxt[emuSettings&1]);
 	drawSubItem("Debug Output: ", autoTxt[g_debugSet&1]);
-	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>7)&3]);
+	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>8)&3]);
 }
 
 void uiLoadGame() {
@@ -243,8 +246,14 @@ void machineSet() {
 	g_machine ^= 0x01;
 }
 
+void speedHackSet() {
+	emuSettings ^= ALLOW_SPEED_HACKS;
+	emuSettings &= ~HALF_CPU_SPEED;
+	hacksInit();
+}
 void cpuHalfSet() {
 	emuSettings ^= HALF_CPU_SPEED;
+	emuSettings &= ~ALLOW_SPEED_HACKS;
 	tweakCpuSpeed(emuSettings & HALF_CPU_SPEED);
 }
 

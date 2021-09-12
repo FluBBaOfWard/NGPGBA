@@ -17,8 +17,6 @@
 static void checkTimeOut(void);
 static void setupGraphics(void);
 
-bool enableExit = false;
-int selectedGame = 0;
 static int sleepTimer = 60*60*5;	// 5 min
 
 u16 *menuMap;

@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-extern int emuSettings;
 extern u8 g_gammaValue;
 
 void setupGUI(void);

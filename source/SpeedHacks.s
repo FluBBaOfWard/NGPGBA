@@ -17,6 +17,7 @@
 	.align 2
 ;@----------------------------------------------------------------------------
 hacksInit:
+	.type   hacksInit STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r6,lr}
 
@@ -80,8 +81,8 @@ InstallHack:
 	str r3,[r1,#4]
 	ldr r3,[r2,#8]
 	str r3,[r1,#8]
-	ldrb r3,[r2,#11]
-	strb r3,[r1,#11]
+	ldrb r3,[r2,#15]
+	strb r3,[r1,#15]
 	add r0,r0,#0x60
 	b tlcs900HRedirectOpcode	;@ Insert new pointer to hack opcode in optable
 
@@ -283,6 +284,8 @@ nz_end:
 ;@----------------------------------------------------------------------------
 sngJR_nc_hack:				;@ 0x6F
 ;@----------------------------------------------------------------------------
+	mov r0,r0
+	mov r0,r0
 	tst t9f,#PSR_C
 	bne nc_end
 nc_end:
