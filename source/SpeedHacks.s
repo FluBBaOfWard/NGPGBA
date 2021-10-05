@@ -9,11 +9,7 @@
 	.syntax unified
 	.arm
 
-#if GBA
-	.section .ewram, "ax", %progbits	;@ For the GBA
-#else
 	.section .text						;@ For anything else
-#endif
 	.align 2
 ;@----------------------------------------------------------------------------
 hacksInit:
@@ -214,8 +210,10 @@ SpeedHacks:
 
 	.byte 0x00,0x00	;@ #1234 Cool Cool Jam (SAMPLE) (E) (C)
 	.byte 0x00,0x00	;@ #9019 Sonic the Hedgehog - Pocket Adventure [sample] (C)
+	.byte 0x00,0x00	;@ #9020 SvC F1 TRIAL
 noHack:
 	.byte 0x00,0x00
+	.align 2
 
 ;@----------------------------------------------------------------------------
 sngJR_lt_hack:				;@ 0x61
@@ -290,6 +288,10 @@ sngJR_nc_hack:				;@ 0x6F
 	bne nc_end
 nc_end:
 
+#if GBA
+	.section .ewram, "ax", %progbits	;@ For the GBA
+	.align 2
+#endif
 ;@----------------------------------------------------------------------------
 sngJR_hack0:				;@
 ;@----------------------------------------------------------------------------

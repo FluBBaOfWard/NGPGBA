@@ -47,6 +47,7 @@ const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDispla
 const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
 
 u8 g_gammaValue = 0;
+char gameInfoString[32];
 
 const char *const autoTxt[]  = {"Off","On","With R"};
 const char *const speedTxt[] = {"Normal","200%","Max","50%"};
@@ -114,11 +115,14 @@ void uiMainMenu() {
 
 void uiAbout() {
 	setupSubMenu("Help");
+	updateGameInfo();
 	drawText("Select:   Power Button",3);
 	drawText("Start:    Option Button",4);
 	drawText("DPad:     Joystick",5);
 	drawText("B:        A Button",6);
 	drawText("A:        B Button",7);
+
+	drawText(gameInfoString, 9);
 
 	drawText("NGPGBA      " EMUVERSION, 15);
 	drawText("ARMZ80      " ARMZ80VERSION, 16);
@@ -178,6 +182,12 @@ void resetGame() {
 	loadCart(0);
 }
 
+void updateGameInfo() {
+	NgpHeader *header = romSpacePtr;
+	strlMerge(gameInfoString, "Game name: ", header->name, sizeof(gameInfoString));
+	int len = strlen(gameInfoString);
+	int2HexStr(&gameInfoString[len], header->catalog);
+}
 
 //---------------------------------------------------------------------------------
 /// Switch between Player 1 & Player 2 controls

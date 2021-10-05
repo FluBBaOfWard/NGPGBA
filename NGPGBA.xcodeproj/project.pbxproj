@@ -11,12 +11,6 @@
 		35E683AF1C664A6D00FCFE8A /* io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = io.h; sourceTree = "<group>"; };
 		746D78E114ED9A8400CC738F /* Makefile */ = {isa = PBXFileReference; explicitFileType = sourcecode.make; fileEncoding = 4; path = Makefile; sourceTree = "<group>"; };
 		9C1FFFA72684A277005851ED /* EmuSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuSettings.h; sourceTree = "<group>"; };
-		9C367C962668B7CA0017B4F6 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
-		9C367C972668B7CA0017B4F6 /* SN76496.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = SN76496.s; sourceTree = "<group>"; };
-		9C367C982668B7CA0017B4F6 /* SN76496.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SN76496.h; sourceTree = "<group>"; };
-		9C367C992668B7CA0017B4F6 /* SN76496.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c.preprocessed; path = SN76496.i; sourceTree = "<group>"; };
-		9C367C9A2668B7CA0017B4F6 /* SN76496_todo.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SN76496_todo.txt; sourceTree = "<group>"; };
-		9C367C9C2668B7CA0017B4F6 /* History.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
 		9C3D5ADD25E3F2ED00E8CD56 /* ARMZ80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARMZ80.h; sourceTree = "<group>"; };
 		9C3D5ADE25E3F2ED00E8CD56 /* ARMZ80mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARMZ80mac.h; sourceTree = "<group>"; };
 		9C3D5ADF25E3F2ED00E8CD56 /* ARMZ80.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c.preprocessed; path = ARMZ80.i; sourceTree = "<group>"; };
@@ -76,7 +70,6 @@
 		9C790E762670EDAA000A3506 /* NGPFlash.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c.preprocessed; path = NGPFlash.i; sourceTree = "<group>"; };
 		9C7BB94A25FCD73C00EA9C9C /* EmuFont.grit */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmuFont.grit; sourceTree = "<group>"; };
 		9C7BB94B25FCD73C00EA9C9C /* EmuFont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = EmuFont.png; sourceTree = "<group>"; };
-		9CBC0C8C26DD79270039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CBC0C8D26DD7BD50039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CBC0C8E26DD7C2A0039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CBC0C8F26DD7D0F0039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -128,20 +121,6 @@
 				746D78E114ED9A8400CC738F /* Makefile */,
 			);
 			name = makefile;
-			sourceTree = "<group>";
-		};
-		9C367C952668B7CA0017B4F6 /* K2Audio */ = {
-			isa = PBXGroup;
-			children = (
-				9CBC0C8C26DD79270039D17E /* README.md */,
-				9C367C9A2668B7CA0017B4F6 /* SN76496_todo.txt */,
-				9C367C9C2668B7CA0017B4F6 /* History.txt */,
-				9C367C962668B7CA0017B4F6 /* Version.h */,
-				9C367C982668B7CA0017B4F6 /* SN76496.h */,
-				9C367C992668B7CA0017B4F6 /* SN76496.i */,
-				9C367C972668B7CA0017B4F6 /* SN76496.s */,
-			);
-			path = K2Audio;
 			sourceTree = "<group>";
 		};
 		9C5081E425D314C900A8E1BA /* ARMZ80 */ = {
@@ -233,7 +212,6 @@
 				9C7151232654F0650084BE99 /* TLCS900H */,
 				9C5081E425D314C900A8E1BA /* ARMZ80 */,
 				9C71513B26550C1E0084BE99 /* K2GE */,
-				9C367C952668B7CA0017B4F6 /* K2Audio */,
 				A47F092A20863AF5004E1DA6 /* Shared */,
 				9CC013FC2668FDD9005714F7 /* Emubase.h */,
 				A49D343A1757E54900BD9B4B /* Equates.h */,

@@ -6,12 +6,9 @@ This is a SNK Neogeo Pocket (Color) emulator for the Nintendo GBA.
 
 ## How to use:
 
-When the emulator starts, you can either press L+R or tap on the screen to open
-up the menu.
-Now you can use the cross or touchscreen to navigate the menus, A or double tap
-to select an option, B or the top of the screen to go back a step.
-
-To select between the tabs use R & L or the touchscreen.
+When the emulator starts, you press L+R to open up the menu.
+Now you can use the cross to navigate the menus, A to select an option,
+B to go back a step.
 
 ## Menu:
 
