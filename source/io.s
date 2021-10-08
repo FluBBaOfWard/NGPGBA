@@ -174,6 +174,17 @@ updateSlowIO:				;@ Call once every frame, updates rtc and battery levels.
 	strb r0,rtcTimer
 	bxpl lr
 
+	ldr r0,batteryLevel
+	subs r0,r0,#1
+	movmi r0,#1
+	str r0,batteryLevel
+
+	ldr r1,=g_subBatteryLevel
+	ldr r0,[r1]
+	subs r0,r0,#0x00000100
+	movmi r0,#0x00001000
+	str r0,[r1]
+
 	ldr r2,=systemMemory
 	ldrb r0,[r2,#0x96]			;@ Seconds
 	add r0,r0,#0x01
@@ -224,18 +235,7 @@ updateSlowIO:				;@ Call once every frame, updates rtc and battery levels.
 	ldrbeq r0,[r2,#0x93]		;@ RTC Days
 	ldrbeq r1,[r2,#0x98]		;@ ALARM Days
 	moveq r0,#0x0A
-	beq TestIntHDMA_External
-
-	ldr r0,batteryLevel
-	subs r0,r0,#1
-	movmi r0,#1
-	str r0,batteryLevel
-
-	ldr r1,=g_subBatteryLevel
-	ldr r0,[r1]
-	subs r0,r0,#0x00000100
-	movmi r0,#0x00001000
-	str r0,[r1]
+	beq setInterrupt
 
 	bx lr
 
@@ -318,7 +318,7 @@ ADStart:
 	ldr r1,=systemMemory
 	strh r0,[r1,#0x60]
 	mov r0,#0x1C
-	b setInterruptNoTest
+	b setInterrupt
 
 ;@----------------------------------------------------------------------------
 cpuSpeedW:

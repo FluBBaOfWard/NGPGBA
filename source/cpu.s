@@ -61,7 +61,7 @@ runStart:
 	ldrbne r2,[r2]
 	tstne r2,#4					;@ Power button NMI enabled?
 	movne r0,#0x08				;@ 0x08 = Power button on NGP
-	blne TestIntHDMA_External
+	blne setInterruptExternal
 
 	bl refreshEMUjoypads		;@ Z=1 if communication ok
 

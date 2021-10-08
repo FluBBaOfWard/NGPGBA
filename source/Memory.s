@@ -418,7 +418,7 @@ z80IrqW:					;@ Write mem (0xC000)
 	bne empty_W
 	stmfd sp!,{r3,lr}
 		mov r0,#0x0C			;@ This must load up tlcs900 regs before executing.
-		bl TestIntHDMA_External
+		bl setInterruptExternal
 	ldmfd sp!,{r3,lr}
 	bx lr
 ;@----------------------------------------------------------------------------

@@ -2,7 +2,7 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.0 - 2021-10-05 (FluBBa)
+V0.5.0 - 2021-10-08 (FluBBa)
 	Completed port to GBA devkitPro.
 
 V0.4.9 - 2021-09-05 (FluBBa)
