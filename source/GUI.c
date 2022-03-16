@@ -1,4 +1,5 @@
 #include <gba.h>
+#include <string.h>
 
 #include "GUI.h"
 #include "Shared/EmuMenu.h"
@@ -14,7 +15,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2021-09-12"
+#define EMUVERSION "V0.5.0 2022-03-16"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -46,7 +47,7 @@ const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), A
 const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
 const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
 
-u8 g_gammaValue = 0;
+u8 gGammaValue = 0;
 char gameInfoString[32];
 
 const char *const autoTxt[]  = {"Off","On","With R"};
@@ -141,17 +142,17 @@ void uiController() {
 
 void uiDisplay() {
 	setupSubMenu("Display Settings");
-	drawSubItem("Gamma: ", brighTxt[g_gammaValue]);
-	drawSubItem("B&W Palette: ", palTxt[g_paletteBank]);
-	drawSubItem("Disable Foreground: ", autoTxt[g_gfxMask&1]);
-	drawSubItem("Disable Background: ", autoTxt[(g_gfxMask>>1)&1]);
-	drawSubItem("Disable Sprites: ", autoTxt[(g_gfxMask>>4)&1]);
+	drawSubItem("Gamma: ", brighTxt[gGammaValue]);
+	drawSubItem("B&W Palette: ", palTxt[gPaletteBank]);
+	drawSubItem("Disable Foreground: ", autoTxt[gGfxMask&1]);
+	drawSubItem("Disable Background: ", autoTxt[(gGfxMask>>1)&1]);
+	drawSubItem("Disable Sprites: ", autoTxt[(gGfxMask>>4)&1]);
 }
 
 static void uiMachine() {
 	setupSubMenu("Machine Settings");
-	drawSubItem("Language: ",langTxt[g_lang]);
-	drawSubItem("Machine: ",machTxt[g_machine]);
+	drawSubItem("Language: ",langTxt[gLang]);
+	drawSubItem("Machine: ",machTxt[gMachine]);
 	drawMenuItem(" Change Batteries");
 	drawMenuItem(" Change Sub Battery");
 	drawSubItem("Cpu speed hacks: ",autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
@@ -202,36 +203,36 @@ void swapABSet() {
 
 /// Turn on/off scaling
 void scalingSet(){
-	g_scaling ^= 0x01;
+	gScaling ^= 0x01;
 	refreshGfx();
 }
 
 /// Change gamma (brightness)
 void gammaSet() {
-	g_gammaValue++;
-	if (g_gammaValue > 4) g_gammaValue=0;
-	paletteInit(g_gammaValue);
+	gGammaValue++;
+	if (gGammaValue > 4) gGammaValue=0;
+	paletteInit(gGammaValue);
 	paletteTxAll();					// Make new palette visible
 	setupMenuPalette();
 }
 
 /// Turn on/off rendering of foreground
 void fgrLayerSet() {
-	g_gfxMask ^= 0x01;
+	gGfxMask ^= 0x01;
 }
 /// Turn on/off rendering of background
 void bgrLayerSet() {
-	g_gfxMask ^= 0x02;
+	gGfxMask ^= 0x02;
 }
 /// Turn on/off rendering of sprites
 void sprLayerSet() {
-	g_gfxMask ^= 0x10;
+	gGfxMask ^= 0x10;
 }
 
 void paletteChange() {
-	g_paletteBank++;
-	if (g_paletteBank > 4) {
-		g_paletteBank = 0;
+	gPaletteBank++;
+	if (gPaletteBank > 4) {
+		gPaletteBank = 0;
 	}
 	settingsChanged = true;
 	monoPalInit();
@@ -248,12 +249,12 @@ void borderSet() {
 }
 */
 void languageSet() {
-	g_lang ^= 0x01;
+	gLang ^= 0x01;
 	fixBiosSettings();
 }
 
 void machineSet() {
-	g_machine ^= 0x01;
+	gMachine ^= 0x01;
 }
 
 void speedHackSet() {

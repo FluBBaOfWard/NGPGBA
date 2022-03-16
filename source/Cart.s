@@ -24,9 +24,9 @@
 	.global g_romSize
 	.global maxRomSize
 	.global g_config
-	.global g_machine
-	.global g_lang
-	.global g_paletteBank
+	.global gMachine
+	.global gLang
+	.global gPaletteBank
 
 
 	.syntax unified
@@ -188,11 +188,11 @@ cartFlags:
 	.byte 0 					;@ cartflags
 g_config:
 	.byte 0						;@ Config, bit 7=BIOS on/off
-g_machine:
+gMachine:
 	.byte 0						;@ machine
-g_lang:
+gLang:
 	.byte 1						;@ language
-g_paletteBank:
+gPaletteBank:
 	.byte 0						;@ palettebank
 isBiosLoaded:
 	.byte 0

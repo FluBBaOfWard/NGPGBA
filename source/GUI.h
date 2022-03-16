@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-extern u8 g_gammaValue;
+extern u8 gGammaValue;
 
 void setupGUI(void);
 void enterGUI(void);
@@ -21,7 +21,6 @@ void uiFile(void);
 void uiSettings(void);
 void uiController(void);
 void uiDisplay(void);
-void uiDipswitches(void);
 void uiAbout(void);
 void uiLoadGame(void);
 

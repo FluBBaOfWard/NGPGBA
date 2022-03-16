@@ -11,9 +11,9 @@ extern u32 emuFlags;
 extern u8 g_cartFlags;
 extern u8 g_configSet;
 extern u8 g_config;
-extern u8 g_machine;
-extern u8 g_lang;
-extern u8 g_paletteBank;
+extern u8 gMachine;
+extern u8 gLang;
+extern u8 gPaletteBank;
 
 extern u8 biosSpace[0x10000];
 extern void *romSpacePtr;

@@ -27,9 +27,9 @@
 u8 *ngpc_bios = 0;			// Holds bios program data
 
 extern u32 g_romSize;			// from cart.s
-extern u8 g_lang;				// from cart.s
-extern u8 g_machine;			// from cart.s
-extern u8 g_paletteBank;		// from cart.s
+extern u8 gLang;				// from cart.s
+extern u8 gMachine;				// from cart.s
+extern u8 gPaletteBank;			// from cart.s
 extern u32 sngBIOSHLE;
 
 //=============================================================================
@@ -364,23 +364,23 @@ void resetBios(NgpHeader *ngpHeader)
 	t9StoreW(0x5AA5, 0x6C7C);	// Running mode
 
 	// Language: 0 = Japanese, 1 = English
-	if (g_lang) {
+	if (gLang) {
 		t9StoreB(0x01, 0x6F87);
 	}
 	else {
 		t9StoreB(0x00, 0x6F87);
 	}
-	t9StoreB(g_paletteBank, 0x6F94);
+	t9StoreB(gPaletteBank, 0x6F94);
 
 	// Color Mode Selection: 0x00 = B&W, 0x10 = Colour
 	int color = ngpHeader->mode;
-	if (g_machine == HW_K1GE) {
+	if (gMachine == HW_K1GE) {
 		color = 0;
 	}
 	t9StoreB(color, 0x6F90);		// Game Displaymode
 	t9StoreB(color, 0x6F95);		// Current Displaymode
 	t9StoreB(color, 0x6F91);		// Machine
-	if (g_machine == HW_K2GE) {
+	if (gMachine == HW_K2GE) {
 		t9StoreB(0x10, 0x6F91);		// Machine
 	}
 	// User Interrupt table
@@ -420,12 +420,12 @@ void fixBiosSettings(void)
 	t9StoreB(cfg.alarmHour, 0x6C34);
 	t9StoreB(cfg.alarmMinute, 0x6C35);
 
-	int check = g_lang ? 0x01 : 0x00;
+	int check = gLang ? 0x01 : 0x00;
 	// Language: 0 = Japanese, 1 = English
 	t9StoreB(check, 0x6F87);
-	if (g_machine == HW_K2GE) {
-		t9StoreB(g_paletteBank, 0x6F94);
-		check += g_paletteBank;
+	if (gMachine == HW_K2GE) {
+		t9StoreB(gPaletteBank, 0x6F94);
+		check += gPaletteBank;
 	}
 	check += 0xDC;		// Actualy addition of all IRQ priorities.
 	t9StoreW(check, 0x6C14);

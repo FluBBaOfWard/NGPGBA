@@ -13,11 +13,11 @@
 	.global refreshGfx
 	.global endFrameGfx
 	.global gfxState
-	.global g_gammaValue
-	.global g_flicker
-	.global g_twitch
-	.global g_scaling
-	.global g_gfxMask
+	.global gGammaValue
+	.global gFlicker
+	.global gTwitch
+	.global gScaling
+	.global gGfxMask
 	.global vblIrqHandler
 	.global yStart
 	.global GFX_BG0CNT
@@ -93,12 +93,12 @@ gfxReset:					;@ Called with CPU reset
 //	ldr r0,=m6809SetNMIPin
 //	ldr r1,=m6809SetIRQPin
 	ldr r2,=k2geRAM
-	ldr r3,=g_machine
+	ldr r3,=gMachine
 	ldrb r3,[r3]
 	bl k2GEReset0
 	bl monoPalInit
 
-	ldr r0,=g_gammaValue
+	ldr r0,=gGammaValue
 	ldrb r0,[r0]
 	bl paletteInit				;@ Do palette mapping
 	bl paletteTxAll				;@ Transfer it
@@ -116,7 +116,7 @@ monoPalInit:
 ;@----------------------------------------------------------------------------
 	ldr geptr,=k2GE_0
 	stmfd sp!,{r4-r6,lr}
-	ldr r0,=g_paletteBank
+	ldr r0,=gPaletteBank
 	ldrb r0,[r0]
 	adr r1,monoPalette
 	add r1,r1,r0,lsl#4
@@ -391,12 +391,12 @@ nothingNew:
 
 
 ;@----------------------------------------------------------------------------
-g_flicker:		.byte 1
+gFlicker:		.byte 1
 				.space 2
-g_twitch:		.byte 0
+gTwitch:		.byte 0
 
-g_scaling:		.byte 0
-g_gfxMask:		.byte 0
+gScaling:		.byte 0
+gGfxMask:		.byte 0
 yStart:			.byte 0
 				.byte 0
 ;@----------------------------------------------------------------------------
