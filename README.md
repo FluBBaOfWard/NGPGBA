@@ -53,10 +53,6 @@ B to go back a step.
 		Autosave Settings: This will save settings when
 			leaving menu if any changes are made.
 		Autopause Game: Toggle if the game should pause when opening the menu.
-		Powersave 2nd Screen: If graphics/light should be turned off for the
-			GUI screen when menu is not active.
-		Emulator on Bottom: Select if top or bottom screen should be used for
-			emulator, when menu is active emulator screen is allways on top.
 		Debug Output: Show an FPS meter for now.
 		Autosleep: Doesn't work.
 
@@ -72,6 +68,7 @@ Dwedit for help and inspiration with a lot of things.
 
 
 Fredrik Ahlström
-Twitter @TheRealFluBBa
-http://www.github.com/FluBBaOfWard
 
+Twitter @TheRealFluBBa
+
+http://www.github.com/FluBBaOfWard

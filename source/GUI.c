@@ -15,7 +15,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2022-03-16"
+#define EMUVERSION "V0.5.0 2022-09-18"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -43,9 +43,9 @@ const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange
 const fptr fnList7[] = {uiDummy};
 const fptr fnList8[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
 const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8};
-const u8 menuXitems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8)};
-const fptr drawuiX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
-const u8 menuXback[] = {0,0,1,1,1,1,1,1,2};
+const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8)};
+const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
+const u8 menuXBack[] = {0,0,1,1,1,1,1,1,2};
 
 u8 gGammaValue = 0;
 char gameInfoString[32];
@@ -165,7 +165,7 @@ void uiSettings() {
 	drawSubItem("Autoload State: ", autoTxt[(emuSettings>>1)&1]);
 	drawSubItem("Autosave Settings: ", autoTxt[(emuSettings>>4)&1]);
 	drawSubItem("Autopause Game: ", autoTxt[emuSettings&1]);
-	drawSubItem("Debug Output: ", autoTxt[g_debugSet&1]);
+	drawSubItem("Debug Output: ", autoTxt[gDebugSet&1]);
 	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>8)&3]);
 }
 

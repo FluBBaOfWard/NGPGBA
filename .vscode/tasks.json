@@ -51,7 +51,7 @@
                 "command": "C:/mGBA/mGBA.exe -g ${workspaceFolder}/${workspaceFolderBasename}.gba;sleep 5;echo debuggerReady"
             },
             "osx": {
-                "command": "open /Applications/mGBA.app --args -g ${workspaceFolder}/${workspaceFolderBasename}.gba;sleep 3;echo debuggerReady;echo debuggerReady"
+                "command": "open /Applications/mGBA.app --args -g ${workspaceFolder}/${workspaceFolderBasename}.gba;sleep 3;echo debuggerReady"
             },
             "presentation": {
                 "clear": true,
@@ -82,7 +82,7 @@
             "type": "shell",
             "isBackground": true,
             "windows": {
-                "command": "C:/NO$GBADebugger/NO$GBA.exe  ${workspaceFolder}/${workspaceFolderBasename}.elf",
+                "command": "C:/NO$GBA/NO$GBA.exe ${workspaceFolder}/${workspaceFolderBasename}.elf",
             },
             "osx": {
                 "command": "open /Applications/mGBA.app --args ${workspaceFolder}/${workspaceFolderBasename}.gba"
