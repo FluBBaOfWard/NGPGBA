@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+extern bool gameInserted;
 extern u16 *menuMap;
 
 void waitVBlank(void);

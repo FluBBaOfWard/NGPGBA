@@ -1,6 +1,7 @@
 NGPGBA Todo
 
-	Use CLZ for memory mapping. 
+	Add option to downclock the Z80 or add speedhacks for the Z80.
+	Use CLZ for memory mapping.
 	Fix cpu stuff.
 	Fix saving of (changed) flash memory. Must remember changed blocks forever.
 	Fix savestates!

@@ -1,11 +1,11 @@
 #ifdef __arm__
 
-#include "Shared/gba_asm.h"
 #include "TLCS900H/TLCS900H.i"
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
 
 	.global run
+	.global stepFrame
 	.global cpuReset
 	.global isConsoleRunning
 	.global isConsoleSleeping
@@ -14,7 +14,6 @@
 	.global waitMaskIn
 	.global waitMaskOut
 	.global cpu1SetIRQ
-	.global tlcs_return
 	.global Z80_SetEnable
 	.global Z80_nmi_do
 
@@ -48,17 +47,6 @@ runStart:
 	and r3,r3,r0
 	str r0,joyClick
 
-	ldr r2,=yStart
-	ldrb r1,[r2]
-	tst r0,#0x200				;@ L?
-	subsne r1,#1
-	movmi r1,#0
-	tst r0,#0x100				;@ R?
-	addne r1,#1
-	cmp r1,#GAME_HEIGHT-SCREEN_HEIGHT
-	movpl r1,#GAME_HEIGHT-SCREEN_HEIGHT
-	strb r1,[r2]
-
 	tst r3,#0x04				;@ NDS Select?
 	tsteq r3,#0x800				;@ NDS Y?
 	ldrne r2,=systemMemory+0xB3
@@ -72,23 +60,20 @@ runStart:
 ;@----------------------------------------------------------------------------
 ngpFrameLoop:
 ;@----------------------------------------------------------------------------
-	ldrh r0,z80enabled
+	ldrh r0,z80Enabled
 	ands r0,r0,r0,lsr#8
 	beq NoZ80Now
 
 	ldr z80optbl,=Z80OpTable
 	ldr r0,z80CyclesPerScanline
-	b Z80RestoreAndRunXCycles
-ngpZ80End:
+	bl Z80RestoreAndRunXCycles
 	add r0,z80optbl,#z80Regs
 	stmia r0,{z80f-z80pc,z80sp}			;@ Save Z80 state
 NoZ80Now:
 ;@--------------------------------------
 	ldr t9optbl,=tlcs900HState
 	ldr r0,tlcs900hCyclesPerScanline
-	b tlcsRestoreAndRunXCycles
-tlcs_return:
-tlcs900hEnd:
+	bl tlcsRestoreAndRunXCycles
 ;@--------------------------------------
 	ldr geptr,=k2GE_0
 	bl k2GEDoScanline
@@ -123,10 +108,45 @@ waitMaskIn:			.byte 0
 waitCountOut:		.byte 0
 waitMaskOut:		.byte 0
 
-z80enabled:			.byte 0
-g_z80onoff:			.byte 1
+z80Enabled:			.byte 0
+gZ80OnOff:			.byte 1
 					.byte 0,0
 
+;@----------------------------------------------------------------------------
+stepFrame:					;@ Return after 1 frame
+	.type stepFrame STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{r4-r11,lr}
+;@----------------------------------------------------------------------------
+ngpStepLoop:
+;@----------------------------------------------------------------------------
+	ldrh r0,z80Enabled
+	ands r0,r0,r0,lsr#8
+	beq NoZ80Step
+
+	ldr z80optbl,=Z80OpTable
+	ldr r0,z80CyclesPerScanline
+	bl Z80RestoreAndRunXCycles
+	add r0,z80optbl,#z80Regs
+	stmia r0,{z80f-z80pc,z80sp}			;@ Save Z80 state
+NoZ80Step:
+;@--------------------------------------
+	ldr t9optbl,=tlcs900HState
+	ldr r0,tlcs900hCyclesPerScanline
+	bl tlcsRestoreAndRunXCycles
+;@--------------------------------------
+	ldr geptr,=k2GE_0
+	bl k2GEDoScanline
+	cmp r0,#0
+	bne ngpStepLoop
+;@----------------------------------------------------------------------------
+
+	ldr r1,frameTotal
+	add r1,r1,#1
+	str r1,frameTotal
+
+	ldmfd sp!,{r4-r11,lr}
+	bx lr
 ;@----------------------------------------------------------------------------
 isConsoleRunning:
 	.type   isConsoleRunning STT_FUNC
@@ -156,7 +176,7 @@ Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled
 	cmpne r0,#0xAA				;@ Off
 	bxne lr
 	and r0,r0,#1
-	strb r0,z80enabled
+	strb r0,z80Enabled
 	eor r0,r0,#1
 	stmfd sp!,{z80optbl,lr}
 	ldr z80optbl,=Z80OpTable
@@ -166,7 +186,7 @@ Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled
 ;@----------------------------------------------------------------------------
 Z80_nmi_do:					;@ Address 0xBA of the TLCS-900H
 ;@----------------------------------------------------------------------------
-	ldrb r1,z80enabled
+	ldrb r1,z80Enabled
 	cmp r1,#0
 	bxeq lr
 	stmfd sp!,{z80optbl,lr}
@@ -204,17 +224,13 @@ cpuReset:					;@ Called by loadCart/resetGame
 	ldr r0,[r0]
 	and r0,r0,#0x10000
 	bl tweakCpuSpeed
-	ldr t9optbl,=tlcs900HState
+
+	ldr r0,=tlcs900HState
 	bl tlcs900HReset
 
-
 ;@--------------------------------------
-	ldr z80optbl,=Z80OpTable
-	adr r0,ngpZ80End
-	str r0,[z80optbl,#z80NextTimeout]
-	str r0,[z80optbl,#z80NextTimeout_]
-
-	mov r0,#0
+	ldr r0,=Z80OpTable
+	mov r1,#0
 	bl Z80Reset
 
 	ldmfd sp!,{lr}

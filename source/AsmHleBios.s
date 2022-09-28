@@ -27,7 +27,7 @@ callcRet:
 ;@----------------------------------------------------------------------------
 sngBIOSHLE:
 ;@----------------------------------------------------------------------------
-	ldr r0,[t9optbl,#tlcs_LastBank]
+	ldr r0,[t9optbl,#tlcsLastBank]
 	sub r0,t9pc,r0
 	and r0,r0,#0xFF0000
 	cmp r0,#0xFF0000
@@ -70,10 +70,10 @@ BiosReset:
 ;@----------------------------------------------------------------------------
 BiosSWI_1:
 ;@----------------------------------------------------------------------------
-	ldr r0,[t9optbl,#tlcs_LastBank]
+	ldr r0,[t9optbl,#tlcsLastBank]
 	sub r0,t9pc,r0
 	bl push32
-	add r2,t9optbl,#tlcs_GprBank
+	add r2,t9optbl,#tlcsGprBanks
 	ldrb r0,[r2,#0x20*3+1]
 	ldr r1,=0xFFFE00
 	add r0,r1,r0,lsl#2

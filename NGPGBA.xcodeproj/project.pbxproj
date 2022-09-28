@@ -10,6 +10,8 @@
 		35E683AD1C66453300FCFE8A /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
 		35E683AF1C664A6D00FCFE8A /* io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = io.h; sourceTree = "<group>"; };
 		746D78E114ED9A8400CC738F /* Makefile */ = {isa = PBXFileReference; explicitFileType = sourcecode.make; fileEncoding = 4; path = Makefile; sourceTree = "<group>"; };
+		9C1A755B28E04EB7005F342E /* NeoGeoPocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NeoGeoPocket.h; sourceTree = "<group>"; };
+		9C1A755C28E04EB7005F342E /* NeoGeoPocket.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = NeoGeoPocket.c; sourceTree = "<group>"; };
 		9C1FFFA72684A277005851ED /* EmuSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuSettings.h; sourceTree = "<group>"; };
 		9C3D5ADD25E3F2ED00E8CD56 /* ARMZ80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARMZ80.h; sourceTree = "<group>"; };
 		9C3D5ADE25E3F2ED00E8CD56 /* ARMZ80mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARMZ80mac.h; sourceTree = "<group>"; };
@@ -64,7 +66,6 @@
 		9C715144265645050084BE99 /* bios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bios.c; sourceTree = "<group>"; };
 		9C715145265645DD0084BE99 /* NGPHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NGPHeader.h; sourceTree = "<group>"; };
 		9C715146265661CE0084BE99 /* Memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
-		9C715149265662AF0084BE99 /* RomHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RomHeader.h; sourceTree = "<group>"; };
 		9C732C8E2661547200C8BA35 /* ngpctech.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ngpctech.txt; sourceTree = "<group>"; };
 		9C790E752670EDA9000A3506 /* NGPFlash.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = NGPFlash.s; sourceTree = "<group>"; };
 		9C790E762670EDAA000A3506 /* NGPFlash.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c.preprocessed; path = NGPFlash.i; sourceTree = "<group>"; };
@@ -78,10 +79,13 @@
 		9CC0F92D26C55DD50035478F /* TLCS900H_RegistersMap.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = TLCS900H_RegistersMap.s; sourceTree = "<group>"; };
 		9CC0F92E26D1073F0035478F /* AsmHleBios.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = AsmHleBios.s; sourceTree = "<group>"; };
 		9CC0F93A26D6C4740035478F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9CD304DE28E22CBF00ACD6A7 /* FileHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileHelper.h; sourceTree = "<group>"; };
+		9CD304DF28E22CBF00ACD6A7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9CD304E028E22CBF00ACD6A7 /* FileHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = FileHelper.c; sourceTree = "<group>"; };
+		9CD304E128E22F5500ACD6A7 /* NGPFlash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NGPFlash.h; sourceTree = "<group>"; };
 		A47F092B20863AF5004E1DA6 /* EmuMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuMenu.h; sourceTree = "<group>"; };
 		A47F092C20863AF5004E1DA6 /* EmuMenu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EmuMenu.c; sourceTree = "<group>"; };
 		A49D34381757E54900BD9B4B /* cpu.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = cpu.s; sourceTree = "<group>"; };
-		A49D343A1757E54900BD9B4B /* Equates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Equates.h; sourceTree = "<group>"; };
 		A49D34401757E54900BD9B4B /* io.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = io.s; sourceTree = "<group>"; };
 		A4AA02141B04077F0043E4D4 /* History.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
 		A4D0E11C2089E28D00401463 /* AsmExtra.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = AsmExtra.s; sourceTree = "<group>"; };
@@ -164,8 +168,8 @@
 		9C71513B26550C1E0084BE99 /* K2GE */ = {
 			isa = PBXGroup;
 			children = (
-				9CBC0C8D26DD7BD50039D17E /* README.md */,
 				9C71513D26550C1E0084BE99 /* K2GE_todo.txt */,
+				9CBC0C8D26DD7BD50039D17E /* README.md */,
 				9C71513E26550C1E0084BE99 /* History.txt */,
 				9C71513C26550C1E0084BE99 /* Version.h */,
 				9C71514026550C1E0084BE99 /* K2GE.h */,
@@ -196,10 +200,13 @@
 			isa = PBXGroup;
 			children = (
 				9C7BB94925FCD73C00EA9C9C /* graphics */,
+				9CD304DF28E22CBF00ACD6A7 /* README.md */,
 				9C4C21E226E7DE86007D0280 /* gba_asm.h */,
 				9C1FFFA72684A277005851ED /* EmuSettings.h */,
 				A47F092B20863AF5004E1DA6 /* EmuMenu.h */,
 				A47F092C20863AF5004E1DA6 /* EmuMenu.c */,
+				9CD304DE28E22CBF00ACD6A7 /* FileHelper.h */,
+				9CD304E028E22CBF00ACD6A7 /* FileHelper.c */,
 				A4D0E11D2089E28D00401463 /* AsmExtra.h */,
 				A4D0E11C2089E28D00401463 /* AsmExtra.s */,
 			);
@@ -214,11 +221,14 @@
 				9C71513B26550C1E0084BE99 /* K2GE */,
 				A47F092A20863AF5004E1DA6 /* Shared */,
 				9CC013FC2668FDD9005714F7 /* Emubase.h */,
-				A49D343A1757E54900BD9B4B /* Equates.h */,
 				9C50820725D45A9A00A8E1BA /* Main.h */,
 				9C50820C25D45A9B00A8E1BA /* Main.c */,
 				9C50821025D45A9B00A8E1BA /* Gui.h */,
 				9C50820D25D45A9B00A8E1BA /* Gui.c */,
+				9C4C21E126E54754007D0280 /* FileHandling.h */,
+				9C4C21DE26E54754007D0280 /* FileHandling.c */,
+				9C1A755B28E04EB7005F342E /* NeoGeoPocket.h */,
+				9C1A755C28E04EB7005F342E /* NeoGeoPocket.c */,
 				9C715145265645DD0084BE99 /* NGPHeader.h */,
 				9C715142265645050084BE99 /* bios.h */,
 				9C715144265645050084BE99 /* bios.c */,
@@ -226,6 +236,7 @@
 				9CC0F92E26D1073F0035478F /* AsmHleBios.s */,
 				9C50820525D45A9A00A8E1BA /* Cart.h */,
 				9C50820F25D45A9B00A8E1BA /* Cart.s */,
+				9CD304E128E22F5500ACD6A7 /* NGPFlash.h */,
 				9C790E762670EDAA000A3506 /* NGPFlash.i */,
 				9C790E752670EDA9000A3506 /* NGPFlash.s */,
 				35E683AD1C66453300FCFE8A /* cpu.h */,
@@ -238,11 +249,8 @@
 				9C4C21DF26E54754007D0280 /* t6w28.s */,
 				9C50821125D45A9B00A8E1BA /* Gfx.h */,
 				9C50820825D45A9A00A8E1BA /* Gfx.s */,
-				9C715149265662AF0084BE99 /* RomHeader.h */,
 				9C715146265661CE0084BE99 /* Memory.h */,
 				9C50820E25D45A9B00A8E1BA /* Memory.s */,
-				9C4C21E126E54754007D0280 /* FileHandling.h */,
-				9C4C21DE26E54754007D0280 /* FileHandling.c */,
 				9C4C21C226E12781007D0280 /* SpeedHacks.s */,
 			);
 			path = source;

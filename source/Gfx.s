@@ -1,7 +1,6 @@
 #ifdef __arm__
 
 #include "Shared/gba_asm.h"
-#include "Equates.h"
 #include "TLCS900H/TLCS900H.i"
 #include "K2GE/K2GE.i"
 
@@ -12,14 +11,15 @@
 	.global paletteTxAll
 	.global refreshGfx
 	.global endFrameGfx
+	.global vblIrqHandler
+
 	.global gfxState
-	.global gGammaValue
 	.global gFlicker
 	.global gTwitch
 	.global gScaling
 	.global gGfxMask
-	.global vblIrqHandler
 	.global yStart
+	.global GFX_DISPCNT
 	.global GFX_BG0CNT
 	.global GFX_BG1CNT
 	.global EMUPALBUFF
@@ -48,16 +48,11 @@ gfxInit:					;@ Called from machineInit
 	mov r1,#0x200+SCREEN_HEIGHT
 	mov r2,#0x100
 	bl memset_
-	adr r0,scaleParms
-	bl setupSpriteScaling
 
 	bl k2GEInit
 
 	ldmfd sp!,{pc}
 
-;@----------------------------------------------------------------------------
-scaleParms:					;@  NH     FH     NV     FV
-	.long OAM_BUFFER1,0x0000,0x0100,0xff01,0x0120,0xfee1
 ;@----------------------------------------------------------------------------
 gfxReset:					;@ Called with CPU reset
 ;@----------------------------------------------------------------------------
@@ -93,7 +88,7 @@ gfxReset:					;@ Called with CPU reset
 //	ldr r0,=m6809SetNMIPin
 //	ldr r1,=m6809SetIRQPin
 	ldr r2,=k2geRAM
-	ldr r3,=gMachine
+	ldr r3,=gSOC
 	ldrb r3,[r3]
 	bl k2GEReset0
 	bl monoPalInit
@@ -369,6 +364,12 @@ vblIrqHandler:
 	orreq r0,r0,#0x10000
 	str r0,[r6,#REG_BG0CNT]
 
+	ldr r0,=GFX_DISPCNT
+	ldr r0,[r0]
+	ldrb r2,gGfxMask
+	bic r0,r0,r2,lsl#8
+	strh r0,[r6,#REG_DISPCNT]
+
 	ldr r0,[geptr,#windowData]
 	strh r0,[r6,#REG_WIN0H]
 	mov r0,r0,lsr#16
@@ -477,6 +478,8 @@ windowTop:
 wTop:
 	.long 0,0,0		;@ windowTop  (this label too)   L/R scrolling in unscaled mode
 
+GFX_DISPCNT:
+	.long 0
 GFX_BG0CNT:
 	.short 0
 GFX_BG1CNT:

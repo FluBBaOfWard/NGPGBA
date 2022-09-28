@@ -1,6 +1,5 @@
 #ifdef __arm__
 
-#include "Equates.h"
 #include "TLCS900H/TLCS900H.i"
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
@@ -9,6 +8,7 @@
 
 	.global machineInit
 	.global loadCart
+	.global tlcs9000MemInit
 	.global emuFlags
 	.global romNum
 	.global cartFlags
@@ -21,10 +21,12 @@
 	.global g_BIOSBASE_COLOR
 	.global g_BIOSBASE_BW
 	.global ngpRAM
-	.global g_romSize
+	.global gRomSize
 	.global maxRomSize
-	.global g_config
+	.global gConfig
+	.global gMachineSet
 	.global gMachine
+	.global gSOC
 	.global gLang
 	.global gPaletteBank
 
@@ -37,7 +39,7 @@
 
 ROM_Space:
 //	.incbin "ngproms/Bust-A-Move Pocket (U).ngc"
-	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
+//	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
 //	.incbin "ngproms/Evolution - Eternal Dungeons (E).ngc"
 //	.incbin "ngproms/Fantastic Night Dreams Cotton (E).ngc"
 //	.incbin "ngproms/Fatal Fury F-Contact (JUE) (M2).ngc"
@@ -59,15 +61,14 @@ machineInit: 	;@ Called from C
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
 
-	ldr r0,=romSpacePtr
-	ldr r7,=ROM_Space
-	str r7,[r0]
-							;@ r7=rombase til end of loadcart
-	ldr t9optbl,=tlcs900HState
-	str r7,[t9optbl,#romBaseLo]
-	add r0,r7,#0x200000
-	str r0,[t9optbl,#romBaseHi]
+	ldr r1,=romSpacePtr
+//	ldr r0,=ROM_Space
+//	str r0,[r1]
+	ldr r0,[r1]
 
+	bl tlcs9000MemInit
+
+	ldr t9optbl,=tlcs900HState
 	ldr r0,=biosSpace
 	str r0,[t9optbl,#biosBase]
 	ldr r0,=tlcs_rom_R
@@ -91,10 +92,9 @@ machineInit: 	;@ Called from C
 	cmp r0,#0
 	beq skipBiosSettings
 
-	bl run
-	bl transferTime
-
-	ldr r1,=fixBiosSettings
+	bl run					;@ Settings are cleared when new batteries are inserted.
+	bl transferTime			;@ So set up time
+	ldr r1,=fixBiosSettings	;@ And Bios settings after the first run.
 	mov lr,pc
 	bx r1
 skipBiosSettings:
@@ -110,7 +110,7 @@ loadCart: 		;@ Called from C:  r0=emuflags
 	stmfd sp!,{r4-r11,lr}
 	str r0,emuFlags
 
-	ldr r0,g_romSize
+	ldr r0,gRomSize
 	ldr r1,romSpacePtr
 	bl ngpFlashReset
 	bl hacksInit
@@ -131,6 +131,15 @@ skipHWSetup:
 	ldmfd sp!,{r4-r11,lr}
 	bx lr
 
+;@----------------------------------------------------------------------------
+tlcs9000MemInit: 		;@ Called from C:  r0=rombase address
+	.type   tlcs9000MemInit STT_FUNC
+;@----------------------------------------------------------------------------
+	ldr r1,=tlcs900HState
+	str r0,[r1,#romBaseLo]
+	add r0,r0,#0x200000
+	str r0,[r1,#romBaseHi]
+	bx lr
 ;@----------------------------------------------------------------------------
 z80MemInit:
 ;@----------------------------------------------------------------------------
@@ -180,23 +189,27 @@ romNum:
 	.long 0						;@ romnumber
 romInfo:						;@
 emuFlags:
-	.byte 0						;@ emuflags      (label this so UI.C can take a peek) see equates.h for bitfields
+	.byte 0						;@ emuflags      (label this so UI.C can take a peek) see EmuSettings.h for bitfields
 //scaling:
 	.byte 0						;@ (display type)
 	.byte 0,0					;@ (sprite follow val)
 cartFlags:
 	.byte 0 					;@ cartflags
-g_config:
+gConfig:
 	.byte 0						;@ Config, bit 7=BIOS on/off
+gMachineSet:
+	.byte HW_AUTO
 gMachine:
-	.byte 0						;@ machine
+	.byte HW_NGPCOLOR
+gSOC:
+	.byte SOC_K2GE
 gLang:
 	.byte 1						;@ language
 gPaletteBank:
 	.byte 0						;@ palettebank
 isBiosLoaded:
 	.byte 0
-	.space 2					;@ alignment.
+//	.space 1					;@ alignment.
 
 ngpHeader:
 romSpacePtr:
@@ -205,7 +218,7 @@ g_BIOSBASE_COLOR:
 	.long 0
 g_BIOSBASE_BW:
 	.long 0
-g_romSize:
+gRomSize:
 romSize:
 	.long 0
 maxRomSize:
@@ -216,8 +229,6 @@ ngpRAM:
 	.space 0x4000
 biosSpace:
 	.space 0x10000
-//ROM_Space:
-//	.space 0x200000
 ;@----------------------------------------------------------------------------
 	.end
 #endif // #ifdef __arm__

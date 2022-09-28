@@ -7,13 +7,33 @@ extern "C" {
 
 extern u32 joyCfg;
 extern u32 EMUinput;
-extern u32 g_subBatteryLevel;
+extern u32 gSubBatteryLevel;
 extern u32 batteryLevel;
 
 /**
  * Copies the time from the NDS RTC to the NGP RTC.
  */
 void transferTime(void);
+
+/**
+ * Saves the state of io to the destination.
+ * @param  *destination: Where to save the state.
+ * @return The size of the state.
+ */
+int ioSaveState(void *destination);
+
+/**
+ * Loads the state of io from the source.
+ * @param  *source: Where to load the state from.
+ * @return The size of the state.
+ */
+int ioLoadState(const void *source);
+
+/**
+ * Gets the state size of an io state.
+ * @return The size of the state.
+ */
+int ioGetStateSize(void);
 
 /**
  * Reads a byte from the other system. If no data is available or no

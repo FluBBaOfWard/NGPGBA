@@ -1,18 +1,15 @@
 #include <gba.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/dir.h>
 
 #include "FileHandling.h"
 #include "Emubase.h"
 #include "Main.h"
 #include "Shared/EmuMenu.h"
 #include "Shared/EmuSettings.h"
+#include "Shared/FileHelper.h"
 #include "GUI.h"
 #include "Cart.h"
+#include "cpu.h"
 #include "Gfx.h"
 #include "io.h"
 
@@ -87,110 +84,121 @@ void saveState(void) {
 //	packState(testState);
 	infoOutput("Saved state.");
 }
-/*
-void loadState(void) {
-	u32 *statePtr;
-//	FILE *file;
-	char stateName[32];
 
-	if (findFolder(folderName)) {
-		return;
-	}
-	strlcpy(stateName, gameNames[selectedGame], sizeof(stateName));
-	strlcat(stateName, ".sta", sizeof(stateName));
-	int stateSize = getStateSize();
-	if ( (file = fopen(stateName, "r")) ) {
-		if ( (statePtr = malloc(stateSize)) ) {
-			fread(statePtr, 1, stateSize, file);
-			unpackState(statePtr);
-			free(statePtr);
-			infoOutput("Loaded state.");
-		} else {
-			infoOutput("Couldn't alloc mem for state.");
+/// Hold down the power button for ~40 frames.
+static void turnPowerOff(void) {
+	int i;
+	if (g_BIOSBASE_COLOR != NULL) {
+		EMUinput &= ~4;
+		for (i = 0; i < 100; i++ ) {
+			run();
+			EMUinput |= 4;
+			if (isConsoleSleeping()) {
+				break;
+			}
 		}
-		fclose(file);
 	}
 }
 
-void saveState(void) {
-	u32 *statePtr;
-//	FILE *file;
-	char stateName[32];
-
-	if (findFolder(folderName)) {
-		return;
-	}
-	strlcpy(stateName, gameNames[selectedGame], sizeof(stateName));
-	strlcat(stateName, ".sta", sizeof(stateName));
-	int stateSize = getStateSize();
-	if ( (file = fopen(stateName, "w")) ) {
-		if ( (statePtr = malloc(stateSize)) ) {
-			packState(statePtr);
-			fwrite(statePtr, 1, stateSize, file);
-			free(statePtr);
-			infoOutput("Saved state.");
-		} else {
-			infoOutput("Couldn't alloc mem for state.");
+/// Hold down the power button for ~40 frames.
+static void turnPowerOn(void) {
+	int i;
+	if (g_BIOSBASE_COLOR != NULL) {
+		EMUinput &= ~4;
+		for (i = 0; i < 100; i++ ) {
+			run();
+			EMUinput |= 4;
+			if (isConsoleRunning()) {
+				break;
+			}
 		}
-		fclose(file);
 	}
 }
-*/
+
 //---------------------------------------------------------------------------------
-bool loadGame() {
-	if (loadRoms(selected, false)) {
-		return true;
+bool loadGame(const RomHeader *rh) {
+	if (rh) {
+		cls(0);
+		if (isConsoleRunning()) {
+			drawText("     Please wait, power off.", 9);
+			turnPowerOff();
+		}
+		gRomSize = rh->filesize;
+		romSpacePtr = (u8 *)rh + sizeof(RomHeader);
+		tlcs9000MemInit(romSpacePtr);
+		selectedGame = selected;
+		checkMachine();
+		setEmuSpeed(0);
+		loadCart(0);
+		gameInserted = true;
+		if (emuSettings & AUTOLOAD_NVRAM) {
+			loadNVRAM();
+		}
+		if (emuSettings & AUTOLOAD_STATE) {
+			loadState();
+		}
+		drawText("     Please wait, power on.", 9);
+		turnPowerOn();
+		closeMenu();
+		return false;
 	}
-	selectedGame = selected;
-	loadRoms(selectedGame, true);
-	setEmuSpeed(0);
-	loadCart(selectedGame);
-	if (emuSettings & AUTOLOAD_STATE) {
-		loadState();
-	}
-	return false;
+	return true;
 }
 
-bool loadRoms(int game, bool doLoad) {
-//	int i, j, count;
-//	bool found;
-//	u8 *romArea = ROM_Space;
-//	FILE *file;
-
-//	count = fileCount[game];
-/*
-	chdir("/");			// Stupid workaround.
-	if (chdir(currentDir) == -1) {
-		return true;
+void selectGame() {
+	pauseEmulation = true;
+	setSelectedMenu(9);
+	const RomHeader *rh = browseForFile();
+	if (loadGame(rh)) {
+		backOutOfMenu();
 	}
+}
 
-	for (i=0; i<count; i++) {
-		found = false;
-		if ( (file = fopen(romFilenames[game][i], "r")) ) {
-			if (doLoad) {
-				fread(romArea, 1, romFilesizes[game][i], file);
-				romArea += romFilesizes[game][i];
-			}
-			fclose(file);
-			found = true;
-		} else {
-			for (j=0; j<GAMECOUNT; j++) {
-				if ( !(findFileInZip(gameZipNames[j], romFilenames[game][i])) ) {
-					if (doLoad) {
-						loadFileInZip(romArea, gameZipNames[j], romFilenames[game][i], romFilesizes[game][i]);
-						romArea += romFilesizes[game][i];
-					}
-					found = true;
-					break;
-				}
-			}
-		}
-		if (!found) {
-			infoOutput("Couldn't open file:");
-			infoOutput(romFilenames[game][i]);
-			return true;
+//---------------------------------------------------------------------------------
+static int loadBIOS(void *dest) {
+
+	int i;
+	const RomHeader *rh = NULL;
+	for (i=0; i<3; i++) {
+		rh = findRom(i);
+		if ((rh->extra & 1) != 0 && (rh->filesize == 0x10000)) {
+			memcpy(dest, (u8 *)rh + sizeof(RomHeader), 0x10000);
+			return 1;
 		}
 	}
-*/
-	return false;
+	return 0;
+}
+
+int loadColorBIOS(void) {
+	if ( loadBIOS(biosSpace) ) {
+		g_BIOSBASE_COLOR = biosSpace;
+		return 1;
+	}
+	g_BIOSBASE_COLOR = NULL;
+	return 0;
+}
+
+int loadBWBIOS(void) {
+	if ( loadBIOS(biosSpace) ) {
+		g_BIOSBASE_BW = biosSpace;
+		return 1;
+	}
+	g_BIOSBASE_BW = NULL;
+	return 0;
+}
+
+//---------------------------------------------------------------------------------
+void checkMachine() {
+	if (gMachineSet == HW_AUTO) {
+		if (romSpacePtr[gRomSize - 9] != 0) {
+			gMachine = HW_NGPCOLOR;
+		}
+		else {
+			gMachine = HW_NGPMONO;
+		}
+	}
+	else {
+		gMachine = gMachineSet;
+	}
+//	setupEmuBackground();
 }

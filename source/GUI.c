@@ -15,7 +15,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.0 2022-09-18"
+#define EMUVERSION "V0.5.2 2022-09-28"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -29,42 +29,47 @@ static void batteryChange(void);
 static void subBatteryChange(void);
 static void speedHackSet(void);
 static void cpuHalfSet(void);
+
 static void uiMachine(void);
+static void uiDebug(void);
+static void updateGameInfo(void);
 
 const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
 
 const fptr fnList0[] = {uiDummy};
-const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, gbaSleep, resetGame};
-const fptr fnList2[] = {ui8, loadState, saveState, saveSettings, resetGame};
+const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetGame};
+const fptr fnList2[] = {selectGame, loadState, saveState, saveSettings, resetGame};
 const fptr fnList3[] = {autoBSet, autoASet, controllerSet, swapABSet};
-const fptr fnList4[] = {/*scalingSet, flickSet,*/ gammaSet, paletteChange, fgrLayerSet, bgrLayerSet, sprLayerSet};
+const fptr fnList4[] = {gammaSet, paletteChange};
 const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, debugTextSet, sleepSet};
 const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange, speedHackSet, cpuHalfSet};
-const fptr fnList7[] = {uiDummy};
-const fptr fnList8[] = {quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame, quickSelectGame};
-const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8};
-const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8)};
-const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiAbout, uiLoadGame};
-const u8 menuXBack[] = {0,0,1,1,1,1,1,1,2};
+const fptr fnList7[] = {debugTextSet, fgrLayerSet, bgrLayerSet, sprLayerSet, stepFrame};
+const fptr fnList8[] = {uiDummy};
+const fptr fnList9[] = {quickSelectGame};
+const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8, fnList9};
+const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8), ARRSIZE(fnList9)};
+const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame};
+const u8 menuXBack[] = {0,0,1,1,1,1,1,1,1,2};
 
 u8 gGammaValue = 0;
 char gameInfoString[32];
 
-const char *const autoTxt[]  = {"Off","On","With R"};
-const char *const speedTxt[] = {"Normal","200%","Max","50%"};
-const char *const sleepTxt[] = {"5min","10min","30min","Off"};
-const char *const brighTxt[] = {"I","II","III","IIII","IIIII"};
-const char *const ctrlTxt[]  = {"1P","2P"};
-const char *const dispTxt[]  = {"Unscaled","Scaled"};
-const char *const flickTxt[] = {"No Flicker","Flicker"};
+const char *const autoTxt[]  = {"Off", "On", "With R"};
+const char *const speedTxt[] = {"Normal", "200%", "Max", "50%"};
+const char *const brighTxt[] = {"I", "II", "III", "IIII", "IIIII"};
+const char *const sleepTxt[] = {"5min", "10min", "30min", "Off"};
+const char *const ctrlTxt[]  = {"1P", "2P"};
+const char *const dispTxt[]  = {"Unscaled", "Scaled"};
+const char *const flickTxt[] = {"No Flicker", "Flicker"};
+
+const char *const machTxt[]  = {"Auto", "NeoGeo Pocket", "NeoGeo Pocket Color"};
 const char *const bordTxt[]  = {"Black", "Border Color", "None"};
 const char *const palTxt[]   = {"Black & White", "Red", "Green", "Blue", "Classic"};
 const char *const langTxt[]  = {"Japanese", "English"};
-const char *const machTxt[]  = {"NeoGeo Pocket Color", "NeoGeo Pocket"};
 
 /// This is called at the start of the emulator
 void setupGUI() {
-	emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM | ALLOW_SPEED_HACKS;
+	emuSettings = AUTOPAUSE_EMULATION | ALLOW_SPEED_HACKS;
 //	keysSetRepeat(25, 4);	// Delay, repeat.
 	closeMenu();
 }
@@ -79,10 +84,8 @@ void exitGUI() {
 }
 
 void quickSelectGame() {
-	while (loadGame()) {
-		redrawUI();
-		return;
-	}
+	openMenu();
+	selectGame();
 	closeMenu();
 }
 
@@ -106,7 +109,8 @@ void uiMainMenu() {
 	drawMenuItem("Display->");
 	drawMenuItem("Settings->");
 	drawMenuItem("Machine->");
-	drawMenuItem("Help->");
+	drawMenuItem("Debug->");
+	drawMenuItem("About->");
 	drawMenuItem("Sleep");
 	drawMenuItem("Restart");
 	if (enableExit) {
@@ -115,13 +119,13 @@ void uiMainMenu() {
 }
 
 void uiAbout() {
-	setupSubMenu("Help");
+	setupSubMenu("About");
 	updateGameInfo();
-	drawText("Select:   Power Button",3);
-	drawText("Start:    Option Button",4);
-	drawText("DPad:     Joystick",5);
-	drawText("B:        A Button",6);
-	drawText("A:        B Button",7);
+	drawText("B:        NGP A Button", 3);
+	drawText("A:        NGP B Button", 4);
+	drawText("Select:   Power Button", 5);
+	drawText("Start:    Option Button", 6);
+	drawText("DPad:     Joystick", 7);
 
 	drawText(gameInfoString, 9);
 
@@ -129,7 +133,7 @@ void uiAbout() {
 	drawText("ARMZ80      " ARMZ80VERSION, 16);
 	drawText("ARMTLCS900H " TLCS900VERSION, 17);
 	drawText("ARMK2GE     " K2GEVERSION, 18);
-	drawText("ARMK2Audio  2" , 19);
+	drawText("ARMK2Audio  " , 19);
 }
 
 void uiController() {
@@ -144,19 +148,16 @@ void uiDisplay() {
 	setupSubMenu("Display Settings");
 	drawSubItem("Gamma: ", brighTxt[gGammaValue]);
 	drawSubItem("B&W Palette: ", palTxt[gPaletteBank]);
-	drawSubItem("Disable Foreground: ", autoTxt[gGfxMask&1]);
-	drawSubItem("Disable Background: ", autoTxt[(gGfxMask>>1)&1]);
-	drawSubItem("Disable Sprites: ", autoTxt[(gGfxMask>>4)&1]);
 }
 
 static void uiMachine() {
 	setupSubMenu("Machine Settings");
-	drawSubItem("Language: ",langTxt[gLang]);
-	drawSubItem("Machine: ",machTxt[gMachine]);
-	drawMenuItem(" Change Batteries");
-	drawMenuItem(" Change Sub Battery");
-	drawSubItem("Cpu speed hacks: ",autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
-	drawSubItem("Half cpu speed: ",autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
+	drawSubItem("Language: ", langTxt[gLang]);
+	drawSubItem("Machine: ", machTxt[gMachineSet]);
+	drawMenuItem("Change Batteries");
+	drawMenuItem("Change Sub Battery");
+	drawSubItem("Cpu speed hacks: ", autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
+	drawSubItem("Half cpu speed: ", autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
 }
 
 void uiSettings() {
@@ -167,6 +168,15 @@ void uiSettings() {
 	drawSubItem("Autopause Game: ", autoTxt[emuSettings&1]);
 	drawSubItem("Debug Output: ", autoTxt[gDebugSet&1]);
 	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>8)&3]);
+}
+
+void uiDebug() {
+	setupSubMenu("Debug");
+	drawSubItem("Debug Output: ", autoTxt[gDebugSet&1]);
+	drawSubItem("Disable Foreground: ", autoTxt[gGfxMask&1]);
+	drawSubItem("Disable Background: ", autoTxt[(gGfxMask>>1)&1]);
+	drawSubItem("Disable Sprites: ", autoTxt[(gGfxMask>>4)&1]);
+	drawSubItem("Step Frame ", NULL);
 }
 
 void uiLoadGame() {
@@ -184,10 +194,12 @@ void resetGame() {
 }
 
 void updateGameInfo() {
-	NgpHeader *header = romSpacePtr;
-	strlMerge(gameInfoString, "Game name: ", header->name, sizeof(gameInfoString));
-	int len = strlen(gameInfoString);
-	int2HexStr(&gameInfoString[len], header->catalog);
+	char catalog[8];
+	NgpHeader *header = (NgpHeader *)romSpacePtr;
+	strlMerge(gameInfoString, " Game name: ", header->name, sizeof(gameInfoString));
+	strlcat(gameInfoString, " #", sizeof(gameInfoString));
+	short2HexStr(catalog, header->catalog);
+	strlcat(gameInfoString, catalog, sizeof(gameInfoString));
 }
 
 //---------------------------------------------------------------------------------
@@ -254,7 +266,10 @@ void languageSet() {
 }
 
 void machineSet() {
-	gMachine ^= 0x01;
+	gMachineSet++;
+	if (gMachineSet >= HW_SELECT_END) {
+		gMachineSet = 0;
+	}
 }
 
 void speedHackSet() {
@@ -273,5 +288,5 @@ void batteryChange() {
 }
 
 void subBatteryChange() {
-	g_subBatteryLevel = 0x3FFFFFF;		// 0x3FFFFFF for 2 years battery?
+	gSubBatteryLevel = 0x3FFFFFF;		// 0x3FFFFFF for 2 years battery?
 }

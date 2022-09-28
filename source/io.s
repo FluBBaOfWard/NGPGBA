@@ -8,17 +8,18 @@
 	.global Z80In
 	.global Z80Out
 	.global refreshEMUjoypads
+	.global ioSaveState
+	.global ioLoadState
+	.global ioGetStateSize
 
 	.global joyCfg
 	.global EMUinput
 
 	.global t9LoadB_Low
 	.global t9StoreB_Low
-	.global serialinterrupt
-	.global resetSIO
 	.global updateSlowIO
 	.global z80ReadLatch
-	.global g_subBatteryLevel
+	.global gSubBatteryLevel
 	.global batteryLevel
 	.global commByte
 	.global system_comms_read
@@ -52,6 +53,49 @@ ioResetLoop:
 	bl transferTime
 
 	ldmfd sp!,{r4,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+initSysMem:					;@ In r0=values ptr.
+;@----------------------------------------------------------------------------
+	stmfd sp!,{r4-r5,lr}
+
+	mov r4,r0
+	mov r5,#0xFF
+initMemLoop:
+	ldrb r0,[r4,r5]
+	mov r1,r5
+	bl t9StoreB_Low
+	subs r5,r5,#1
+	bpl initMemLoop
+
+	ldmfd sp!,{r4-r5,pc}
+;@----------------------------------------------------------------------------
+ioSaveState:			;@ In r0=destination. Out r0=size.
+	.type   ioSaveState STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{lr}
+
+	ldr r1,=systemMemory
+	mov r2,#0x100
+	bl memcpy
+
+	ldmfd sp!,{lr}
+	mov r0,#0x100
+	bx lr
+;@----------------------------------------------------------------------------
+ioLoadState:			;@ In r0=source. Out r0=size.
+	.type   ioLoadState STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{lr}
+
+	bl initSysMem
+
+	ldmfd sp!,{lr}
+;@----------------------------------------------------------------------------
+ioGetStateSize:		;@ Out r0=state size.
+	.type   ioGetStateSize STT_FUNC
+;@----------------------------------------------------------------------------
+	mov r0,#0x100
 	bx lr
 ;@----------------------------------------------------------------------------
 transferTime:
@@ -113,7 +157,7 @@ refreshEMUjoypads:			;@ Call every frame
 	tst r4,#0x04				;@ NDS Select
 	tsteq r4,#0x800				;@ NDS Y
 	bicne r0,r0,#0x01			;@ NGP Power
-	ldr r1,=g_subBatteryLevel
+	ldr r1,=gSubBatteryLevel
 	ldr r1,[r1]
 	tst r1,#0x2000000			;@ highest bit of subbattery level
 	biceq r0,r0,#0x02
@@ -183,7 +227,7 @@ updateSlowIO:				;@ Call once every frame, updates rtc and battery levels.
 	movmi r0,#1
 	str r0,batteryLevel
 
-	ldr r1,=g_subBatteryLevel
+	ldr r1,=gSubBatteryLevel
 	ldr r0,[r1]
 	subs r0,r0,#0x00000100
 	movmi r0,#0x00001000
@@ -290,14 +334,14 @@ t9StoreB_Low:
 
 	and r2,r1,#0xF0
 	cmp r2,#0x20
-	beq timer_write8
+	beq timerWrite8
 
 	cmp r2,#0x90
 	beq rtc_write8
 
 	and r0,r0,#0xFF
 	cmp r2,#0x70
-	beq int_write8
+	beq intWrite8
 
 	cmp r1,#0xB3				;@ Power button NMI on/off.
 //	beq lowW_cont
@@ -336,7 +380,7 @@ cpuSpeedW:
 	bxeq lr
 	strb r0,[r1,#0x80]
 	rsb r0,r0,#T9CYC_SHIFT
-	strb r0,[t9optbl,#tlcs_cycShift]
+	strb r0,[t9optbl,#tlcsCycShift]
 	mov t9cycles,t9cycles,ror r2
 	bx lr
 
@@ -346,13 +390,13 @@ t9LoadB_Low:
 	and r1,r0,#0xF0
 
 	cmp r1,#0x70
-	beq int_read8
+	beq intRead8
 
 	cmp r1,#0x90
 	beq rtc_read8
 
 	cmp r1,#0x20
-	beq timer_read8
+	beq timerRead8
 lowR_cont:
 	cmp r0,#0x50				;@ Serial channel 0 buffer.
 	ldrbeq r0,sc0Buf
@@ -428,7 +472,7 @@ Z80Out:
 	mov r0,#0
 	b Z80SetIRQPin
 ;@----------------------------------------------------------------------------
-g_subBatteryLevel:
+gSubBatteryLevel:
 	.long 0x3000000				;@ subBatteryLevel
 batteryLevel:
 	.long 0xFFFF				;@ Max = 0xFFFF (0x3FF)

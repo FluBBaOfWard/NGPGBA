@@ -14,22 +14,22 @@
 
 #include <gba.h>
 #include <string.h>
+
 #include "Memory.h"
 #include "bios.h"
 #include "K2GE/K2GE.h"
 #include "Shared/EmuMenu.h"
 #include "Filehandling.h"
-#include "EmuBase.h"
 #include "TLCS900H/TLCS900H.h"
 
 //=============================================================================
 
-u8 *ngpc_bios = 0;			// Holds bios program data
+u8 *ngpc_bios = NULL;			// Holds bios program data
 
-extern u32 g_romSize;			// from cart.s
-extern u8 gLang;				// from cart.s
-extern u8 gMachine;				// from cart.s
-extern u8 gPaletteBank;			// from cart.s
+extern u32 gRomSize;			// From Cart.s
+extern u8 gLang;				// From Cart.s
+extern u8 gMachine;				// From Cart.s
+extern u8 gPaletteBank;			// From Cart.s
 extern u32 sngBIOSHLE;
 
 //=============================================================================
@@ -341,14 +341,14 @@ void resetBios(NgpHeader *ngpHeader)
 	t9StoreB(0x01, 0x6C58);
 	t9StoreB(0x00, 0x6C59);
 	// 32MBit cart?
-	if (g_romSize > 0x200000) {
+	if (gRomSize > 0x200000) {
 		t9StoreB(0x03, 0x6C58);
 		t9StoreB(0x03, 0x6C59);
 	}
-	else if (g_romSize > 0x100000) {
+	else if (gRomSize > 0x100000) {
 		t9StoreB(0x03, 0x6C58);
 	}
-	else if (g_romSize > 0x080000) {
+	else if (gRomSize > 0x080000) {
 		t9StoreB(0x02, 0x6C58);
 	}
 
@@ -374,13 +374,13 @@ void resetBios(NgpHeader *ngpHeader)
 
 	// Color Mode Selection: 0x00 = B&W, 0x10 = Colour
 	int color = ngpHeader->mode;
-	if (gMachine == HW_K1GE) {
+	if (gMachine == HW_NGPMONO) {
 		color = 0;
 	}
 	t9StoreB(color, 0x6F90);		// Game Displaymode
 	t9StoreB(color, 0x6F95);		// Current Displaymode
 	t9StoreB(color, 0x6F91);		// Machine
-	if (gMachine == HW_K2GE) {
+	if (gMachine == HW_NGPCOLOR) {
 		t9StoreB(0x10, 0x6F91);		// Machine
 	}
 	// User Interrupt table
@@ -423,7 +423,7 @@ void fixBiosSettings(void)
 	int check = gLang ? 0x01 : 0x00;
 	// Language: 0 = Japanese, 1 = English
 	t9StoreB(check, 0x6F87);
-	if (gMachine == HW_K2GE) {
+	if (gMachine == HW_NGPCOLOR) {
 		t9StoreB(gPaletteBank, 0x6F94);
 		check += gPaletteBank;
 	}

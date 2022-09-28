@@ -3,6 +3,7 @@
 
 #include "Main.h"
 #include "Shared/EmuMenu.h"
+#include "Shared/FileHelper.h"
 #include "Shared/AsmExtra.h"
 #include "GUI.h"
 #include "bios.h"
@@ -17,6 +18,7 @@
 static void checkTimeOut(void);
 static void setupGraphics(void);
 
+bool gameInserted = false;
 static int sleepTimer = 60*60*5;	// 5 min
 
 u16 *menuMap;
@@ -48,14 +50,18 @@ int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
 	irqInit();
 
-	irqSet( IRQ_VBLANK, myVBlank );
-	irqEnable(IRQ_VBLANK);
-
 	setupGraphics();
+	irqSet(IRQ_VBLANK, myVBlank);
+	irqEnable(IRQ_VBLANK);
 	setupGUI();
 	getInput();
-
-	if ( g_BIOSBASE_COLOR == NULL ) {
+	if (initFileHelper(SMSID)) {
+//		loadColorBIOS();
+	}
+	else {
+		infoOutput("No roms found.");
+	}
+	if (g_BIOSBASE_COLOR == NULL) {
 		installHleBios(biosSpace);
 	}
 	machineInit();
@@ -115,7 +121,6 @@ void setEmuSpeed(int speed) {
 		waitMaskIn = 0x01;
 		waitMaskOut = 0x00;
 	}
-
 }
 
 //---------------------------------------------------------------------------------
@@ -123,7 +128,7 @@ static void setupGraphics() {
 //---------------------------------------------------------------------------------
 
 	// Set up the display
-	SetMode(MODE_0
+	GFX_DISPCNT = MODE_0
 			| OBJ_1D_MAP
 			| BG0_ON
 			| BG1_ON
@@ -132,12 +137,13 @@ static void setupGraphics() {
 			| OBJ_ON
 			| WIN0_ON
 			| WIN1_ON
-			);
-
+			;
+	SetMode(GFX_DISPCNT);
 	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(2);
 	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(2);
 	REG_BG0CNT = GFX_BG0CNT;
 	REG_BG1CNT = GFX_BG1CNT;
+	// Background 2 for border
 	REG_BG2CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(2) | BG_256_COLOR | BG_TILE_BASE(1) | BG_PRIORITY(3);
 
 	REG_WIN0H = 0x0000+SCREEN_WIDTH;		// Horizontal start-end
@@ -146,7 +152,7 @@ static void setupGraphics() {
 
 	// Set up background 3 for menu
 	REG_BG3CNT = TEXTBG_SIZE_512x256 | BG_MAP_BASE(6) | BG_TILE_BASE(0) | BG_PRIORITY(0);
-	menuMap = (u16 *)SCREEN_BASE_BLOCK(6);
+	menuMap = MAP_BASE_ADR(6);
 
 	LZ77UnCompVram(NGPBorderTiles, CHAR_BASE_ADR(1));
 	LZ77UnCompVram(NGPBorderMap, MAP_BASE_ADR(2));
