@@ -5,7 +5,7 @@
 #include "Shared/EmuMenu.h"
 #include "Shared/FileHelper.h"
 #include "Shared/AsmExtra.h"
-#include "GUI.h"
+#include "Gui.h"
 #include "bios.h"
 #include "EmuFont.h"
 #include "NGPBorder.h"

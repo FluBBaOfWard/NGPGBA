@@ -301,8 +301,7 @@ t9StoreB_Low:
 	bxeq lr
 
 	cmp r1,#0xB8				;@ Soundchip enable/disable, 0x55 On 0xAA Off.
-	andeq r0,r0,#2
-	beq setMuteSoundChip
+	beq setMuteT6W28
 
 	cmp r1,#0xB9				;@ Z80 enable/disable, 0x55 On 0xAA Off.
 	beq Z80_SetEnable

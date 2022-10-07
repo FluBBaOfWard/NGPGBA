@@ -7,7 +7,7 @@
 #include "Shared/EmuMenu.h"
 #include "Shared/EmuSettings.h"
 #include "Shared/FileHelper.h"
-#include "GUI.h"
+#include "Gui.h"
 #include "Cart.h"
 #include "cpu.h"
 #include "Gfx.h"
@@ -147,7 +147,7 @@ bool loadGame(const RomHeader *rh) {
 
 void selectGame() {
 	pauseEmulation = true;
-	setSelectedMenu(9);
+	ui9();
 	const RomHeader *rh = browseForFile();
 	if (loadGame(rh)) {
 		backOutOfMenu();

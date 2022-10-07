@@ -1,7 +1,7 @@
 #include <gba.h>
 #include <string.h>
 
-#include "GUI.h"
+#include "Gui.h"
 #include "Shared/EmuMenu.h"
 #include "Shared/EmuSettings.h"
 #include "Main.h"
@@ -15,7 +15,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.2 2022-09-28"
+#define EMUVERSION "V0.5.2 2022-10-07"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -49,7 +49,6 @@ const fptr fnList9[] = {quickSelectGame};
 const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8, fnList9};
 const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8), ARRSIZE(fnList9)};
 const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame};
-const u8 menuXBack[] = {0,0,1,1,1,1,1,1,1,2};
 
 u8 gGammaValue = 0;
 char gameInfoString[32];
@@ -196,7 +195,7 @@ void resetGame() {
 void updateGameInfo() {
 	char catalog[8];
 	NgpHeader *header = (NgpHeader *)romSpacePtr;
-	strlMerge(gameInfoString, " Game name: ", header->name, sizeof(gameInfoString));
+	strlMerge(gameInfoString, "Game name: ", header->name, sizeof(gameInfoString));
 	strlcat(gameInfoString, " #", sizeof(gameInfoString));
 	short2HexStr(catalog, header->catalog);
 	strlcat(gameInfoString, catalog, sizeof(gameInfoString));

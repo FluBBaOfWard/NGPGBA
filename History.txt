@@ -2,12 +2,18 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.2 - 2022-09-28 (FluBBa)
+V0.5.2 - 2022-10-07 (FluBBa)
 	Added back game selection.
 	Added new debug menu.
+	Better menu traversing.
 
-V0.5.0 - 2021-10-08 (FluBBa)
+V0.5.1 - 2021-10-10 (FluBBa)
+	Fixed timers, interrupts and scrolling.
+	Fixed DAA opcode.
 	Completed port to GBA devkitPro.
+
+V0.5.0 - 2021-09-29 (FluBBa)
+	Fixed sound mute handling.
 
 V0.4.9 - 2021-09-05 (FluBBa)
 	Started porting back to GBA devkitPro.

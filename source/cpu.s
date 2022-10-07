@@ -27,7 +27,7 @@
 #endif
 	.align 2
 ;@----------------------------------------------------------------------------
-run:		;@ Return after 1 frame
+run:						;@ Return after X frame(s)
 	.type   run STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldrh r0,waitCountIn
@@ -68,7 +68,7 @@ ngpFrameLoop:
 	ldr r0,z80CyclesPerScanline
 	bl Z80RestoreAndRunXCycles
 	add r0,z80optbl,#z80Regs
-	stmia r0,{z80f-z80pc,z80sp}			;@ Save Z80 state
+	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Now:
 ;@--------------------------------------
 	ldr t9optbl,=tlcs900HState
@@ -102,7 +102,7 @@ NoZ80Now:
 tlcs900hCyclesPerScanline:	.long 0
 z80CyclesPerScanline:	.long 0
 joyClick:			.long 0
-frameTotal:			.long 0		;@ Let ui.c see frame count for savestates
+frameTotal:			.long 0		;@ Let Gui.c see frame count for savestates
 waitCountIn:		.byte 0
 waitMaskIn:			.byte 0
 waitCountOut:		.byte 0
@@ -128,7 +128,7 @@ ngpStepLoop:
 	ldr r0,z80CyclesPerScanline
 	bl Z80RestoreAndRunXCycles
 	add r0,z80optbl,#z80Regs
-	stmia r0,{z80f-z80pc,z80sp}			;@ Save Z80 state
+	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Step:
 ;@--------------------------------------
 	ldr t9optbl,=tlcs900HState
