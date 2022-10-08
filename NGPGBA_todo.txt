@@ -1,11 +1,9 @@
 NGPGBA Todo
 
-	Fix sound!
-	Add option to downclock the Z80 or add speedhacks for the Z80.
+	Add speedhacks for the Z80?
 	Fix cpu stuff.
 	Fix saving of (changed) flash memory. Must remember changed blocks forever.
 	Fix savestates!
-	Connect NDS battery level to NGP battery level?
 	Timers?
 		http://forum.fobby.net/index.php?t=msg&th=796&start=0&
 	Push instructions might write to 32bit address.

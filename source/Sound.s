@@ -14,6 +14,7 @@
 	.global T6W28_L_W
 	.global T6W28_R_W
 	.global t6W28_0
+	.global soundMode
 
 	.extern pauseEmulation
 
@@ -64,7 +65,7 @@ soundInit:
 	ldr t6ptr,=t6W28_0
 	mov r1,#1
 	bl t6W28SetMixrate			;@ Sound, 0=low, 1=high mixrate
-	ldr r1,=1536000
+	ldr r1,=1536000				;@ 1.536MHz
 	bl t6W28SetFrequency		;@ Sound, chip frequency
 	ldr r1,=FREQTBL
 	bl t6W28Init				;@ Sound
@@ -145,9 +146,8 @@ vblSound2:
 	ldr r1,pcmPtr0
 	ldr r0,muteSound
 	cmp r0,#0
-//	bne silenceMix
-	ldr r0,=t6W28_0
-	b t6W28Mixer
+	ldreq r0,=t6W28_0
+	beq t6W28Mixer
 
 ;@----------------------------------------------------------------------------
 silenceMix:					;@ r1=destination, r2=len
@@ -160,19 +160,19 @@ silenceLoop:
 
 	bx lr
 ;@----------------------------------------------------------------------------
-T6W28_L_W:					;@ Sound left write
-;@----------------------------------------------------------------------------
-	stmfd sp!,{r3,lr}
-	ldr r1,=t6W28_0
-	bl t6W28LW
-	ldmfd sp!,{r3,lr}
-	bx lr
-;@----------------------------------------------------------------------------
 T6W28_R_W:					;@ Sound right write
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r3,lr}
 	ldr r1,=t6W28_0
 	bl t6W28W
+	ldmfd sp!,{r3,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+T6W28_L_W:					;@ Sound left write
+;@----------------------------------------------------------------------------
+	stmfd sp!,{r3,lr}
+	ldr r1,=t6W28_0
+	bl t6W28LW
 	ldmfd sp!,{r3,lr}
 	bx lr
 

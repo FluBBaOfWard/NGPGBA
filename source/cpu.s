@@ -10,6 +10,7 @@
 	.global isConsoleRunning
 	.global isConsoleSleeping
 	.global tweakCpuSpeed
+	.global tweakZ80Speed
 	.global frameTotal
 	.global waitMaskIn
 	.global waitMaskOut
@@ -64,10 +65,10 @@ ngpFrameLoop:
 	ands r0,r0,r0,lsr#8
 	beq NoZ80Now
 
-	ldr z80optbl,=Z80OpTable
+	ldr z80ptr,=Z80OpTable
 	ldr r0,z80CyclesPerScanline
 	bl Z80RestoreAndRunXCycles
-	add r0,z80optbl,#z80Regs
+	add r0,z80ptr,#z80Regs
 	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Now:
 ;@--------------------------------------
@@ -124,10 +125,10 @@ ngpStepLoop:
 	ands r0,r0,r0,lsr#8
 	beq NoZ80Step
 
-	ldr z80optbl,=Z80OpTable
+	ldr z80ptr,=Z80OpTable
 	ldr r0,z80CyclesPerScanline
 	bl Z80RestoreAndRunXCycles
-	add r0,z80optbl,#z80Regs
+	add r0,z80ptr,#z80Regs
 	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Step:
 ;@--------------------------------------
@@ -178,10 +179,10 @@ Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled
 	and r0,r0,#1
 	strb r0,z80Enabled
 	eor r0,r0,#1
-	stmfd sp!,{z80optbl,lr}
-	ldr z80optbl,=Z80OpTable
+	stmfd sp!,{z80ptr,lr}
+	ldr z80ptr,=Z80OpTable
 	bl Z80SetResetPin
-	ldmfd sp!,{z80optbl,lr}
+	ldmfd sp!,{z80ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 Z80_nmi_do:					;@ Address 0xBA of the TLCS-900H
@@ -189,19 +190,19 @@ Z80_nmi_do:					;@ Address 0xBA of the TLCS-900H
 	ldrb r1,z80Enabled
 	cmp r1,#0
 	bxeq lr
-	stmfd sp!,{z80optbl,lr}
-	ldr z80optbl,=Z80OpTable
+	stmfd sp!,{z80ptr,lr}
+	ldr z80ptr,=Z80OpTable
 	mov r0,#1
 	bl Z80SetNMIPin
-	ldmfd sp!,{z80optbl,lr}
+	ldmfd sp!,{z80ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 cpu1SetIRQ:
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{z80optbl,lr}
-	ldr z80optbl,=Z80OpTable
+	stmfd sp!,{z80ptr,lr}
+	ldr z80ptr,=Z80OpTable
 	bl Z80SetIRQPin
-	ldmfd sp!,{z80optbl,pc}
+	ldmfd sp!,{z80ptr,pc}
 ;@----------------------------------------------------------------------------
 tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 	.type   tweakCpuSpeed STT_FUNC
@@ -214,6 +215,15 @@ tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 ;@---Speed - 3.072MHz / 60Hz / 198 lines	;NGP Z80.
 	mov r0,r0,lsr#1
 	str r0,z80CyclesPerScanline
+	bx lr
+;@----------------------------------------------------------------------------
+tweakZ80Speed:				;@ in r0=0 normal, 1=half speed, 2=1/4 speed...
+	.type   tweakZ80Speed STT_FUNC
+;@----------------------------------------------------------------------------
+;@---Speed - 3.072MHz / 60Hz / 198 lines	;NGP Z80.
+	ldr r1,=T9_HINT_RATE/2				;@ 515/2
+	mov r1,r1,lsr r0
+	str r1,z80CyclesPerScanline
 	bx lr
 ;@----------------------------------------------------------------------------
 cpuReset:					;@ Called by loadCart/resetGame
@@ -229,6 +239,11 @@ cpuReset:					;@ Called by loadCart/resetGame
 	bl tlcs900HReset
 
 ;@--------------------------------------
+	ldr r0,=gZ80Speed
+	ldrb r0,[r0]
+	and r0,r0,#7
+	bl tweakZ80Speed
+
 	ldr r0,=Z80OpTable
 	mov r1,#0
 	bl Z80Reset

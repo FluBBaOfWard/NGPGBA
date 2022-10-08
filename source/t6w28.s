@@ -9,6 +9,9 @@
 	.global t6W28Reset
 	.global t6W28SetMixrate
 	.global t6W28SetFrequency
+	.global t6W28SaveState
+	.global t6W28LoadState
+	.global t6W28GetStateSize
 	.global t6W28Mixer
 	.global t6W28LW
 	.global t6W28W
@@ -146,10 +149,38 @@ frqLoop:
 	bx lr
 
 ;@----------------------------------------------------------------------------
+t6W28SaveState:				;@ In r0=destination, r1=snptr. Out r0=state size.
+	.type   sn76496SaveState STT_FUNC
+;@----------------------------------------------------------------------------
+	mov r2,#t6StateEnd-t6StateStart
+	stmfd sp!,{r2,lr}
+
+	bl memcpy
+
+	ldmfd sp!,{r0,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t6W28LoadState:				;@ In r0=snptr, r1=source. Out r0=state size.
+	.type   sn76496LoadState STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{lr}
+
+	mov r2,#t6StateEnd-t6StateStart
+	bl memcpy
+
+	ldmfd sp!,{lr}
+;@----------------------------------------------------------------------------
+t6W28GetStateSize:		;@ Out r0=state size.
+	.type   sn76496GetStateSize STT_FUNC
+;@----------------------------------------------------------------------------
+	mov r0,#t6StateEnd-t6StateStart
+	bx lr
+
+;@----------------------------------------------------------------------------
 	.section .ewram,"ax"
 	.align 2
 ;@----------------------------------------------------------------------------
-t6W28W:						;@ In r0 = value, r1 = struct-pointer
+t6W28W:						;@ In r0 = value, r1 = struct-pointer, right ch.
 	.type   t6W28W STT_FUNC
 ;@----------------------------------------------------------------------------
 	tst r0,#0x80
@@ -179,10 +210,10 @@ setFreq:
 	strbne r0,[r2,#ch0Reg]
 	ldrh r0,[r2,#ch0Reg]
 	mov r0,r0,lsr#3
+	strh r0,[r1,#ch1Reg]
 
 	ldr r2,[r1,#freqTablePtr]
 	ldrh r0,[r2,r0]
-	strh r0,[r1,#ch0Frq]
 	cmp r3,#2					;@ Ch2
 	ldrbeq r2,[r1,#ch3Reg]
 	cmpeq r2,#3
@@ -207,7 +238,7 @@ setNoiseFreq:
 	strh r3,[r1,#ch3Frq]
 	bx lr
 ;@----------------------------------------------------------------------------
-t6W28LW:					;@ In r0 = value, r1 = struct-pointer
+t6W28LW:					;@ In r0 = value, r1 = struct-pointer, left ch.
 	.type   t6W28L_W STT_FUNC
 ;@----------------------------------------------------------------------------
 	tst r0,#0x80
@@ -236,9 +267,9 @@ setFreqL:
 	strbne r0,[r2,#ch0RegL]
 	ldrh r0,[r2,#ch0RegL]
 	mov r0,r0,lsr#3
-	ldr r2,[r1,#freqTablePtr]
-	ldrh r0,[r2,r0]
-	strh r0,[r1,#ch0Frq]
+	ldr r3,[r1,#freqTablePtr]
+	ldrh r0,[r3,r0]
+	strh r0,[r2,#ch0Frq]
 
 //	cmp r3,#2					;@ Ch2
 //	ldrbeq r2,[r1,#ch3Reg]

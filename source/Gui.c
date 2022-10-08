@@ -8,6 +8,7 @@
 #include "FileHandling.h"
 #include "Cart.h"
 #include "Gfx.h"
+#include "Sound.h"
 #include "io.h"
 #include "cpu.h"
 #include "bios.h"
@@ -15,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.2 2022-10-07"
+#define EMUVERSION "V0.5.2 2022-10-08"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -29,6 +30,8 @@ static void batteryChange(void);
 static void subBatteryChange(void);
 static void speedHackSet(void);
 static void cpuHalfSet(void);
+static void z80SpeedSet(void);
+static void soundSet(void);
 
 static void uiMachine(void);
 static void uiDebug(void);
@@ -39,10 +42,10 @@ const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, 
 const fptr fnList0[] = {uiDummy};
 const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetGame};
 const fptr fnList2[] = {selectGame, loadState, saveState, saveSettings, resetGame};
-const fptr fnList3[] = {autoBSet, autoASet, controllerSet, swapABSet};
+const fptr fnList3[] = {autoBSet, autoASet, swapABSet};
 const fptr fnList4[] = {gammaSet, paletteChange};
-const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, debugTextSet, sleepSet};
-const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange, speedHackSet, cpuHalfSet};
+const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, ewramSet, sleepSet};
+const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange, speedHackSet, cpuHalfSet, z80SpeedSet, soundSet};
 const fptr fnList7[] = {debugTextSet, fgrLayerSet, bgrLayerSet, sprLayerSet, stepFrame};
 const fptr fnList8[] = {uiDummy};
 const fptr fnList9[] = {quickSelectGame};
@@ -51,6 +54,7 @@ const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), A
 const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame};
 
 u8 gGammaValue = 0;
+u8 gZ80Speed = 0;
 char gameInfoString[32];
 
 const char *const autoTxt[]  = {"Off", "On", "With R"};
@@ -65,6 +69,7 @@ const char *const machTxt[]  = {"Auto", "NeoGeo Pocket", "NeoGeo Pocket Color"};
 const char *const bordTxt[]  = {"Black", "Border Color", "None"};
 const char *const palTxt[]   = {"Black & White", "Red", "Green", "Blue", "Classic"};
 const char *const langTxt[]  = {"Japanese", "English"};
+const char *const cpuSpeedTxt[]  = {"Full Speed", "Half Speed", "1/4 Speed", "1/8 Speed", "1/16 Speed"};
 
 /// This is called at the start of the emulator
 void setupGUI() {
@@ -139,7 +144,6 @@ void uiController() {
 	setupSubMenu("Controller Settings");
 	drawSubItem("B Autofire: ", autoTxt[autoB]);
 	drawSubItem("A Autofire: ", autoTxt[autoA]);
-	drawSubItem("Controller: ", ctrlTxt[(joyCfg>>29)&1]);
 	drawSubItem("Swap A-B:   ", autoTxt[(joyCfg>>10)&1]);
 }
 
@@ -155,8 +159,10 @@ static void uiMachine() {
 	drawSubItem("Machine: ", machTxt[gMachineSet]);
 	drawMenuItem("Change Batteries");
 	drawMenuItem("Change Sub Battery");
-	drawSubItem("Cpu speed hacks: ", autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
-	drawSubItem("Half cpu speed: ", autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
+	drawSubItem("Cpu Speed Hacks: ", autoTxt[(emuSettings&ALLOW_SPEED_HACKS)>>17]);
+	drawSubItem("Half Cpu Speed: ", autoTxt[(emuSettings&HALF_CPU_SPEED)>>16]);
+	drawSubItem("Z80 Clock: ", cpuSpeedTxt[gZ80Speed&7]);
+	drawSubItem("Sound: ", autoTxt[soundMode&1]);
 }
 
 void uiSettings() {
@@ -165,7 +171,7 @@ void uiSettings() {
 	drawSubItem("Autoload State: ", autoTxt[(emuSettings>>1)&1]);
 	drawSubItem("Autosave Settings: ", autoTxt[(emuSettings>>4)&1]);
 	drawSubItem("Autopause Game: ", autoTxt[emuSettings&1]);
-	drawSubItem("Debug Output: ", autoTxt[gDebugSet&1]);
+	drawSubItem("EWRAM Overclock: ", autoTxt[ewram&1]);
 	drawSubItem("Autosleep: ", sleepTxt[(emuSettings>>8)&3]);
 }
 
@@ -195,7 +201,7 @@ void resetGame() {
 void updateGameInfo() {
 	char catalog[8];
 	NgpHeader *header = (NgpHeader *)romSpacePtr;
-	strlMerge(gameInfoString, "Game name: ", header->name, sizeof(gameInfoString));
+	strlMerge(gameInfoString, "Game Name: ", header->name, sizeof(gameInfoString));
 	strlcat(gameInfoString, " #", sizeof(gameInfoString));
 	short2HexStr(catalog, header->catalog);
 	strlcat(gameInfoString, catalog, sizeof(gameInfoString));
@@ -271,21 +277,42 @@ void machineSet() {
 	}
 }
 
-void speedHackSet() {
-	emuSettings ^= ALLOW_SPEED_HACKS;
-	emuSettings &= ~HALF_CPU_SPEED;
-	hacksInit();
-}
-void cpuHalfSet() {
-	emuSettings ^= HALF_CPU_SPEED;
-	emuSettings &= ~ALLOW_SPEED_HACKS;
-	tweakCpuSpeed(emuSettings & HALF_CPU_SPEED);
-}
-
 void batteryChange() {
 	batteryLevel = 0xFFFF;				// 0xFFFF for 2 days battery?
 }
 
 void subBatteryChange() {
 	gSubBatteryLevel = 0x3FFFFFF;		// 0x3FFFFFF for 2 years battery?
+}
+
+void speedHackSet() {
+	emuSettings ^= ALLOW_SPEED_HACKS;
+	emuSettings &= ~HALF_CPU_SPEED;
+	hacksInit();
+	tweakCpuSpeed(emuSettings & HALF_CPU_SPEED);
+}
+void cpuHalfSet() {
+	emuSettings ^= HALF_CPU_SPEED;
+	emuSettings &= ~ALLOW_SPEED_HACKS;
+	tweakCpuSpeed(emuSettings & HALF_CPU_SPEED);
+	if ((emuSettings & HALF_CPU_SPEED) && gZ80Speed < 1) {
+		gZ80Speed = 1;
+	}
+	tweakZ80Speed(gZ80Speed);
+}
+
+void z80SpeedSet() {
+	gZ80Speed++;
+	if (gZ80Speed >= 5) {
+		gZ80Speed = 0;
+	}
+	tweakZ80Speed(gZ80Speed);
+}
+
+void soundSet() {
+	soundMode++;
+	if (soundMode >= 2) {
+		soundMode = 0;
+	}
+	soundInit();
 }

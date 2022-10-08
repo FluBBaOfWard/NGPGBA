@@ -5,9 +5,10 @@
 extern "C" {
 #endif
 
-//#include "t6w28.i"
+#include "t6w28.h"
 
-//extern SN76496 k2Audio_0;
+extern T6W28 k2Audio_0;
+extern u8 soundMode;
 
 void soundInit(void);
 void soundSetFrequency(void);

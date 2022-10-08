@@ -143,9 +143,9 @@ tlcs9000MemInit: 		;@ Called from C:  r0=rombase address
 ;@----------------------------------------------------------------------------
 z80MemInit:
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{z80optbl}
-	ldr z80optbl,=Z80OpTable
-	add r0,z80optbl,#z80ReadTbl
+	stmfd sp!,{z80ptr}
+	ldr z80ptr,=Z80OpTable
+	add r0,z80ptr,#z80ReadTbl
 	ldr r1,=empty_R
 	ldr r2,=empty_W
 	mov r3,#8
@@ -155,13 +155,13 @@ z80MemLoop0:
 	subs r3,r3,#1
 	bne z80MemLoop0
 
-	add r0,z80optbl,#z80ReadTbl
+	add r0,z80ptr,#z80ReadTbl
 	ldr r1,=z80RamR
 	str r1,[r0]					;@ 0x0000-0x1FFF
 	ldr r1,=z80LatchR
 	str r1,[r0,#16]				;@ 0x8000-0x9FFF
 
-	add r0,z80optbl,#z80WriteTbl
+	add r0,z80ptr,#z80WriteTbl
 	ldr r1,=z80RamW
 	str r1,[r0]					;@ 0x0000-0x1FFF
 	ldr r1,=z80SoundW
@@ -172,14 +172,14 @@ z80MemLoop0:
 	str r1,[r0,#24]				;@ 0xC000-0xDFFF
 
 	ldr r0,=ngpRAM+0x3000		;@ Shared Z80/TLCS-900H RAM.
-	add r1,z80optbl,#z80MemTbl
+	add r1,z80ptr,#z80MemTbl
 	mov r2,#8
 z80MemLoop1:
 	str r0,[r1],#4				;@ z80MemTbl
 	subs r2,r2,#1
 	bne z80MemLoop1
 
-	ldmfd sp!,{z80optbl}
+	ldmfd sp!,{z80ptr}
 	bx lr
 
 

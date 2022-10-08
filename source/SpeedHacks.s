@@ -328,10 +328,10 @@ z80jrzHack:					;@ Jump if zero
 	ldrsb r0,[z80pc],#1
 	tst z80f,#PSR_Z
 	beq skipJRZ
-	subne cycles,cycles,#5*CYCLE
+	subne z80cyc,z80cyc,#5*CYCLE
 	addne z80pc,z80pc,r0
 	cmp r0,#-28
-	andeq cycles,cycles,#CYC_MASK
+	andeq z80cyc,z80cyc,#CYC_MASK
 skipJRZ:
 	fetch 7
 ;@----------------------------------------------------------------------------

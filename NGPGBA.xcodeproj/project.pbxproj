@@ -83,6 +83,7 @@
 		9CD304DF28E22CBF00ACD6A7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CD304E028E22CBF00ACD6A7 /* FileHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = FileHelper.c; sourceTree = "<group>"; };
 		9CD304E128E22F5500ACD6A7 /* NGPFlash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NGPFlash.h; sourceTree = "<group>"; };
+		9CD304E328F17E4600ACD6A7 /* t6w28.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = t6w28.h; sourceTree = "<group>"; };
 		A47F092B20863AF5004E1DA6 /* EmuMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuMenu.h; sourceTree = "<group>"; };
 		A47F092C20863AF5004E1DA6 /* EmuMenu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EmuMenu.c; sourceTree = "<group>"; };
 		A49D34381757E54900BD9B4B /* cpu.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = cpu.s; sourceTree = "<group>"; };
@@ -245,6 +246,7 @@
 				A49D34401757E54900BD9B4B /* io.s */,
 				9C50820925D45A9B00A8E1BA /* Sound.h */,
 				9C50820625D45A9A00A8E1BA /* Sound.s */,
+				9CD304E328F17E4600ACD6A7 /* t6w28.h */,
 				9C4C21E026E54754007D0280 /* t6w28.i */,
 				9C4C21DF26E54754007D0280 /* t6w28.s */,
 				9C50821125D45A9B00A8E1BA /* Gfx.h */,

@@ -2,7 +2,7 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.2 - 2022-10-07 (FluBBa)
+V0.5.2 - 2022-10-08 (FluBBa)
 	Added back game selection.
 	Added new debug menu.
 	Better menu traversing.

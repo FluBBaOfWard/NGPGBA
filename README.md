@@ -38,11 +38,14 @@ B to go back a step.
 ### Machine Settings:
 	Language: Select between Japanese and English.
 	Machine: Select the emulated machine.
-	Half cpu speed: This halves the emulated cpu speed.
-		Can make games faster.
 	Change Batteries: Change to new main batteries (AA/LR6).
 	Change Sub Battery: Change to a new sub battery (CR2032).
-	Bios Settings: Load a real NGP Bios.
+	Cpu Speed Hacks: Allow speed hacks.
+	Half Cpu Speed: This halves the emulated cpu speed.
+		Can make games faster.
+	Z80 Clock: Down shit the clock of the Z80.
+		This can make a huge impact to the speed but can also screw up sound.
+	Sound: On / Off.
 ### Settings:
 	Speed: Switch between speed modes.
 		Normal: Game runs at it's normal speed.
@@ -56,6 +59,9 @@ B to go back a step.
 	Autosave Settings: This will save settings when
 		leaving menu if any changes are made.
 	Autopause Game: Toggle if the game should pause when opening the menu.
+	Overclock EWRAM: Changes the waitstates on EWRAM between 2 and 1,
+		might damage your GBA and uses more power, around 10% speedgain.
+		Use at your own risk!
 	Autosleep: Change the autosleep time, also see Sleep.
 ### Debug:
 	Debug Output: Show FPS and logged text.
