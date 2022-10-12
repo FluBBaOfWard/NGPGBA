@@ -432,18 +432,18 @@ FF0000 -> FFFFFF	BIOS
 				Bit 3-5 = - ?
 				Bit 6-7 = !0 = Auto clock speed regeneration with panel switch input
 
-6C58 B		: EEPROM(LO) 'size' 
-				0x00 = Not present EEPROM(LO)
+6C58 B		: Flash(LO) 'size'
+				0x00 = Not present Flash(LO)
 				0x01 = 4Mbit
 				0x02 = 8Mbit
 				0x03 = 16Mbit
-6C59 B		: EEPROM(HI) 'size' 
-				0x00 = Not present EEPROM(HI)
+6C59 B		: Flash(HI) 'size'
+				0x00 = Not present Flash(HI)
 				0x01 = 4Mbit?
 				0x02 = 8Mbit?
 				0x03 = 16Mbit
-6C5A B		: Copy of byte 0x02 of the EEPROM(LO) manf.id.
-6C5B B		: Copy of byte 0x02 of the EEPROM(HI) manf.id. (bad == 01)
+6C5A B		: Flash(LO) protected(1) or not(2?).
+6C5B B		: Flash(HI) protected(1) or not(2?).
 6C5C B		: Copy of byte from 0x9FFFF7, compared to 0xCC
 6C5D B		: Copy of byte from 0x9FFFF8, compared to 0x33
 
@@ -463,7 +463,7 @@ FF0000 -> FFFFFF	BIOS
 6C7A W		: ? Set to 0xA5A5 just before HALT, also set/compared to 0x5A5A
 6C7C W		: System running or halt? 0xA55A = Halt, 0x5AA5 = Running.
 
-6C7E B		: EEPROM valid?
+6C7E B		: Flash valid?
 
 6C80-6CBF	: Serial Comms Transmit buffer?
 6CC0-6CFF	: Serial Comms Receive buffer?
@@ -494,11 +494,11 @@ FF0000 -> FFFFFF	BIOS
 
 6E85 B		: Copy of COMM status (0xB2)
 
-6E86 B		: Flash Device ID / Size?
+6E86 B		: Last boot Flash Device ID / Size?
 				0x0A = 4Mbit?
 				0x12 = 8Mbit?
 				0x22 = 16Mbit?
-6E87 B		: Flash Manufacturer ID.
+6E87 B		: Last boot Flash Manufacturer ID.
 				0x00 = Not present
 				0x01 = Toshiba
 				0x02 = Samsung
@@ -593,8 +593,8 @@ FF0000 -> FFFFFF	BIOS
 				0x00 = Neogeo Pocket Classic (Black & White)
 				0x10 = Neogeo Pocket Color
 
-6F92 B		: Copy of EEPROM(LO) size (0x6C58)
-6F93 B		: Copy of EEPROM(HI) size (0x6C59)
+6F92 B		: Copy of Flash(LO) size (0x6C58)
+6F93 B		: Copy of Flash(HI) size (0x6C59)
 
 6F94 B		: User setting - Palette for mono games.
 				0x00 = Black & White

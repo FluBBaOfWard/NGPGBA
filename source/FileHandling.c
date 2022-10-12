@@ -166,6 +166,7 @@ static int loadBIOS(void *dest) {
 			return 1;
 		}
 	}
+//	memcpy(dest, (u8 *)rawBios, 0x10000);
 	return 0;
 }
 

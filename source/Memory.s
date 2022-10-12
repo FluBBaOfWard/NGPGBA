@@ -60,13 +60,8 @@ empty_W:					;@ Write bad address (error)
 	mov r0,#0xBA
 	bx lr
 ;@----------------------------------------------------------------------------
-rom_W:						;@ Write ROM address (error)
+rom_W:						;@ Write ROM address
 ;@----------------------------------------------------------------------------
-	and r2,r1,#0xE00000
-	cmp r2,#0x200000
-	beq FlashWriteLO
-	cmp r2,#0x800000
-	beq FlashWriteHI
 	mov r11,r11					;@ No$GBA breakpoint
 	mov r0,#0xB0
 	bx lr
@@ -97,6 +92,11 @@ t9StoreB:					;@ r0=value, r1=address
 	beq t9StoreB_ram
 	cmp r2,#2
 	beq t9StoreB_vram
+	mov r2,r2,lsr#7
+	cmp r2,#1
+	beq FlashWriteLO
+	cmp r2,#4
+	beq FlashWriteHI
 	b rom_W
 ;@----------------------------------------------------------------------------
 t9StoreW_32:

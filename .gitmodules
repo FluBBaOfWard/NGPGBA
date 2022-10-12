@@ -10,3 +10,6 @@
 [submodule "source/K2GE"]
 	path = source/K2GE
 	url = https://github.com/FluBBaOfWard/K2GE.git
+[submodule "source/NGPFlash"]
+	path = source/NGPFlash
+	url = https://github.com/FluBBaOfWard/NGPFlash.git

@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.2 2022-10-08"
+#define EMUVERSION "V0.5.2 2022-10-12"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)

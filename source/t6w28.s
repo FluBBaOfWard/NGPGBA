@@ -99,7 +99,7 @@ t6W28Reset:					;@ t6ptr=r0=pointer to struct
 //	ldr r3,=(WFEED_SN<<16)+PFEED_SN
 
 	mov r1,#0
-	mov r2,#(t6Size-16)/4		;@ 52/4=13
+	mov r2,#(t6StateEnd-t6StateStart)/4		;@ 52/4=13
 rLoop:
 	subs r2,r2,#1
 	strpl r1,[t6ptr,r2,lsl#2]

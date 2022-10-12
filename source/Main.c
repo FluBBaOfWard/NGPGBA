@@ -6,6 +6,7 @@
 #include "Shared/FileHelper.h"
 #include "Shared/AsmExtra.h"
 #include "Gui.h"
+#include "FileHandling.h"
 #include "bios.h"
 #include "EmuFont.h"
 #include "NGPBorder.h"
@@ -56,7 +57,9 @@ int main(int argc, char **argv) {
 	setupGUI();
 	getInput();
 	if (initFileHelper(SMSID)) {
-//		loadColorBIOS();
+		loadColorBIOS();
+		const RomHeader *rh = findRom(0);
+		loadGame(rh);
 	}
 	else {
 		infoOutput("No roms found.");
@@ -139,8 +142,8 @@ static void setupGraphics() {
 			| WIN1_ON
 			;
 	SetMode(GFX_DISPCNT);
-	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(2);
-	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(2);
+	GFX_BG0CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(0) | BG_TILE_BASE(2) | BG_PRIORITY(1);
+	GFX_BG1CNT = TEXTBG_SIZE_256x256 | BG_MAP_BASE(1) | BG_TILE_BASE(3) | BG_PRIORITY(1);
 	REG_BG0CNT = GFX_BG0CNT;
 	REG_BG1CNT = GFX_BG1CNT;
 	// Background 2 for border

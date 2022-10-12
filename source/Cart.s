@@ -18,6 +18,7 @@
 	.global romSpacePtr
 
 	.global biosSpace
+	.global rawBios
 	.global g_BIOSBASE_COLOR
 	.global g_BIOSBASE_BW
 	.global ngpRAM
@@ -46,7 +47,7 @@ ROM_Space:
 //	.incbin "ngproms/Last Blade, The - Beyond the Destiny (E).ngc"
 //	.incbin "ngproms/Metal Slug - 1st Mission (JUE) (M2).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
-//biosSpace:
+//rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
 
 #if GBA
@@ -56,7 +57,7 @@ ROM_Space:
 #endif
 	.align 2
 ;@----------------------------------------------------------------------------
-machineInit: 	;@ Called from C
+machineInit: 				;@ Called from C
 	.type   machineInit STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
@@ -92,9 +93,9 @@ machineInit: 	;@ Called from C
 	cmp r0,#0
 	beq skipBiosSettings
 
-	bl run					;@ Settings are cleared when new batteries are inserted.
-	bl transferTime			;@ So set up time
-	ldr r1,=fixBiosSettings	;@ And Bios settings after the first run.
+	bl run						;@ Settings are cleared when new batteries are inserted.
+	bl transferTime				;@ So set up time
+	ldr r1,=fixBiosSettings		;@ And Bios settings after the first run.
 	mov lr,pc
 	bx r1
 skipBiosSettings:
@@ -104,7 +105,7 @@ skipBiosSettings:
 //	.section .ewram,"ax"
 //	.align 2
 ;@----------------------------------------------------------------------------
-loadCart: 		;@ Called from C:  r0=emuflags
+loadCart: 					;@ Called from C:  r0=emuflags
 	.type   loadCart STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
@@ -132,7 +133,7 @@ skipHWSetup:
 	bx lr
 
 ;@----------------------------------------------------------------------------
-tlcs9000MemInit: 		;@ Called from C:  r0=rombase address
+tlcs9000MemInit: 			;@ Called from C:  r0=rombase address
 	.type   tlcs9000MemInit STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldr r1,=tlcs900HState
@@ -150,8 +151,8 @@ z80MemInit:
 	ldr r2,=empty_W
 	mov r3,#8
 z80MemLoop0:
+	str r2,[r0,#32]				;@ z80WriteTbl
 	str r1,[r0],#4
-	str r2,[r0,#28]
 	subs r3,r3,#1
 	bne z80MemLoop0
 

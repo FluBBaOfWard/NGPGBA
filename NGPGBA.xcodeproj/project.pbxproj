@@ -67,8 +67,6 @@
 		9C715145265645DD0084BE99 /* NGPHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NGPHeader.h; sourceTree = "<group>"; };
 		9C715146265661CE0084BE99 /* Memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
 		9C732C8E2661547200C8BA35 /* ngpctech.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ngpctech.txt; sourceTree = "<group>"; };
-		9C790E752670EDA9000A3506 /* NGPFlash.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = NGPFlash.s; sourceTree = "<group>"; };
-		9C790E762670EDAA000A3506 /* NGPFlash.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c.preprocessed; path = NGPFlash.i; sourceTree = "<group>"; };
 		9C7BB94A25FCD73C00EA9C9C /* EmuFont.grit */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmuFont.grit; sourceTree = "<group>"; };
 		9C7BB94B25FCD73C00EA9C9C /* EmuFont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = EmuFont.png; sourceTree = "<group>"; };
 		9CBC0C8D26DD7BD50039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -82,8 +80,14 @@
 		9CD304DE28E22CBF00ACD6A7 /* FileHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileHelper.h; sourceTree = "<group>"; };
 		9CD304DF28E22CBF00ACD6A7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CD304E028E22CBF00ACD6A7 /* FileHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = FileHelper.c; sourceTree = "<group>"; };
-		9CD304E128E22F5500ACD6A7 /* NGPFlash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NGPFlash.h; sourceTree = "<group>"; };
 		9CD304E328F17E4600ACD6A7 /* t6w28.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = t6w28.h; sourceTree = "<group>"; };
+		9CD304ED28F6F3D900ACD6A7 /* Version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
+		9CD304EE28F6F3D900ACD6A7 /* NGPFlash.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = NGPFlash.s; sourceTree = "<group>"; };
+		9CD304EF28F6F3D900ACD6A7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9CD304F028F6F3D900ACD6A7 /* NGPFlash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NGPFlash.h; sourceTree = "<group>"; };
+		9CD304F128F6F3D900ACD6A7 /* NGPFlash_todo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NGPFlash_todo.txt; sourceTree = "<group>"; };
+		9CD304F228F6F3D900ACD6A7 /* NGPFlash.i */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c.preprocessed; path = NGPFlash.i; sourceTree = "<group>"; };
+		9CD304F328F6F3D900ACD6A7 /* History.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
 		A47F092B20863AF5004E1DA6 /* EmuMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuMenu.h; sourceTree = "<group>"; };
 		A47F092C20863AF5004E1DA6 /* EmuMenu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EmuMenu.c; sourceTree = "<group>"; };
 		A49D34381757E54900BD9B4B /* cpu.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = cpu.s; sourceTree = "<group>"; };
@@ -189,6 +193,20 @@
 			path = graphics;
 			sourceTree = "<group>";
 		};
+		9CD304EC28F6F3D900ACD6A7 /* NGPFlash */ = {
+			isa = PBXGroup;
+			children = (
+				9CD304F128F6F3D900ACD6A7 /* NGPFlash_todo.txt */,
+				9CD304EF28F6F3D900ACD6A7 /* README.md */,
+				9CD304F328F6F3D900ACD6A7 /* History.txt */,
+				9CD304ED28F6F3D900ACD6A7 /* Version.h */,
+				9CD304F028F6F3D900ACD6A7 /* NGPFlash.h */,
+				9CD304F228F6F3D900ACD6A7 /* NGPFlash.i */,
+				9CD304EE28F6F3D900ACD6A7 /* NGPFlash.s */,
+			);
+			path = NGPFlash;
+			sourceTree = "<group>";
+		};
 		A42D0269205FEC6E00515C72 /* Docs */ = {
 			isa = PBXGroup;
 			children = (
@@ -220,6 +238,7 @@
 				9C7151232654F0650084BE99 /* TLCS900H */,
 				9C5081E425D314C900A8E1BA /* ARMZ80 */,
 				9C71513B26550C1E0084BE99 /* K2GE */,
+				9CD304EC28F6F3D900ACD6A7 /* NGPFlash */,
 				A47F092A20863AF5004E1DA6 /* Shared */,
 				9CC013FC2668FDD9005714F7 /* Emubase.h */,
 				9C50820725D45A9A00A8E1BA /* Main.h */,
@@ -237,9 +256,6 @@
 				9CC0F92E26D1073F0035478F /* AsmHleBios.s */,
 				9C50820525D45A9A00A8E1BA /* Cart.h */,
 				9C50820F25D45A9B00A8E1BA /* Cart.s */,
-				9CD304E128E22F5500ACD6A7 /* NGPFlash.h */,
-				9C790E762670EDAA000A3506 /* NGPFlash.i */,
-				9C790E752670EDA9000A3506 /* NGPFlash.s */,
 				35E683AD1C66453300FCFE8A /* cpu.h */,
 				A49D34381757E54900BD9B4B /* cpu.s */,
 				35E683AF1C664A6D00FCFE8A /* io.h */,

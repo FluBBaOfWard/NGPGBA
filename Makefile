@@ -26,7 +26,7 @@ SOURCES		:=	source \
 				source/TLCS900H \
 				source/ARMZ80 \
 				source/K2GE \
-				source/YM2203
+				source/NGPFlash
 DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	graphics \
