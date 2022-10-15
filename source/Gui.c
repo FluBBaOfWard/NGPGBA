@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.2 2022-10-12"
+#define EMUVERSION "V0.5.2 2022-10-15"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -37,10 +37,10 @@ static void uiMachine(void);
 static void uiDebug(void);
 static void updateGameInfo(void);
 
-const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
+const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
 
 const fptr fnList0[] = {uiDummy};
-const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetGame};
+const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetGame, ui10};
 const fptr fnList2[] = {selectGame, loadState, saveState, saveSettings, resetGame};
 const fptr fnList3[] = {autoBSet, autoASet, swapABSet};
 const fptr fnList4[] = {gammaSet, paletteChange};
@@ -49,9 +49,10 @@ const fptr fnList6[] = {languageSet, machineSet, batteryChange, subBatteryChange
 const fptr fnList7[] = {debugTextSet, fgrLayerSet, bgrLayerSet, sprLayerSet, stepFrame};
 const fptr fnList8[] = {uiDummy};
 const fptr fnList9[] = {quickSelectGame};
-const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8, fnList9};
-const u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8), ARRSIZE(fnList9)};
-const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame};
+const fptr fnList10[] = {exitEmulator, backOutOfMenu};
+const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnList5, fnList6, fnList7, fnList8, fnList9, fnList10};
+u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8), ARRSIZE(fnList9), ARRSIZE(fnList10)};
+const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame, uiYesNo};
 
 u8 gGammaValue = 0;
 u8 gZ80Speed = 0;
@@ -75,6 +76,7 @@ const char *const cpuSpeedTxt[]  = {"Full Speed", "Half Speed", "1/4 Speed", "1/
 void setupGUI() {
 	emuSettings = AUTOPAUSE_EMULATION | ALLOW_SPEED_HACKS;
 //	keysSetRepeat(25, 4);	// Delay, repeat.
+	menuXItems[1] = ARRSIZE(fnList1) - (enableExit?0:1);
 	closeMenu();
 }
 
@@ -116,9 +118,9 @@ void uiMainMenu() {
 	drawMenuItem("Debug->");
 	drawMenuItem("About->");
 	drawMenuItem("Sleep");
-	drawMenuItem("Restart");
+	drawMenuItem("Reset Console");
 	if (enableExit) {
-		drawMenuItem("Exit");
+		drawMenuItem("Quit Emulator");
 	}
 }
 

@@ -2,9 +2,12 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.2 - 2022-10-12 (FluBBa)
+V0.5.2 - 2022-10-15 (FluBBa)
 	Added back game selection.
 	Added new debug menu.
+	Added Z80 CPU slow down menu item.
+	Added Quit Emulator menu item.
+	Added Overclock EWRAM menu item.
 	Better menu traversing.
 
 V0.5.1 - 2021-10-10 (FluBBa)
@@ -39,7 +42,7 @@ V0.4.5 - 2021-06-28 (FluBBa)
 	Sound working.
 
 V0.4.0 - 2021-05-18 (FluBBa)
-	Started port to Nintendo DS & dekitPro.
+	Started port to Nintendo DS & devkitPro.
 
 V0.3.0 - 2008-10-01 (FluBBa)
 	Fixed copy protection in "Metal Slug 2" (SNK logo in VRAM).

@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
 	irqInit();
 
+	enableExit = true;
 	setupGraphics();
 	irqSet(IRQ_VBLANK, myVBlank);
 	irqEnable(IRQ_VBLANK);

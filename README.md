@@ -13,8 +13,10 @@ The name field can be 31 bytes plus a terminating zero.
 There is an example header file included, "ngp.header".
 
 When the emulator starts, you press L+R to open up the menu.
-Now you can use the cross to navigate the menus, A to select an option,
-B to go back a step.
+Now you can use the cross to navigate the menus, A to select an option, B to
+go back a step.
+To get maximum speed turn off sound and set Z80 CPU to 1/16 speed, maybe even
+turn on overclock EWRAM.
 
 ## Menu:
 
@@ -43,7 +45,7 @@ B to go back a step.
 	Cpu Speed Hacks: Allow speed hacks.
 	Half Cpu Speed: This halves the emulated cpu speed.
 		Can make games faster.
-	Z80 Clock: Down shit the clock of the Z80.
+	Z80 Clock: Down shift the clock of the Z80.
 		This can make a huge impact to the speed but can also screw up sound.
 	Sound: On / Off.
 ### Settings:
@@ -77,8 +79,20 @@ B to go back a step.
 	Put the GBA into sleepmode.
 	START+SELECT wakes up from sleep mode (activated from this menu or from	5/10/30	minutes of inactivity).
 
+### Quit Emulator:
+	Tries to reset the Flashcart and reboots the GBA.
+
+## Controls:
+	GBA A & B buttons are mapped to NeoGeo Pocket B & A.
+	GBA Start is mapped to NeoGeo Pocket Option.
+	GBA Select is mapped to NeoGeo Pocket Power.
+	GBA d-pad is mapped to NeoGeo Pocket d-pad.
+	GBA L button is mapped to NeoGeo Pocket D (debug).
+
 ## Games:
-	Sonic the Hedgehog has problems when you reach the boss.
+	Memories of - Pure: Glitches everywhere.
+	Sonic The Hedgehog: First boss sometimes disappear.
+	Super Real Mahjong - Premium Collection: Graphic bugs on intro.
 
 ## Credits:
 

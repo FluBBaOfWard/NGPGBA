@@ -41,6 +41,7 @@
 ROM_Space:
 //	.incbin "ngproms/Bust-A-Move Pocket (U).ngc"
 //	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
+//	.incbin "ngproms/Dokodemo Mahjong (J).ngp"
 //	.incbin "ngproms/Evolution - Eternal Dungeons (E).ngc"
 //	.incbin "ngproms/Fantastic Night Dreams Cotton (E).ngc"
 //	.incbin "ngproms/Fatal Fury F-Contact (JUE) (M2).ngc"

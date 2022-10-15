@@ -70,7 +70,7 @@ initMemLoop:
 
 	ldmfd sp!,{r4-r5,pc}
 ;@----------------------------------------------------------------------------
-ioSaveState:			;@ In r0=destination. Out r0=size.
+ioSaveState:				;@ In r0=destination. Out r0=size.
 	.type   ioSaveState STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{lr}
@@ -83,7 +83,7 @@ ioSaveState:			;@ In r0=destination. Out r0=size.
 	mov r0,#0x100
 	bx lr
 ;@----------------------------------------------------------------------------
-ioLoadState:			;@ In r0=source. Out r0=size.
+ioLoadState:				;@ In r0=source. Out r0=size.
 	.type   ioLoadState STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{lr}
@@ -92,7 +92,7 @@ ioLoadState:			;@ In r0=source. Out r0=size.
 
 	ldmfd sp!,{lr}
 ;@----------------------------------------------------------------------------
-ioGetStateSize:		;@ Out r0=state size.
+ioGetStateSize:				;@ Out r0=state size.
 	.type   ioGetStateSize STT_FUNC
 ;@----------------------------------------------------------------------------
 	mov r0,#0x100
@@ -159,31 +159,23 @@ refreshEMUjoypads:			;@ Call every frame
 	bicne r0,r0,#0x01			;@ NGP Power
 	ldr r1,=gSubBatteryLevel
 	ldr r1,[r1]
-	tst r1,#0x2000000			;@ highest bit of subbattery level
+	tst r1,#0x2000000			;@ Highest bit of subbattery level
 	biceq r0,r0,#0x02
 	strb r0,[r2,#1]				;@ HW powerbutton + subbattery
 
 	bx lr
 
-joyCfg: .long 0x00ff01ff	;@ byte0=auto mask, byte1=(saves R), byte2=R auto mask
-							;@ bit 31=single/multi, 30,29=1P/2P, 27=(multi) link active, 24=reset signal received
-playerCount:.long 0			;@ Number of players in multilink.
-joySerial:	.byte 0
-joy0State:	.byte 0
-joy1State:	.byte 0
-joy2State:	.byte 0
-rlud2lrud:		.byte 0x00,0x08,0x04,0x0C, 0x01,0x09,0x05,0x0D, 0x02,0x0A,0x06,0x0E, 0x03,0x0B,0x07,0x0F
+joyCfg: .long 0x00ff01ff		;@ byte0=auto mask, byte1=(saves R), byte2=R auto mask
+								;@ bit 31=single/multi, 30,29=1P/2P, 27=(multi) link active, 24=reset signal received
+playerCount:.long 0				;@ Number of players in multilink.
+			.byte 0
+			.byte 0
+			.byte 0
+			.byte 0
+rlud2lrud:	.byte 0x00,0x08,0x04,0x0C, 0x01,0x09,0x05,0x0D, 0x02,0x0A,0x06,0x0E, 0x03,0x0B,0x07,0x0F
 
-EMUinput:			;@ This label here for main.c to use
-	.long 0			;@ EMUjoypad (this is what Emu sees)
-
-;@----------------------------------------------------------------------------
-input0_R:		;@ Player 1
-;@----------------------------------------------------------------------------
-;@	mov r11,r11					;@ No$GBA breakpoint
-	ldrb r0,joy0State
-	eor r0,r0,#0xFF
-	bx lr
+EMUinput:						;@ This label here for main.c to use
+	.long 0						;@ EMUjoypad (this is what Emu sees)
 
 ;@----------------------------------------------------------------------------
 z80ReadLatch:
@@ -192,7 +184,7 @@ z80ReadLatch:
 	mov r0,#0
 	bl Z80SetNMIPin
 	ldmfd sp!,{lr}
-	ldrb r0,commByte				;@ 0xBC
+	ldrb r0,commByte			;@ 0xBC
 	bx lr
 
 ;@----------------------------------------------------------------------------

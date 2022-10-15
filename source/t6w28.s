@@ -17,12 +17,8 @@
 	.global t6W28W
 
 								;@ These values are for the SMS/GG/MD vdp/sound chip.
-.equ PFEED_SMS,	0x8000			;@ Periodic Noise Feedback
-.equ WFEED_SMS,	0x9000			;@ White Noise Feedback
-
-								;@ These values are for the SN76489/SN76496 sound chip.
-.equ PFEED_SN,	0x4000			;@ Periodic Noise Feedback
-.equ WFEED_SN,	0x6000			;@ White Noise Feedback
+	.equ PFEED_SMS,	0x8000		;@ Periodic Noise Feedback
+	.equ WFEED_SMS,	0x9000		;@ White Noise Feedback
 
 	.syntax unified
 	.arm
@@ -49,8 +45,8 @@
 ;@----------------------------------------------------------------------------
 t6W28Mixer:					;@ r0=t6ptr, r1=dest, r2=len
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r11,lr}
-	ldmia r0,{r3-r10}		;@ Load freq,addr,rng, noisefb,volR, volL
+	stmfd sp!,{r4-r10,lr}
+	ldmia r0,{r3-r10}			;@ Load freq,addr,rng, noisefb, volR,volL
 ;@----------------------------------------------------------------------------
 mixLoop:
 	adds r6,r6,r6,lsl#16
@@ -80,7 +76,7 @@ mixLoop:
 	bhi mixLoop
 
 	stmia t6ptr,{r3-r7}			;@ Writeback freq,addr,rng
-	ldmfd sp!,{r4-r11,lr}
+	ldmfd sp!,{r4-r10,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
@@ -95,16 +91,15 @@ t6W28Init:					;@ t6ptr=r0=pointer to struct, r1=FREQTABLE
 ;@----------------------------------------------------------------------------
 t6W28Reset:					;@ t6ptr=r0=pointer to struct
 ;@----------------------------------------------------------------------------
-	ldr r3,=(WFEED_SMS<<16)+PFEED_SMS
-//	ldr r3,=(WFEED_SN<<16)+PFEED_SN
-
 	mov r1,#0
-	mov r2,#(t6StateEnd-t6StateStart)/4		;@ 52/4=13
+	mov r2,#(t6StateEnd-t6StateStart)/4		;@ 68/4=17
 rLoop:
 	subs r2,r2,#1
 	strpl r1,[t6ptr,r2,lsl#2]
 	bhi rLoop
-	strh r3,[t6ptr,#noiseFB]
+
+	ldr r2,=(WFEED_SMS<<16)+PFEED_SMS
+	strh r2,[t6ptr,#noiseFB]
 
 	bx lr
 
@@ -170,7 +165,7 @@ t6W28LoadState:				;@ In r0=snptr, r1=source. Out r0=state size.
 
 	ldmfd sp!,{lr}
 ;@----------------------------------------------------------------------------
-t6W28GetStateSize:		;@ Out r0=state size.
+t6W28GetStateSize:			;@ Out r0=state size.
 	.type   sn76496GetStateSize STT_FUNC
 ;@----------------------------------------------------------------------------
 	mov r0,#t6StateEnd-t6StateStart

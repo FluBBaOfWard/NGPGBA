@@ -31,9 +31,10 @@ typedef struct {
 	u8 ch2VolL;
 	u8 ch3VolL;
 
+	u8 snAttChg;
 	u8 snLastReg;
 	u8 snLastRegL;
-	u8 snPadding[2];
+	u8 snPadding[1];
 
 	u16 ch0Reg;
 	u16 ch0Att;

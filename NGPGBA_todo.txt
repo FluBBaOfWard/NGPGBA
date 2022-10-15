@@ -36,6 +36,7 @@ CPU:
 	See TLCS900H Todo.
 
 Sound T6W28:
+	Rewrite mixer with per channel eor.
 	Add sample playing?
 	Sample Darkarms from HW.
 
@@ -48,8 +49,9 @@ Misc:
 Games Non Working:
 
 Games With Glitches:
-	Super Real Mahjong - Premium Collection: Graphic bugs on intro.
 	Memories of - Pure: Glitches everywhere.
+	Sonic The Hedgehog: First boss sometimes disappear.
+	Super Real Mahjong - Premium Collection: Graphic bugs on intro.
 	...
 
 Speedhacks:

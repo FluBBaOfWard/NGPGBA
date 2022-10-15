@@ -88,6 +88,7 @@
 		9CD304F128F6F3D900ACD6A7 /* NGPFlash_todo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NGPFlash_todo.txt; sourceTree = "<group>"; };
 		9CD304F228F6F3D900ACD6A7 /* NGPFlash.i */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c.preprocessed; path = NGPFlash.i; sourceTree = "<group>"; };
 		9CD304F328F6F3D900ACD6A7 /* History.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
+		9CD304F428F70F9900ACD6A7 /* FlashCart.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = FlashCart.s; sourceTree = "<group>"; };
 		A47F092B20863AF5004E1DA6 /* EmuMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmuMenu.h; sourceTree = "<group>"; };
 		A47F092C20863AF5004E1DA6 /* EmuMenu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EmuMenu.c; sourceTree = "<group>"; };
 		A49D34381757E54900BD9B4B /* cpu.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = cpu.s; sourceTree = "<group>"; };
@@ -228,6 +229,7 @@
 				9CD304E028E22CBF00ACD6A7 /* FileHelper.c */,
 				A4D0E11D2089E28D00401463 /* AsmExtra.h */,
 				A4D0E11C2089E28D00401463 /* AsmExtra.s */,
+				9CD304F428F70F9900ACD6A7 /* FlashCart.s */,
 			);
 			path = Shared;
 			sourceTree = "<group>";

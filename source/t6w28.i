@@ -36,9 +36,10 @@ ch1VolL:		.byte 0
 ch2VolL:		.byte 0
 ch3VolL:		.byte 0
 
+snAttChg:		.byte 0
 snLastReg:		.byte 0
 snLastRegL:		.byte 0
-snPadding:		.space 2
+snPadding:		.space 1
 
 ch0Reg:			.short 0
 ch0Att:			.short 0
