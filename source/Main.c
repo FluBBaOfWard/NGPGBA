@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	irqEnable(IRQ_VBLANK);
 	setupGUI();
 	getInput();
-	if (initFileHelper(SMSID)) {
+	if (initFileHelper(NGPID)) {
 		loadColorBIOS();
 		const RomHeader *rh = findRom(0);
 		loadGame(rh);

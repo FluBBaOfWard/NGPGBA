@@ -48,8 +48,7 @@ runStart:
 	and r3,r3,r0
 	str r0,joyClick
 
-	tst r3,#0x04				;@ NDS Select?
-	tsteq r3,#0x800				;@ NDS Y?
+	tst r3,#0x04				;@ GBA Select?
 	ldrne r2,=systemMemory+0xB3
 	ldrbne r2,[r2]
 	tstne r2,#4					;@ Power button NMI enabled?

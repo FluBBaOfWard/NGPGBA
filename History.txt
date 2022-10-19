@@ -2,6 +2,12 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.5.4 - 2022-10-19 (FluBBa)
+	Optimized Z80 communication.
+
+V0.5.3 - 2022-10-18 (FluBBa)
+	Fixed header ID.
+
 V0.5.2 - 2022-10-15 (FluBBa)
 	Added back game selection.
 	Added new debug menu.

@@ -4,3 +4,4 @@ NGPGBA.xcodeproj/project.xcworkspace/xcuserdata
 *.elf
 *.gba
 *.sav
+*.zip

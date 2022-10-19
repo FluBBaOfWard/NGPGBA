@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.2 2022-10-15"
+#define EMUVERSION "V0.5.4 2022-10-19"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -129,11 +129,12 @@ void uiAbout() {
 	updateGameInfo();
 	drawText("B:        NGP A Button", 3);
 	drawText("A:        NGP B Button", 4);
-	drawText("Select:   Power Button", 5);
+	drawText("L:        NGP D Button", 5);
 	drawText("Start:    Option Button", 6);
-	drawText("DPad:     Joystick", 7);
+	drawText("Select:   Power Button", 7);
+	drawText("DPad:     Joystick", 8);
 
-	drawText(gameInfoString, 9);
+	drawText(gameInfoString, 10);
 
 	drawText("NGPGBA      " EMUVERSION, 15);
 	drawText("ARMZ80      " ARMZ80VERSION, 16);

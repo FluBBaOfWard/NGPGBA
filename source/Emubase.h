@@ -7,7 +7,6 @@ extern "C" {
 
 #define COUNTRY 2					// Japan
 #define NGPID 0x1A50474E			// "NGP",0x1A
-#define SMSID 0x1A534D53			// "SMS",0x1A
 
 typedef struct {
 	const u32 identifier;

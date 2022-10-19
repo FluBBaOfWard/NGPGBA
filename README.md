@@ -1,4 +1,4 @@
-# NGPGBA V0.5.2
+# NGPGBA V0.5.4
 
 <img align="right" width="220" src="./logo.png" />
 
@@ -32,7 +32,7 @@ turn on overclock EWRAM.
 ### Controller:
 	Autofire: Select if you want autofire.
 	Controller: 2P start a 2 player game.
-	Swap A/B: Swap which NDS button is mapped to which NGP button.
+	Swap A/B: Swap which GBA button is mapped to which NGP button.
 
 ### Display:
 	Mono Palette: Here you can select the palette for B & W games.
