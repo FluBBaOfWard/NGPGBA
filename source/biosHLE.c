@@ -18,7 +18,7 @@
 #include "io.h"
 #include "bios.h"
 #include "TLCS900H/TLCS900H_registers.h"
-#include "TLCS900H/TLCS900H_int.h"
+#include "cpu.h"
 #include "Memory.h"
 
 const u8 IndexConv[0x21] = {0,0,0,0,1,2,3,0,0,0,4,5,6,0,0,0, 7,8,9,10,0,0,0,0,11,12,0,0,0,14,15,16, 17};

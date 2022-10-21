@@ -15,6 +15,7 @@
 	.global waitMaskIn
 	.global waitMaskOut
 	.global cpu1SetIRQ
+	.global setInterruptExternal
 	.global Z80_SetEnable
 	.global Z80_nmi_do
 
@@ -168,6 +169,15 @@ isConsoleSleeping:
 	cmp r0,r1
 	moveq r0,#1
 	movne r0,#0
+	bx lr
+;@---------------------------------------------------------------------------
+setInterruptExternal:		;@ r0 = index
+	.type setInterruptExternal STT_FUNC
+;@---------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl setInterrupt
+	ldmfd sp!,{t9optbl,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled

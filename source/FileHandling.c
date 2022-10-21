@@ -161,7 +161,7 @@ static int loadBIOS(void *dest) {
 	const RomHeader *rh = NULL;
 	for (i=0; i<3; i++) {
 		rh = findRom(i);
-		if ((rh->extra & 1) != 0 && (rh->filesize == 0x10000)) {
+		if ((rh->bios & 1) != 0 && (rh->filesize == 0x10000)) {
 			memcpy(dest, (u8 *)rh + sizeof(RomHeader), 0x10000);
 			return 1;
 		}

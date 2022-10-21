@@ -14,6 +14,8 @@ void cpuReset(void);
 bool isConsoleRunning(void);
 bool isConsoleSleeping(void);
 
+void setInterruptExternal(int index);
+
 /**
  * Change emulated cpu speed between normal or half for speedup on low power devices.
  * @param hack: True to lower speed, false to reset to normal speed.
