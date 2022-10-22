@@ -73,7 +73,6 @@
 		9CBC0C8E26DD7C2A0039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CBC0C8F26DD7D0F0039D17E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9CC013FC2668FDD9005714F7 /* Emubase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Emubase.h; sourceTree = "<group>"; };
-		9CC013FE26694C6C005714F7 /* TLCS900H_int.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLCS900H_int.h; sourceTree = "<group>"; };
 		9CC0F92D26C55DD50035478F /* TLCS900H_RegistersMap.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = TLCS900H_RegistersMap.s; sourceTree = "<group>"; };
 		9CC0F92E26D1073F0035478F /* AsmHleBios.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = AsmHleBios.s; sourceTree = "<group>"; };
 		9CC0F93A26D6C4740035478F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -163,7 +162,6 @@
 				9C7151312654F0650084BE99 /* TLCS900H_reg.s */,
 				9C7151322654F0650084BE99 /* TLCS900H_src.s */,
 				9C7151242654F0650084BE99 /* TLCS900H_dst.s */,
-				9CC013FE26694C6C005714F7 /* TLCS900H_int.h */,
 				9C7151352654F0650084BE99 /* TLCS900H_int.s */,
 				9C7151362654F0650084BE99 /* TLCS900H_registers.h */,
 				9CC0F92D26C55DD50035478F /* TLCS900H_RegistersMap.s */,

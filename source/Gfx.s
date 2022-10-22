@@ -97,6 +97,7 @@ gfxReset:					;@ Called with CPU reset
 	ldrb r0,[r0]
 	bl paletteInit				;@ Do palette mapping
 	bl paletteTxAll				;@ Transfer it
+	bl updateLED
 
 	ldmfd sp!,{pc}
 
@@ -310,6 +311,7 @@ txLoop1:
 
 ;@----------------------------------------------------------------------------
 updateLED:
+	.type updateLED STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldrb r0,[geptr,#kgeLedOnOff]
 	tst r0,#0x01

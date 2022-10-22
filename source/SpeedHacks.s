@@ -97,7 +97,7 @@ HackOpcodes:
 SpeedHacks:
 	.byte 0x00,0x00	;@ #000
 	.byte 0xE8,0x00	;@ #001 King Of Fighters - Round 1 (W)
-	.byte 0x63,0x74	;@ #002 Neogeo Cup '98 (W), 63, 74
+	.byte 0x63,0x74	;@ #002 Neogeo Cup '98 (W)
 	.byte 0x00,0x00	;@ #003
 	.byte 0x00,0x00	;@ #004 Melon-chan no Seichou Nikki (J)
 	.byte 0x68,0x00	;@ #005 Shougi no Tatsujin (J)
@@ -161,7 +161,7 @@ SpeedHacks:
 	.byte 0x69,0x00	;@ #063 Mezase! Kanji Ou (J) (C)
 	.byte 0x58,0x00	;@ #064 Last Blade, The (Bakumatsu Rouman Tokubetsu) (J) (C)
 	.byte 0x68,0x00	;@ #065 SNK Gals Fighters (J) (C)
-	.byte 0x00,0x00	;@ #066 Big Bang Pro Wrestling/Wrestling Madness (W)(J) (C)
+	.byte 0x67,0x00	;@ #066 Big Bang Pro Wrestling/Wrestling Madness (W)(J) (C)
 	.byte 0xE9,0x00	;@ #067 SNK Vs Capcom - Card Fighters Clash (SNK Version) (E) (C)
 	.byte 0xE9,0x00	;@ #068 SNK Vs Capcom - Card Fighters Clash (Capcom Version) (E) (C)
 	.byte 0xE8,0x00	;@ #069 SNK Vs Capcom - The Match Of The Millenium (W) (C)

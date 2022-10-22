@@ -1,19 +1,11 @@
 NGPGBA Todo
 
 	Add speedhacks for the Z80?
-	Fix cpu stuff.
-	Fix saving of (changed) flash memory. Must remember changed blocks forever.
 	Fix savestates!
-	Timers?
-		http://forum.fobby.net/index.php?t=msg&th=796&start=0&
-	Push instructions might write to 32bit address.
-	Add another jump table for reg opcodes?
-	Optimize dst opcodes, "and r12,r0,#0x07" in fetch.
 	Save settings for Swap A-B.
 
 	Add SWI & Interrupt to BiosHLE.
 	Rewrite BiosHLE to asm?
-	Make all system regs writeable (default mem vs sysmem). Not really needed?
 	Rewrite bios FLASHWRITE function to use GBA SRAM directly? Game reads directly from flash...
 	Keep disassemblying Bios from 0xFF476C.
 
@@ -164,7 +156,7 @@ VBLIRQ_Entry
 	ngpc_bios[i] = 0x1F; i++;
 	ngpc_bios[i] = 0xC8; i++; ngpc_bios[i] = 0x80; i++;		// add w,w
 	ngpc_bios[i] = 0xC8; i++; ngpc_bios[i] = 0x80; i++;		// add w,w
-	ngpc_bios[i] = 0x44; i++; ngpc_bios[i] = 0x00; i++;		// ld XIX,0x00FFFE00
+	ngpc_bios[i] = 0x44; i++; ngpc_bios[i] = 0x00; i++;		// ld XIX,0xFFFE00
 	ngpc_bios[i] = 0xFE; i++; ngpc_bios[i] = 0xFF; i++;		//
 	ngpc_bios[i] = 0x00; i++;								//
 	ngpc_bios[i] = 0xE3; i++; ngpc_bios[i] = 0x03; i++;		// ld XIX,(XIX+W)

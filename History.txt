@@ -2,6 +2,10 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.5.5 - 2022-10-22 (FluBBa)
+	Optimized K2GE access.
+	Added speedhack for Big Bang Pro Wrestling.
+
 V0.5.4 - 2022-10-19 (FluBBa)
 	Optimized Z80 communication.
 

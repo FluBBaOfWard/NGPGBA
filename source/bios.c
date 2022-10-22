@@ -406,6 +406,12 @@ void resetBios(NgpHeader *ngpHeader)
 		t9StoreB(snk_logo[i], 0xA1C0 + i);
 	}
 
+	// Enable sound
+	t9StoreB(0x55, 0xB8);
+
+	// Turn on LED
+	t9StoreB(0xFF, 0x8400);
+
 	// Do some setup for the interrupt priorities.
 	BIOSHLE_Reset();
 }
