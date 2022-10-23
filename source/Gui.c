@@ -209,6 +209,33 @@ void updateGameInfo() {
 	short2HexStr(catalog, header->catalog);
 	strlcat(gameInfoString, catalog, sizeof(gameInfoString));
 }
+//---------------------------------------------------------------------------------
+void debugIO(u16 port, u8 val, const char *message) {
+	char debugString[32];
+
+	debugString[0] = 0;
+	strlcat(debugString, message, sizeof(debugString));
+	short2HexStr(&debugString[strlen(debugString)], port);
+	strlcat(debugString, " val:", sizeof(debugString));
+	char2HexStr(&debugString[strlen(debugString)], val);
+	debugOutput(debugString);
+}
+//---------------------------------------------------------------------------------
+void debugIOUnimplR(u16 port) {
+	debugIO(port, 0, "Unimpl R port:");
+}
+void debugIOUnimplW(u8 val, u16 port) {
+	debugIO(port, val, "Unimpl W port:");
+}
+void debugDivideError() {
+	debugOutput("Divide Error.");
+}
+void debugUndefinedInstruction() {
+	debugOutput("Undefined Instruction.");
+}
+void debugCrashInstruction() {
+	debugOutput("CPU Crash! (0xF1)");
+}
 
 //---------------------------------------------------------------------------------
 /// Switch between Player 1 & Player 2 controls
