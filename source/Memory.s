@@ -172,7 +172,7 @@ t9StoreW_vram:				;@ Write VRAM (0x009000-0x00BFFF)
 	add r2,r2,r1,lsr#17
 	strh r0,[r2]
 	ldr r2,=DIRTYTILES-0x100
-	strb r1,[r2,r1,lsr#21]
+	strb r1,[r2,r1,lsr#21]		;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreB_vram:				;@ Write VRAM (0x009000-0x00BFFF)
@@ -183,7 +183,7 @@ t9StoreB_vram:				;@ Write VRAM (0x009000-0x00BFFF)
 	mov r1,r1,lsl#17
 	strb r0,[r2,r1,lsr#17]
 	ldr r2,=DIRTYTILES-0x100
-	strb r1,[r2,r1,lsr#21]
+	strb r1,[r2,r1,lsr#21]		;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadB_32:

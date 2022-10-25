@@ -433,6 +433,10 @@ void fixBiosSettings(void)
 		t9StoreB(gPaletteBank, 0x6F94);
 		check += gPaletteBank;
 	}
+	else {
+		// Required by mono BIOS to skip setup.
+		t9StoreB(0xDC, 0x6C25);
+	}
 	check += 0xDC;		// Actualy addition of all IRQ priorities.
 	t9StoreW(check, 0x6C14);
 
