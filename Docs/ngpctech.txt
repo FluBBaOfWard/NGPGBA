@@ -78,7 +78,7 @@ FF0000 -> FFFFFF	BIOS
 0023 B		: TREG1 - Time Register 1 (Write only)
 0024 B		: T01MOD - Timer 0,1 Mode Register
 				Bit 0-1 = Timer0 source clock.
-					00 = External input.
+					00 = External input (HBlank).
 					01 = T1 Prescaler.
 					10 = T4 Prescaler.
 					11 = T16 Prescaler.
@@ -87,34 +87,54 @@ FF0000 -> FFFFFF	BIOS
 					01 = T1 Prescaler.
 					10 = T16 Prescaler.
 					11 = T256 Prescaler.
-				Bit 4-5 = PWM cycle?
-					00 = Reserved?
-					01 = 2^6 Clock source?
-					10 = 2^7 Clock source?
-					11 = 2^8 Clock source?
-				Bit 6-7 = Operation mode?
+				Bit 4-5 = Select PWM0 cycle, only used in PWM mode
+					00 = Reserved
+					01 = 2^6-1 PWM
+					10 = 2^7-1 cycle
+					11 = 2^8-1
+				Bit 6-7 = Timer 0, 1 Operation mode setting
 					00 = 2 8-bit timers.
-					01 = 16-bit timer?
-					10 =  8-bit PPG?
-					11 =  8-bit PWM (Timer0), 8-bit timer (Timer1).
+					01 = 16-bit timer
+					10 =  8-bit Programmable Pulse Generator (square wave) output
+					11 =  8-bit PWM output (Timer0), 8-bit timer (Timer1).
 0025 B		: TFFCFR - 8 Bit Timer Flip-Flop Control Register
 		R/W		Bit 0 = Flip signal select, 0 = Flipped by Timer0, 1 = Flipped by Timer1.
 		R/W		Bit 1 = Invert on/off.
-		W		Bit 2-3 = TFF1 Control
-					00 = Invert TFF1.
+		W		Bit 2-3 = TFF1 Control (software flip)
+					00 = Flip TFF1.
 					01 = Set TFF1 to "1".
 					10 = Set TFF1 to "0".
-					11 = Don't care/change.
+					11 = Don't change.
 		R/W		Bit 4 = Flip signal select, 0 = Flipped by Timer2, 1 = Flipped by Timer3.
 		R/W		Bit 5 = Invert on/off.
-		W		Bit 6-7 = TFF3 Control
+		W		Bit 6-7 = TFF3 Control (software flip)
+					00 = Flip TFF3.
+					01 = Set TFF3 to "1".
+					10 = Set TFF3 to "0".
+					11 = Don't change.
 0026 B		: TREG2 - Time Register 2 (Write only)
 0027 B		: TREG3 - Time Register 3 (Write only)
 0028 B		: T23MOD - Timer 2,3 Mode Register
 				Bit 0-1 = Timer2 source clock.
+					00 = -
+					01 = T1 Prescaler.
+					10 = T4 Prescaler.
+					11 = T16 Prescaler.
 				Bit 2-3 = Timer3 source clock.
-				Bit 4-5 = PWM cycle? Preserved by bios.
-				Bit 6-7 = Operation mode?
+					00 = Input from timer2.
+					01 = T1 Prescaler.
+					10 = T16 Prescaler.
+					11 = T256 Prescaler.
+				Bit 4-5 = Select PWM2 cycle, only used in PWM mode
+					00 = Reserved
+					01 = 2^6-1 PWM
+					10 = 2^7-1 cycle
+					11 = 2^8-1
+				Bit 6-7 = Timer 2, 3 Operation mode setting
+					00 = 2 8-bit timers.
+					01 = 16-bit timer
+					10 =  8-bit Programmable Pulse Generator (square wave) output
+					11 =  8-bit PWM output (Timer2), 8-bit timer (Timer3).
 0029 B		: TRDC - Timer Register Double Buffer Control Register
 				Bit 0 = Timer0 double buffer on/off.
 				Bit 1 = Timer2 double buffer on/off.
@@ -178,8 +198,8 @@ FF0000 -> FFFFFF	BIOS
 005F B		: ??? MAMR3?	0xFF ChipSelect3 mask?
 
 0060 W	R	: Battery status (AD), this is shifted down 6 steps by the bios before written to 6F80.
-				Bit 0    = A/D conversion data storage flag, 1=conversion result stored?
-				Bit 1-5  = 1?
+				Bit 0    = A/D conversion data storage flag, 1=conversion result stored. Cleared to 0 after read.
+				Bit 1-5  = 1.
 				Bit 6-15 = A/D conversion result.
 
 0068 B		: B0CS	0x17 Written by Bios at reset?
@@ -212,7 +232,7 @@ FF0000 -> FFFFFF	BIOS
 				Bit 5 = repeat
 				Bit 6 = busy
 				Bit 7 = end
-006E B		: Watchdog timer control?
+006E B		: Watchdog Timer Mode Control (WDMOD)?
 				Bit 0 = Pin control at STOP mode, 1 drives pin even during STOP mode?
 				Bit 1 = Internal reset on runaway?
 				Bit 2-3 = Selects HALT mode?
@@ -227,13 +247,14 @@ FF0000 -> FFFFFF	BIOS
 					10 = 2^20/fc?
 					11 = 2^22/fc?
 				Bit 7 = Watchdog enable/disable?
+
 				0xF0 Written by Bios at game bootup?
 				0x14 Written by Bios at startup.
 				0x04 Written by Bios at reset?
 				AND 0xF2, OR 0x14...
 				Bit 4 = Tested by vector 0x08 IRQ.
 
-006F B		: Watch Dog Timer.
+006F B		: Watch Dog Timer (WDCR).
 				Requires 0x4E to be written every 100ms otherwise the NGPC will reset.
 				0xB1   = Disable code.
 				0x4E   = Clear code.
@@ -384,7 +405,7 @@ FF0000 -> FFFFFF	BIOS
 6C23 B		: ?
 
 6C24 B		: Readable copy of 0070.
-6C25 B		: Readable copy of 0071.
+6C25 B		: Readable copy of 0071. // Mono BIOS requires 0xDC to skip setup.
 6C26 B		: Readable copy of 0072.
 6C27 B		: Readable copy of 0073.
 6C28 B		: Readable copy of 0074.
@@ -468,8 +489,8 @@ FF0000 -> FFFFFF	BIOS
 6C80-6CBF	: Serial Comms Transmit buffer?
 6CC0-6CFF	: Serial Comms Receive buffer?
 
-6D00 B		: Serial Comms flag?
-6D01 B		: Serial Comms flag?
+6D00 B		: Serial Comms Transmit buffer count.
+6D01 B		: Serial Comms Receive buffer count.
 6D02 B		: Serial Comms flag?
 6D03 B		: Serial Comms flag?
 6D04 B		: Serial Comms flag?
@@ -494,11 +515,11 @@ FF0000 -> FFFFFF	BIOS
 
 6E85 B		: Copy of COMM status (0xB2)
 
-6E86 B		: Last boot Flash Device ID / Size?
+6E86 B		: Flash Device ID / Size?
 				0x0A = 4Mbit?
 				0x12 = 8Mbit?
 				0x22 = 16Mbit?
-6E87 B		: Last boot Flash Manufacturer ID.
+6E87 B		: Flash Manufacturer ID.
 				0x00 = Not present
 				0x01 = Toshiba
 				0x02 = Samsung
@@ -512,7 +533,6 @@ FF0000 -> FFFFFF	BIOS
 6E95 W		: Reset RTC and more if not 0x4E50(/"NP"?)
 
 
-
 6F80 W		: Battery Voltage, Maximum value 0x3FF, see 0x0060.
 
 6F82 B		: Joypad Status
@@ -523,7 +543,7 @@ FF0000 -> FFFFFF	BIOS
 				Bit 4 = "A"
 				Bit 5 = "B"
 				Bit 6 = "Option" (C button NeoGeo controller when connected)
-				Bit 7 = -  (D button NeoGeo controller when connected)
+				Bit 7 = - (D button NeoGeo controller when connected)
 
 6F83 B		: Boot something? 0x00 Bios UI running.
 				Bit 3 = ??? Set at shutdown, tested in Bios VBlank.
@@ -732,6 +752,14 @@ C000 B	: Write any value to this address to start the Z80 interrupt
 						SubBattery fail writes 0x10
 
 
+8700 B		: ??? 0x37 written at startup of BnW BIOS.
+8702 B		: ??? 0x37 written at startup of BnW BIOS.
+8704 B		: ??? 0x32 written at startup of BnW BIOS.
+8706 B		: ??? 0x2A written at startup of BnW BIOS.
+8708 B		: ??? 0x2A written at startup of BnW BIOS.
+870A B		: ??? 0x46 written at startup of BnW BIOS.
+870C B		: ??? 0xC2 written at startup of BnW BIOS.
+
 87E0 B		: 2D software reset - Write 0x52 to reset?, otherwise ignored.
 				Reset writes 0x53 & 0x47.
 				Bios compares with 0x01.
@@ -746,9 +774,9 @@ C000 B	: Write any value to this address to start the Z80 interrupt
 				0xAA = Allowed,
 				0x55 = Denied
 
-87F2 B		: ??? 0x00 written at shutdown.
+87F2 B		: ??? 0x00 written at shutdown & startup.
 
-87F4 B		: ??? 0x80 written at shutdown.
+87F4 B		: ??? 0x80 written at shutdown & startup.
 
 87FE B		: Input Port Register (Reserved)
 				Bit 0-5 = 1
@@ -1006,9 +1034,9 @@ ANSWERF_TIME           equ     40h     ; long time no use shutdown operation (0=
 ; Entry:
 ;    rw3 = VECT_FLASHWRITE
 ;    ra3 = Flash Memory Address (0=$200000, 1=$800000)
-;    rbc3 = Transfer byte number (transfer in multiples of 256: 1=256, 2=512, etc)
-;    xhl3 = Transfer from Address
+;    rbc3 = Transfer byte count (transfer in multiples of 256: 1=256, 2=512, etc)
 ;    xde3 = Transfer to Address
+;    xhl3 = Transfer from Address
 ; Exit:
 ;    ra3 = SYS_SUCCESS if ok, other values are an error.
 ;

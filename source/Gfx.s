@@ -83,10 +83,10 @@ gfxReset:					;@ Called with CPU reset
 	strh r0,[r1,#REG_WIN1V]
 
 
-	mov r0,#0
-	mov r1,#0
-//	ldr r0,=m6809SetNMIPin
-//	ldr r1,=m6809SetIRQPin
+//	mov r0,#0
+//	mov r1,#0
+	ldr r0,=setVBlankInterrupt
+	ldr r1,=clockTimer0
 	ldr r2,=k2geRAM
 	ldr r3,=gSOC
 	ldrb r3,[r3]

@@ -55,18 +55,6 @@ bool system_comms_poll(char *buffer);
  */
 void system_comms_write(char data);
 
-/**
- * Reads the "appropriate" (system specific) flash data into the given
- * preallocated buffer. The emulation core doesn't care where from.
- */
-bool system_io_flash_read(char *buffer, int bufferLength);
-
-/**
- * Writes the given flash data into an "appropriate" (system specific)
- * place. The emulation core doesn't care where to.
- */
-bool system_io_flash_write(char *buffer, int bufferLength);
-
 #ifdef __cplusplus
 } // extern "C"
 #endif
