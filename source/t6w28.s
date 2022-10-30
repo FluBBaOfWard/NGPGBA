@@ -98,7 +98,9 @@ rLoop:
 	strpl r1,[t6ptr,r2,lsl#2]
 	bhi rLoop
 
-	ldr r2,=(WFEED_SMS<<16)+PFEED_SMS
+	mov r2,#PFEED_SMS
+	strh r2,[r0,#rng]
+	mov r2,#WFEED_SMS
 	strh r2,[t6ptr,#noiseFB]
 
 	bx lr

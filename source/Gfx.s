@@ -67,9 +67,9 @@ gfxReset:					;@ Called with CPU reset
 	bl memclr_					;@ Clear GFX regs
 
 	mov r1,#REG_BASE
-	ldr r0,=0x28C8				;@ start-end
+	ldr r0,=(((SCREEN_WIDTH-GAME_WIDTH)/2)<<8)+(SCREEN_WIDTH+GAME_WIDTH)/2
 	strh r0,[r1,#REG_WIN0H]
-	ldr r0,=0x0400+(SCREEN_HEIGHT+GAME_HEIGHT)/2	;@ start-end
+	ldr r0,=(((SCREEN_HEIGHT-GAME_HEIGHT)/2)<<8)+(SCREEN_HEIGHT+GAME_HEIGHT)/2
 	strh r0,[r1,#REG_WIN0V]
 
 	mov r0,#0x003F				;@ WinIN0, Everything enabled inside Win0

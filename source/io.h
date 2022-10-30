@@ -11,7 +11,7 @@ extern u32 gSubBatteryLevel;
 extern u32 batteryLevel;
 
 /**
- * Copies the time from the NDS RTC to the NGP RTC.
+ * Copies the time from the GBA RTC to the NGP RTC.
  */
 void transferTime(void);
 
@@ -40,20 +40,20 @@ int ioGetStateSize(void);
  * high-level communications have been established, then return FALSE.
  * If buffer is NULL, then no data is read, only status is returned
  */
-bool system_comms_read(char *buffer);
+bool system_comms_read(u8 *buffer);
 
 /**
  * Peeks at any data from the other system. If no data is available or
  * no high-level communications have been established, then return FALSE.
  * If buffer is NULL, then no data is read, only status is returned
  */
-bool system_comms_poll(char *buffer);
+bool system_comms_poll(u8 *buffer);
 
 /**
  * Writes a byte from the other system. This function should block until
  * the data is written. USE RELIABLE COMMS! Data cannot be re-requested.
  */
-void system_comms_write(char data);
+void system_comms_write(u8 data);
 
 #ifdef __cplusplus
 } // extern "C"

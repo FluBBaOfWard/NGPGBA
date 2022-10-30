@@ -291,7 +291,7 @@ void iBIOSHLE(int vector)
 	// VECT_COMGETDATA (0xFF2CB4)
 	case 0x14:
 	{
-		char data;
+		u8 data;
 
 		if (system_comms_read(&data)) {
 			rCodeB(0x30) = 0;	// COM_BUF_OK
@@ -350,7 +350,7 @@ void iBIOSHLE(int vector)
 	// VECT_COMGETBUFDATA (0xFF2D85)
 	case 0x1A:
 		while(rCodeB(0x35) > 0) {
-			char data;
+			u8 data;
 			if (system_comms_read(&data)) {
 				// Read data into (XHL3++)
 				t9StoreB(data, rCodeL(0x3C));

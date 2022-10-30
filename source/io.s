@@ -187,7 +187,7 @@ refreshEMUjoypads:			;@ Call every frame
 	ldr r1,[r1]
 	tst r1,#0x2000000			;@ Highest bit of subbattery level
 	biceq r0,r0,#0x02
-	strb r0,[r2,#1]				;@ HW powerbutton + subbattery
+	strb r0,systemMemory+0xB1	;@ HW powerbutton + subbattery
 
 	bx lr
 
