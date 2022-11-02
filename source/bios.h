@@ -11,7 +11,7 @@ bool installHleBios(u8 *ngpBios);
 
 void BIOSHLE_Reset(void);
 
-void resetBios(NgpHeader *ngpHeader);
+void resetBios(NgpHeader *cartHeader);
 
 void fixBiosSettings(void);
 

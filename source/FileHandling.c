@@ -195,8 +195,7 @@ int loadBWBIOS(void) {
 //---------------------------------------------------------------------------------
 void checkMachine() {
 	if (gMachineSet == HW_AUTO) {
-		NgpHeader *header = (NgpHeader *)romSpacePtr;
-		if (header->mode != 0) {
+		if (ngpHeader->mode != 0) {
 			gMachine = HW_NGPCOLOR;
 		}
 		else {

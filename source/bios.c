@@ -313,7 +313,7 @@ bool installHleBios(u8 *ngpBios)
 	return true;				// Success
 }
 
-void resetBios(NgpHeader *ngpHeader)
+void resetBios(NgpHeader *cartHeader)
 {
 	int i;
 
@@ -326,16 +326,16 @@ void resetBios(NgpHeader *ngpHeader)
 //006C00 -> 006FFF	BIOS Workspace
 //==================================
 
-	t9StoreLX(ngpHeader->startPC, 0x6C00);		// Start
+	t9StoreLX(cartHeader->startPC, 0x6C00);		// Start
 
-	t9StoreWX(ngpHeader->catalog, 0x6C04);
-	t9StoreWX(ngpHeader->catalog, 0x6E82);
+	t9StoreWX(cartHeader->catalog, 0x6C04);
+	t9StoreWX(cartHeader->catalog, 0x6E82);
 
-	t9StoreBX(ngpHeader->subCatalog, 0x6C06);
-	t9StoreBX(ngpHeader->subCatalog, 0x6E84);
+	t9StoreBX(cartHeader->subCatalog, 0x6C06);
+	t9StoreBX(cartHeader->subCatalog, 0x6E84);
 
 	for (i = 0; i < 12; i++) {
-		t9StoreBX(ngpHeader->name[i], 0x6C08 + i);
+		t9StoreBX(cartHeader->name[i], 0x6C08 + i);
 	}
 
 	t9StoreBX(0x01, 0x6C58);
@@ -373,7 +373,7 @@ void resetBios(NgpHeader *ngpHeader)
 	t9StoreBX(gPaletteBank, 0x6F94);
 
 	// Color Mode Selection: 0x00 = B&W, 0x10 = Colour
-	int color = ngpHeader->mode;
+	int color = cartHeader->mode;
 	if (gMachine == HW_NGPMONO) {
 		color = 0;
 	}

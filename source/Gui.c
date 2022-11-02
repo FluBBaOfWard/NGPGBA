@@ -203,10 +203,9 @@ void resetGame() {
 
 void updateGameInfo() {
 	char catalog[8];
-	NgpHeader *header = (NgpHeader *)romSpacePtr;
-	strlMerge(gameInfoString, "Game Name: ", header->name, sizeof(gameInfoString));
+	strlMerge(gameInfoString, "Game Name: ", ngpHeader->name, sizeof(gameInfoString));
 	strlcat(gameInfoString, " #", sizeof(gameInfoString));
-	short2HexStr(catalog, header->catalog);
+	short2HexStr(catalog, ngpHeader->catalog);
 	strlcat(gameInfoString, catalog, sizeof(gameInfoString));
 }
 //---------------------------------------------------------------------------------
