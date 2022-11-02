@@ -8,6 +8,12 @@
 	.global empty_R
 	.global empty_W
 	.global rom_W
+	.global t9StoreBX
+	.global t9StoreWX
+	.global t9StoreLX
+	.global t9LoadBX
+	.global t9LoadWX
+	.global t9LoadLX
 	.global t9StoreB
 	.global t9StoreB_mem
 	.global t9StoreW
@@ -58,10 +64,64 @@ empty_W:					;@ Write bad address (error)
 	mov r0,#0xBA
 	bx lr
 ;@----------------------------------------------------------------------------
-rom_W:						;@ Write ROM address
+rom_W:						;@ Write ROM address (error)
 ;@----------------------------------------------------------------------------
 	mov r11,r11					;@ No$GBA breakpoint
 	mov r0,#0xB0
+	bx lr
+;@----------------------------------------------------------------------------
+t9StoreBX:					;@ r0=value, r1=address
+	.type	t9StoreBX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9StoreB
+	ldmfd sp!,{t9optbl,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t9StoreWX:					;@ r0=value, r1=address
+	.type	t9StoreWX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9StoreW
+	ldmfd sp!,{t9optbl,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t9StoreLX:					;@ r0=value, r1=address
+	.type	t9StoreLX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9StoreL
+	ldmfd sp!,{t9optbl,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t9LoadBX:					;@ r0=address
+	.type	t9LoadBX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9LoadB
+	ldmfd sp!,{t9optbl,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t9LoadWX:					;@ r0=address
+	.type	t9LoadWX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9LoadW
+	ldmfd sp!,{t9optbl,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+t9LoadLX:					;@ r0=address
+	.type	t9LoadLX STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{t9optbl,lr}
+	ldr t9optbl,=tlcs900HState
+	bl t9LoadL
+	ldmfd sp!,{t9optbl,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 

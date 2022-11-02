@@ -17,14 +17,14 @@ extern u8 gPaletteBank;
 
 extern u8 ngpRAM[0x4000];
 extern u8 biosSpace[0x10000];
-extern u8 rawBios[0x10000];
-extern u8 *romSpacePtr;
+extern const u8 rawBios[0x10000];
+extern const u8 *romSpacePtr;
 extern const void *g_BIOSBASE_COLOR;
 extern const void *g_BIOSBASE_BW;
 
 void machineInit(void);
 void loadCart(int emuFlags);
-void tlcs9000MemInit(u8 *romBase);
+void tlcs9000MemInit(const u8 *romBase);
 
 #ifdef __cplusplus
 } // extern "C"

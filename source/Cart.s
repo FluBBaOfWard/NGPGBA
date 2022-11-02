@@ -85,9 +85,9 @@ machineInit: 				;@ Called from C
 //	bl cpuInit
 
 	bl gfxReset
+	bl ioReset
 	bl soundReset
 	bl cpuReset
-	bl ioReset
 
 	ldr r0,=g_BIOSBASE_COLOR
 	ldr r0,[r0]

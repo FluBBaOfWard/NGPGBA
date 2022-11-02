@@ -2,7 +2,7 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.5 - 2022-10-30 (FluBBa)
+V0.5.5 - 2022-11-02 (FluBBa)
 	Fixed writing to scroll registers.
 	Optimized K2GE access.
 	Added speedhack for Big Bang Pro Wrestling.

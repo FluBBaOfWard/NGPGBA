@@ -4,8 +4,6 @@
 
 #include "NGPHeader.h"
 
-extern u8 *ngpc_bios;
-
 void iBIOSHLE(int);
 
 /** Fill the bios rom area with a HLE BIOS. Call once at program start */

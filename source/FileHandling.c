@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "Gfx.h"
 #include "io.h"
+#include "NGPHeader.h"
 
 static int selectedGame = 0;
 ConfigData cfg;
@@ -194,7 +195,8 @@ int loadBWBIOS(void) {
 //---------------------------------------------------------------------------------
 void checkMachine() {
 	if (gMachineSet == HW_AUTO) {
-		if (romSpacePtr[gRomSize - 9] != 0) {
+		NgpHeader *header = (NgpHeader *)romSpacePtr;
+		if (header->mode != 0) {
 			gMachine = HW_NGPCOLOR;
 		}
 		else {

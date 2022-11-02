@@ -5,13 +5,13 @@
 extern "C" {
 #endif
 
-u8  t9LoadB(u32 address);
-u16 t9LoadW(u32 address);
-u32 t9LoadL(u32 address);
+u8  t9LoadBX(u32 address);
+u16 t9LoadWX(u32 address);
+u32 t9LoadLX(u32 address);
 
-void t9StoreB(u8 data, u32 address);
-void t9StoreW(u16 data, u32 address);
-void t9StoreL(u32 data, u32 address);
+void t9StoreBX(u8 data, u32 address);
+void t9StoreWX(u16 data, u32 address);
+void t9StoreLX(u32 data, u32 address);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -36,7 +36,7 @@ void BIOSHLE_Reset(void)
 	CacheIntPrio[1] = 0x32;
 
 	for (x = 0; x < 0xB; x++) {
-		t9StoreB(CacheIntPrio[x], 0x70 + x);
+		t9StoreBX(CacheIntPrio[x], 0x70 + x);
 	}
 }
 
@@ -62,7 +62,7 @@ void iBIOSHLE(int vector)
 
 	// VECT_CLOCKGEARSET (0xFF1034)
 	case 0x01:
-		t9StoreB(rCodeL(0x3C), 0x80);
+		t9StoreBX(rCodeL(0x3C), 0x80);
 		break;
 
 	// VECT_RTCGET (0xFF1440)
@@ -70,10 +70,10 @@ void iBIOSHLE(int vector)
 		if (rCodeL(0x3C) < 0xC000)
 		{
 			// Copy data from hardware area
-			t9StoreB(t9LoadB(0x91), rCodeL(0x3C) + 0);
-			t9StoreW(t9LoadW(0x92), rCodeL(0x3C) + 1);
-			t9StoreW(t9LoadW(0x94), rCodeL(0x3C) + 3);
-			t9StoreW(t9LoadW(0x96), rCodeL(0x3C) + 5);
+			t9StoreBX(t9LoadBX(0x91), rCodeL(0x3C) + 0);
+			t9StoreWX(t9LoadWX(0x92), rCodeL(0x3C) + 1);
+			t9StoreWX(t9LoadWX(0x94), rCodeL(0x3C) + 3);
+			t9StoreWX(t9LoadWX(0x96), rCodeL(0x3C) + 5);
 		}
 		break; 
 
@@ -92,43 +92,43 @@ void iBIOSHLE(int vector)
 	{
 		case 0x00:	// Interrupt from RTC alarm
 			CacheIntPrio[0x0] = (CacheIntPrio[0x0] & 0xf0) |  level;
-			t9StoreB(CacheIntPrio[0x0], 0x70);
+			t9StoreBX(CacheIntPrio[0x0], 0x70);
 			break;
 		case 0x01:	// Interrupt from the Z80 CPU
 			CacheIntPrio[0x1] = (CacheIntPrio[0x1] & 0x0f) | (level<<4);
-			t9StoreB(CacheIntPrio[0x1], 0x71);
+			t9StoreBX(CacheIntPrio[0x1], 0x71);
 			break;
 		case 0x02:	// Interrupt from the 8 bit timer 0
 			CacheIntPrio[0x3] = (CacheIntPrio[0x3] & 0xf0) |  level;
-			t9StoreB(CacheIntPrio[0x3], 0x73);
+			t9StoreBX(CacheIntPrio[0x3], 0x73);
 			break;
 		case 0x03:	// Interrupt from the 8 bit timer 1
 			CacheIntPrio[0x3] = (CacheIntPrio[0x3] & 0x0f) | (level<<4);
-			t9StoreB(CacheIntPrio[0x3], 0x73);
+			t9StoreBX(CacheIntPrio[0x3], 0x73);
 			break;
 		case 0x04:	// Interrupt from the 8 bit timer 2
 			CacheIntPrio[0x4] = (CacheIntPrio[0x4] & 0xf0) |  level;
-			t9StoreB(CacheIntPrio[0x4], 0x74);
+			t9StoreBX(CacheIntPrio[0x4], 0x74);
 			break;
 		case 0x05:	// Interrupt from the 8 bit timer 3
 			CacheIntPrio[0x4] = (CacheIntPrio[0x4] & 0x0f) | (level<<4);
-			t9StoreB(CacheIntPrio[0x4], 0x74);
+			t9StoreBX(CacheIntPrio[0x4], 0x74);
 			break;
 		case 0x06:	// End of transfer interrupt from DMA channel 0
 			CacheIntPrio[0x9] = (CacheIntPrio[0x9] & 0xf0) |  level;
-			t9StoreB(CacheIntPrio[0x9], 0x79);
+			t9StoreBX(CacheIntPrio[0x9], 0x79);
 			break;
 		case 0x07:	// End of transfer interrupt from DMA channel 1
 			CacheIntPrio[0x9] = (CacheIntPrio[0x9] & 0x0f) | (level<<4);
-			t9StoreB(CacheIntPrio[0x9], 0x79);
+			t9StoreBX(CacheIntPrio[0x9], 0x79);
 			break;
 		case 0x08:	// End of transfer interrupt from DMA channel 2
 			CacheIntPrio[0xa] = (CacheIntPrio[0xa] & 0xf0) |  level;
-			t9StoreB(CacheIntPrio[0xa], 0x7a);
+			t9StoreBX(CacheIntPrio[0xa], 0x7a);
 			break;
 		case 0x09:	// End of transfer interrupt from DMA channel 3
 			CacheIntPrio[0xa] = (CacheIntPrio[0xa] & 0x0f) | (level<<4);
-			t9StoreB(CacheIntPrio[0xa], 0x7a);
+			t9StoreBX(CacheIntPrio[0xa], 0x7a);
 			break;
 		default:
 			//puts("DOH");
@@ -147,17 +147,17 @@ void iBIOSHLE(int vector)
 		a = rCodeB(0x30) & 3;
 
 		for (i = 0; i < 0x800; i++) {
-			c = ngpc_bios[0x8DCF + i];
+			c = t9LoadBX(0xFF8DCF + i);
 
 			for (j = 0; j < 8; j++, c<<=1) {
 				u16 data16;
 
-				data16 = t9LoadW(dst);
+				data16 = t9LoadWX(dst);
 				data16 <<= 2;
-				t9StoreW(data16, dst);
+				t9StoreWX(data16, dst);
 
-				if (c & 0x80)	t9StoreB(t9LoadB(dst) | a, dst);
-				else			t9StoreB(t9LoadB(dst) | b, dst);
+				if (c & 0x80)	t9StoreBX(t9LoadBX(dst) | a, dst);
+				else			t9StoreBX(t9LoadBX(dst) | b, dst);
 			}
 			dst += 2;
 		}
@@ -177,10 +177,10 @@ void iBIOSHLE(int vector)
 
 		int count = rCodeW(0x34) * 256;
 		for (i = 0; i < count; i++) {
-			t9StoreB(0xAA, bank + 0x5555);
-			t9StoreB(0x55, bank + 0x2AAA);
-			t9StoreB(0xA0, bank + 0x5555);
-			t9StoreB(t9LoadB(rCodeL(0x3C) + i), address + i);
+			t9StoreBX(0xAA, bank + 0x5555);
+			t9StoreBX(0x55, bank + 0x2AAA);
+			t9StoreBX(0xA0, bank + 0x5555);
+			t9StoreBX(t9LoadBX(rCodeL(0x3C) + i), address + i);
 		}
 		int block = getBlockFromAddress(address);
 		markBlockDirty(rCodeB(0x30), block);
@@ -205,11 +205,11 @@ void iBIOSHLE(int vector)
 		}
 		address = bank + getBlockOffset(rCodeB(0x34));
 
-		t9StoreB(0xAA, address + 0x5555);
-		t9StoreB(0x55, address + 0x2AAA);
-		t9StoreB(0x80, address + 0x5555);
-		t9StoreB(0xAA, address + 0x5555);
-		t9StoreB(0x55, address + 0x2AAA);
+		t9StoreBX(0xAA, address + 0x5555);
+		t9StoreBX(0x55, address + 0x2AAA);
+		t9StoreBX(0x80, address + 0x5555);
+		t9StoreBX(0xAA, address + 0x5555);
+		t9StoreBX(0x55, address + 0x2AAA);
 		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 	}
 		break;
@@ -240,18 +240,18 @@ void iBIOSHLE(int vector)
 
 	// VECT_GEMODESET (0xFF17C4)
 	case 0x0E:
-		t9StoreB(0xAA, 0x87F0);		// Allow GE MODE registers to be written to
+		t9StoreBX(0xAA, 0x87F0);		// Allow GE MODE registers to be written to
 		if (rCodeB(0x30) < 0x10) {	// Current A register.
 			// set B/W mode
-			t9StoreB(0x80, 0x87E2);
-			t9StoreB(0x00, 0x6F95);
+			t9StoreBX(0x80, 0x87E2);
+			t9StoreBX(0x00, 0x6F95);
 		}
 		else {
 			// set color mode
-			t9StoreB(0x00, 0x87E2);
-			t9StoreB(0x10, 0x6F95);
+			t9StoreBX(0x00, 0x87E2);
+			t9StoreBX(0x10, 0x6F95);
 		}
-		t9StoreB(0x55, 0x87F0);		// Disallow GE MODE registers to be written to
+		t9StoreBX(0x55, 0x87F0);		// Disallow GE MODE registers to be written to
 		break;
 
 	// Reserved (just RET) (0xFF1032)
@@ -297,7 +297,7 @@ void iBIOSHLE(int vector)
 			rCodeB(0x30) = 0;	// COM_BUF_OK
 			rCodeB(0x35) = data;
 			// Comms. Read interrupt
-			t9StoreB(data, 0x50);
+			t9StoreBX(data, 0x50);
 
 //			tlcs_pc = pop32();
 			setInterruptExternal(0x19);
@@ -311,12 +311,12 @@ void iBIOSHLE(int vector)
 	
 	// VECT_COMONRTS (0xFF2D27)
 	case 0x15:
-		t9StoreB(0, 0xB2);
+		t9StoreBX(0, 0xB2);
 		break;
 	
 	// VECT_COMOFFRTS (0xFF2D33)
 	case 0x16:
-		t9StoreB(1, 0xB2);
+		t9StoreBX(1, 0xB2);
 		break;	
 
 	// VECT_COMSENDSTATUS (0xFF2D3A)
@@ -336,7 +336,7 @@ void iBIOSHLE(int vector)
 		while(rCodeB(0x35) > 0)
 		{
 			u8 data;
-			data = t9LoadB(rCodeL(0x3C));
+			data = t9LoadBX(rCodeL(0x3C));
 
 			// Write data from (XHL3++)
 			system_comms_write(data);
@@ -353,12 +353,12 @@ void iBIOSHLE(int vector)
 			u8 data;
 			if (system_comms_read(&data)) {
 				// Read data into (XHL3++)
-				t9StoreB(data, rCodeL(0x3C));
+				t9StoreBX(data, rCodeL(0x3C));
 				rCodeL(0x3C)++; // Next data
 				rCodeB(0x35)--;	// RB3 = Count Left
 
 				// Comms. Read interrupt
-				t9StoreB(data, 0x50);
+				t9StoreBX(data, 0x50);
 //				tlcs_pc = pop32();
 				setInterruptExternal(0x19);
 				return;

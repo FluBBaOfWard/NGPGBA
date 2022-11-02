@@ -24,8 +24,6 @@
 
 //=============================================================================
 
-u8 *ngpc_bios = NULL;			// Holds bios program data
-
 extern u32 gRomSize;			// From Cart.s
 extern u8 gLang;				// From Cart.s
 extern u8 gMachine;				// From Cart.s
@@ -207,7 +205,7 @@ bool installHleBios(u8 *ngpBios)
 		0xFF149B,		//0x09		VECT_ALARMSET
 		0xFF1033,		//0x0A		Reserved (just RET)
 		0xFF1487,		//0x0B		VECT_ALARMDOWNSET
-		0xFF731F,		//0x0C		?
+		0xFF731F,		//0x0C		Another FLASHPROTECT?
 		0xFF70CA,		//0x0D		VECT_FLASHPROTECT
 		0xFF17C4,		//0x0E		VECT_GEMODESET
 		0xFF1032,		//0x0F		Reserved (just RET)
@@ -312,7 +310,6 @@ bool installHleBios(u8 *ngpBios)
 	// ==========
 
 	tlcs900HRedirectOpcode(0x1F, &sngBIOSHLE);
-	ngpc_bios = ngpBios;		// Holds bios program data
 	return true;				// Success
 }
 
@@ -320,97 +317,102 @@ void resetBios(NgpHeader *ngpHeader)
 {
 	int i;
 
-//	REGXSP = 0x00006C00; //Confirmed from BIOS,
-						 //immediately changes value from default of 0x100
 //=============================================================================
 //006C00 -> 006FFF	BIOS Workspace
 //==================================
 
-	t9StoreL(ngpHeader->startPC, 0x6C00);		// Start
+	t9StoreLX(ngpHeader->startPC, 0x6C00);		// Start
 
-	t9StoreW(ngpHeader->catalog, 0x6C04);
-	t9StoreW(ngpHeader->catalog, 0x6E82);
+	t9StoreWX(ngpHeader->catalog, 0x6C04);
+	t9StoreWX(ngpHeader->catalog, 0x6E82);
 
-	t9StoreB(ngpHeader->subCatalog, 0x6C06);
-	t9StoreB(ngpHeader->subCatalog, 0x6E84);
+	t9StoreBX(ngpHeader->subCatalog, 0x6C06);
+	t9StoreBX(ngpHeader->subCatalog, 0x6E84);
 
 	for (i = 0; i < 12; i++) {
-		t9StoreB(ngpHeader->name[i], 0x6C08 + i);
+		t9StoreBX(ngpHeader->name[i], 0x6C08 + i);
 	}
 
-	t9StoreB(0x01, 0x6C58);
-	t9StoreB(0x00, 0x6C59);
+	t9StoreBX(0x01, 0x6C58);
+	t9StoreBX(0x00, 0x6C59);
 	// 32MBit cart?
 	if (gRomSize > 0x200000) {
-		t9StoreB(0x03, 0x6C58);
-		t9StoreB(0x03, 0x6C59);
+		t9StoreBX(0x03, 0x6C58);
+		t9StoreBX(0x03, 0x6C59);
 	}
 	else if (gRomSize > 0x100000) {
-		t9StoreB(0x03, 0x6C58);
+		t9StoreBX(0x03, 0x6C58);
 	}
 	else if (gRomSize > 0x080000) {
-		t9StoreB(0x02, 0x6C58);
+		t9StoreBX(0x02, 0x6C58);
 	}
 
-	t9StoreB(0x01, 0x6C55);		// 0x01 = Commercial game
+	t9StoreBX(0x01, 0x6C55);		// 0x01 = Commercial game
 
-	t9StoreW(0x03FF, 0x6F80);	// Lots of battery power!
+	t9StoreWX(0x03FF, 0x6F80);	// Lots of battery power!
 
-	t9StoreB(0x40, 0x6F84);		// "Power On" startup
-	t9StoreB(0x00, 0x6F85);		// No shutdown request
-	t9StoreB(0x00, 0x6F86);		// No user answer (?)
+	t9StoreBX(0x40, 0x6F84);		// "Power On" startup
+	t9StoreBX(0x00, 0x6F85);		// No shutdown request
+	t9StoreBX(0x00, 0x6F86);		// No user answer (?)
 
-	t9StoreW(0xA5A5, 0x6C7A);	// Running mode
-	t9StoreW(0x5AA5, 0x6C7C);	// Running mode
+	t9StoreWX(0xA5A5, 0x6C7A);	// Running mode
+	t9StoreWX(0x5AA5, 0x6C7C);	// Running mode
 
 	// Language: 0 = Japanese, 1 = English
 	if (gLang) {
-		t9StoreB(0x01, 0x6F87);
+		t9StoreBX(0x01, 0x6F87);
 	}
 	else {
-		t9StoreB(0x00, 0x6F87);
+		t9StoreBX(0x00, 0x6F87);
 	}
-	t9StoreB(gPaletteBank, 0x6F94);
+	t9StoreBX(gPaletteBank, 0x6F94);
 
 	// Color Mode Selection: 0x00 = B&W, 0x10 = Colour
 	int color = ngpHeader->mode;
 	if (gMachine == HW_NGPMONO) {
 		color = 0;
 	}
-	t9StoreB(color, 0x6F90);		// Game Displaymode
-	t9StoreB(color, 0x6F95);		// Current Displaymode
-	t9StoreB(color, 0x6F91);		// Machine
+	t9StoreBX(color, 0x6F90);		// Game Displaymode
+	t9StoreBX(color, 0x6F95);		// Current Displaymode
+	t9StoreBX(color, 0x6F91);		// Machine
 	if (gMachine == HW_NGPCOLOR) {
-		t9StoreB(0x10, 0x6F91);		// Machine
+		t9StoreBX(0x10, 0x6F91);		// Machine
 	}
 	// User Interrupt table
 	for (i = 0; i < 0x12; i++) {
-		t9StoreL(0x00FF23DF, 0x6FB8 + i * 4);
+		t9StoreLX(0x00FF23DF, 0x6FB8 + i * 4);
 	}
 
 //=============================================================================
 //008000 -> 00BFFF	Video RAM
 //=============================
 
-	t9StoreB(0xAA, 0x87F0);
-	t9StoreB(color ? 0x00 : 0x80, 0x87E2);
-	t9StoreB(0x55, 0x87F0);
+	t9StoreBX(0xAA, 0x87F0);
+	t9StoreBX(color ? 0x00 : 0x80, 0x87E2);
+	t9StoreBX(0x55, 0x87F0);
 
 	// Clear some tiles, (Cool Cool Jam in B&W)
 	for (i = 0; i < 0x20; i++) {
-		t9StoreB(0, 0xA000 + i);
+		t9StoreBX(0, 0xA000 + i);
 	}
 
 	// Copy SNK logo to VRAM, Metal Slug 2 checks this unless run in debug mode.
 	for (i = 0; i < 0x40; i++) {
-		t9StoreB(snkLogo[i], 0xA1C0 + i);
+		t9StoreBX(snkLogo[i], 0xA1C0 + i);
 	}
 
+	t9StoreBX(0xF3, 0x7000);	// Z80 DI
+	t9StoreBX(0x31, 0x7001);	// Z80 LD SP 0x0FFF
+	t9StoreBX(0xFF, 0x7002);
+	t9StoreBX(0x0F, 0x7003);
+	t9StoreBX(0x18, 0x7004);	// Z80 JR -2
+	t9StoreBX(0xFE, 0x7005);
+
 	// Enable sound
-	t9StoreW(0x5555, 0xB8);
+	t9StoreWX(0x5555, 0xB8);
 
 	// Turn on LED
-	t9StoreB(0xFF, 0x8400);
+	t9StoreBX(0xFF, 0x8400);
 
 	// Do some setup for the interrupt priorities.
 	BIOSHLE_Reset();
@@ -418,31 +420,31 @@ void resetBios(NgpHeader *ngpHeader)
 
 void fixBiosSettings(void)
 {
-	t9StoreB(cfg.birthYear, 0x6F8B);
-	t9StoreB(cfg.birthMonth, 0x6F8C);
-	t9StoreB(cfg.birthDay, 0x6F8D);
+	t9StoreBX(cfg.birthYear, 0x6F8B);
+	t9StoreBX(cfg.birthMonth, 0x6F8C);
+	t9StoreBX(cfg.birthDay, 0x6F8D);
 
 	// Setup alarm from config
-	t9StoreB(cfg.alarmHour, 0x6C34);
-	t9StoreB(cfg.alarmMinute, 0x6C35);
+	t9StoreBX(cfg.alarmHour, 0x6C34);
+	t9StoreBX(cfg.alarmMinute, 0x6C35);
 
 	int check = gLang ? 0x01 : 0x00;
 	// Language: 0 = Japanese, 1 = English
-	t9StoreB(check, 0x6F87);
+	t9StoreBX(check, 0x6F87);
 	if (gMachine == HW_NGPCOLOR) {
-		t9StoreB(gPaletteBank, 0x6F94);
+		t9StoreBX(gPaletteBank, 0x6F94);
 		check += gPaletteBank;
 	}
 	else {
 		// Required by mono BIOS to skip setup.
-		t9StoreB(0xDC, 0x6C25);
+		t9StoreBX(0xDC, 0x6C25);
 	}
 	check += 0xDC;		// Actualy addition of all IRQ priorities.
-	t9StoreW(check, 0x6C14);
+	t9StoreWX(check, 0x6C14);
 
-	t9StoreB(0x4E, 0x6E96);
-	t9StoreB(0x50, 0x6E95);
-	t9StoreB(0x00, 0x6F83);
+	t9StoreBX(0x4E, 0x6E96);
+	t9StoreBX(0x50, 0x6E95);
+	t9StoreBX(0x00, 0x6F83);
 }
 
 //=============================================================================
