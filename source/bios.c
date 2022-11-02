@@ -317,6 +317,11 @@ void resetBios(NgpHeader *ngpHeader)
 {
 	int i;
 
+	// Clear all RAM first
+	for (i = 0; i < 0x1000; i++) {
+		t9StoreLX(0, 0x4000 + i*4);
+	}
+
 //=============================================================================
 //006C00 -> 006FFF	BIOS Workspace
 //==================================
@@ -409,7 +414,7 @@ void resetBios(NgpHeader *ngpHeader)
 	t9StoreBX(0xFE, 0x7005);
 
 	// Enable sound
-	t9StoreWX(0x5555, 0xB8);
+	t9StoreBX(0x55, 0xB9);
 
 	// Turn on LED
 	t9StoreBX(0xFF, 0x8400);
