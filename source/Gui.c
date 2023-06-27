@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.5 2022-11-02"
+#define EMUVERSION "V0.5.6 2023-06-27"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -233,7 +233,7 @@ void debugUndefinedInstruction() {
 	debugOutput("Undefined Instruction.");
 }
 void debugCrashInstruction() {
-	debugOutput("CPU Crash! (0xF1)");
+	debugOutput("CPU Crash!");
 }
 
 //---------------------------------------------------------------------------------

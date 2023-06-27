@@ -63,10 +63,9 @@ machineInit: 				;@ Called from C
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
 
-	ldr r1,=romSpacePtr
 //	ldr r0,=ROM_Space
-//	str r0,[r1]
-	ldr r0,[r1]
+//	str r0,romSpacePtr
+	ldr r0,romSpacePtr
 
 	bl tlcs9000MemInit
 
