@@ -4,34 +4,33 @@
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
 
+	.global joyCfg
+	.global EMUinput
+	.global gSubBatteryLevel
+	.global batteryLevel
+	.global systemMemory
+
 	.global ioReset
+	.global refreshEMUjoypads
 	.global transferTime
 	.global Z80In
 	.global Z80Out
-	.global refreshEMUjoypads
 	.global ioSaveState
 	.global ioLoadState
 	.global ioGetStateSize
 
-	.global joyCfg
-	.global EMUinput
-
-	.global t9LoadB_Low
-	.global t9StoreB_Low
 	.global updateSlowIO
 	.global z80LatchR
 	.global z80LatchW
-	.global gSubBatteryLevel
-	.global batteryLevel
 	.global system_comms_read
-	.global system_comms_poll
 	.global system_comms_write
-	.global systemMemory
+	.global ADStart
 
 	.syntax unified
 	.arm
 
-	.section .text
+//	.section .text
+	.section .ewram, "ax", %progbits	;@ For the GBA
 	.align 2
 ;@----------------------------------------------------------------------------
 ioReset:
@@ -46,8 +45,8 @@ ioReset:
 ;@----------------------------------------------------------------------------
 initSysMem:					;@ In r0=values ptr.
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r5,t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{r4-r5,t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 
 	mov r4,r0
 	mov r5,#0xFF
@@ -58,7 +57,7 @@ initMemLoop:
 	subs r5,r5,#1
 	bpl initMemLoop
 
-	ldmfd sp!,{r4-r5,t9optbl,pc}
+	ldmfd sp!,{r4-r5,t9ptr,pc}
 ;@----------------------------------------------------------------------------
 ioSaveState:				;@ In r0=destination. Out r0=size.
 	.type   ioSaveState STT_FUNC
@@ -230,12 +229,6 @@ system_comms_read:			;@ r0 = (u8 *buffer)
 	mov r0,#0
 	bx lr
 ;@----------------------------------------------------------------------------
-system_comms_poll:			;@ r0 = (u8 *buffer)
-	.type system_comms_poll STT_FUNC
-;@----------------------------------------------------------------------------
-	mov r0,#0
-	bx lr
-;@----------------------------------------------------------------------------
 system_comms_write:			;@ r0 = (u8 data)
 	.type system_comms_write STT_FUNC
 ;@----------------------------------------------------------------------------
@@ -333,59 +326,6 @@ checkForAlarm:
 	bx lr
 
 ;@----------------------------------------------------------------------------
-t9StoreB_Low:
-;@----------------------------------------------------------------------------
-	adr r2,systemMemory
-	strb r0,[r2,r1]
-
-	cmp r1,#0x50				;@ Serial channel 0 buffer.
-	strbeq r0,sc0Buf
-	bxeq lr
-
-	cmp r1,#0xB2				;@ COMMStatus
-	andeq r0,r0,#1
-	strbeq r0,commStatus
-	bxeq lr
-
-	cmp r1,#0xB8				;@ Soundchip enable/disable, 0x55 On 0xAA Off.
-	beq setMuteT6W28
-
-	cmp r1,#0xB9				;@ Z80 enable/disable, 0x55 On 0xAA Off.
-	beq Z80_SetEnable
-
-	cmp r1,#0xBA				;@ Z80 NMI
-	beq Z80_nmi_do
-
-	cmp r1,#0xA0				;@ T6W28, Right
-	beq T6W28_R_W
-	cmp r1,#0xA1				;@ T6W28, Left
-	beq T6W28_L_W
-;@	cmp r1,#0xA2				;@ T6W28 DAC, Left
-;@	beq T6W28_DAC_L_W
-;@	cmp r1,#0xA3				;@ T6W28 DAC, Right
-;@	beq T6W28_DAC_R_W
-
-	cmp r1,#0x6F				;@ Watchdog
-	beq watchDogW
-
-	cmp r1,#0x6D				;@ Battery A/D start
-	beq ADStart
-
-	cmp r1,#0x80				;@ CpuSpeed
-	beq cpuSpeedW
-
-	and r2,r1,#0xF0
-	cmp r2,#0x20
-	beq timerWrite8
-
-	and r0,r0,#0xFF
-	cmp r2,#0x70
-	beq intWrite8
-
-//	cmp r1,#0xB3				;@ Power button NMI on/off.
-	bx lr
-
-;@----------------------------------------------------------------------------
 ADStart:
 ;@----------------------------------------------------------------------------
 	tst r0,#0x04
@@ -396,44 +336,6 @@ ADStart:
 	mov r0,#0x1C
 	b setInterrupt
 
-;@----------------------------------------------------------------------------
-cpuSpeedW:
-;@----------------------------------------------------------------------------
-	and r0,r0,#0x07
-	cmp r0,#4
-	movpl r0,#4
-	ldrb r2,systemMemory+0x80
-	subs r2,r0,r2
-	bxeq lr
-	strb r0,systemMemory+0x80
-	rsb r0,r0,#T9CYC_SHIFT
-	strb r0,[t9optbl,#tlcsCycShift]
-	mov t9cycles,t9cycles,ror r2
-	bx lr
-
-;@----------------------------------------------------------------------------
-t9LoadB_Low:
-;@----------------------------------------------------------------------------
-	and r1,r0,#0xF0
-
-	cmp r1,#0x70
-	beq intRead8
-
-	cmp r1,#0x20
-	beq timerRead8
-
-	cmp r0,#0x50				;@ Serial channel 0 buffer.
-	ldrbeq r0,sc0Buf
-	bxeq lr
-
-	adr r2,systemMemory
-	ldrb r0,[r2,r0]
-	bx lr
-
-;@----------------------------------------------------------------------------
-watchDogW:
-;@----------------------------------------------------------------------------
-	bx lr
 ;@----------------------------------------------------------------------------
 Z80In:
 ;@----------------------------------------------------------------------------
@@ -462,11 +364,7 @@ systemMemory:
 
 rtcTimer:
 	.byte 0
-sc0Buf:
-	.byte 0
-commStatus:
-	.byte 0
-	.space 1
+	.space 3
 
 ;@----------------------------------------------------------------------------
 	.end

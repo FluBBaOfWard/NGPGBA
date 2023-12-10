@@ -14,8 +14,8 @@
 #include "io.h"
 #include "NGPHeader.h"
 
-static int selectedGame = 0;
-ConfigData cfg;
+EWRAM_BSS int selectedGame = 0;
+EWRAM_BSS ConfigData cfg;
 
 //---------------------------------------------------------------------------------
 int loadSettings() {
@@ -98,7 +98,7 @@ static void turnPowerOff(void) {
 				break;
 			}
 		}
-		for (i = 0; i < 6; i++ ) {
+		for (i = 0; i < 6; i++) {
 			run();
 		}
 	}
@@ -109,7 +109,7 @@ static void turnPowerOn(void) {
 	int i;
 	if (g_BIOSBASE_COLOR != NULL) {
 		EMUinput &= ~4;
-		for (i = 0; i < 100; i++ ) {
+		for (i = 0; i < 100; i++) {
 			run();
 			EMUinput |= 4;
 			if (isConsoleRunning()) {
@@ -122,6 +122,7 @@ static void turnPowerOn(void) {
 //---------------------------------------------------------------------------------
 bool loadGame(const RomHeader *rh) {
 	if (rh) {
+		selectedGame = selected;
 		cls(0);
 		if (isConsoleRunning()) {
 			drawText("     Please wait, power off.", 9);
@@ -130,7 +131,6 @@ bool loadGame(const RomHeader *rh) {
 		gRomSize = rh->filesize;
 		romSpacePtr = (u8 *)rh + sizeof(RomHeader);
 		tlcs9000MemInit(romSpacePtr);
-		selectedGame = selected;
 		checkMachine();
 		setEmuSpeed(0);
 		loadCart(0);
@@ -175,7 +175,7 @@ static int loadBIOS(void *dest) {
 }
 
 int loadColorBIOS(void) {
-	if ( loadBIOS(biosSpace) ) {
+	if (loadBIOS(biosSpace)) {
 		g_BIOSBASE_COLOR = biosSpace;
 		return 1;
 	}
@@ -184,7 +184,7 @@ int loadColorBIOS(void) {
 }
 
 int loadBWBIOS(void) {
-	if ( loadBIOS(biosSpace) ) {
+	if (loadBIOS(biosSpace)) {
 		g_BIOSBASE_BW = biosSpace;
 		return 1;
 	}
@@ -194,16 +194,23 @@ int loadBWBIOS(void) {
 
 //---------------------------------------------------------------------------------
 void checkMachine() {
-	if (gMachineSet == HW_AUTO) {
+	u8 newMachine = gMachineSet;
+	if (newMachine == HW_AUTO) {
 		if (ngpHeader->mode != 0) {
-			gMachine = HW_NGPCOLOR;
+			newMachine = HW_NGPCOLOR;
 		}
 		else {
-			gMachine = HW_NGPMONO;
+			newMachine = HW_NGPMONO;
 		}
 	}
-	else {
-		gMachine = gMachineSet;
+	if (gMachine != newMachine) {
+		gMachine = newMachine;
+		if (gMachine == HW_NGPMONO) {
+			gSOC = SOC_K1GE;
+		}
+		else {
+			gSOC = SOC_K2GE;
+		}
+		machineInit();
 	}
-//	setupEmuBackground();
 }

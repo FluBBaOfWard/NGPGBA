@@ -51,7 +51,6 @@
 		9C7151312654F0650084BE99 /* TLCS900H_reg.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = TLCS900H_reg.s; sourceTree = "<group>"; };
 		9C7151322654F0650084BE99 /* TLCS900H_src.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = TLCS900H_src.s; sourceTree = "<group>"; };
 		9C7151352654F0650084BE99 /* TLCS900H_int.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = TLCS900H_int.s; sourceTree = "<group>"; };
-		9C7151362654F0650084BE99 /* TLCS900H_registers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TLCS900H_registers.h; sourceTree = "<group>"; };
 		9C7151382654F0E90084BE99 /* TLCS900H_todo.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TLCS900H_todo.txt; sourceTree = "<group>"; };
 		9C7151392654F0E90084BE99 /* History.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
 		9C71513A2654F0E90084BE99 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
@@ -163,7 +162,6 @@
 				9C7151322654F0650084BE99 /* TLCS900H_src.s */,
 				9C7151242654F0650084BE99 /* TLCS900H_dst.s */,
 				9C7151352654F0650084BE99 /* TLCS900H_int.s */,
-				9C7151362654F0650084BE99 /* TLCS900H_registers.h */,
 				9CC0F92D26C55DD50035478F /* TLCS900H_RegistersMap.s */,
 			);
 			path = TLCS900H;

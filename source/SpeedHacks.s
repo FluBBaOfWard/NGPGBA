@@ -10,7 +10,7 @@
 	.syntax unified
 	.arm
 
-	.section .text						;@ For anything else
+	.section .text
 	.align 2
 ;@----------------------------------------------------------------------------
 hacksInit:

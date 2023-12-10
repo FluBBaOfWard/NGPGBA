@@ -1,6 +1,5 @@
 #ifdef __arm__
 
-#include "TLCS900H/TLCS900H.i"
 #include "TLCS900H/TLCS900H_mac.h"
 
 	.global sngBIOSHLE
@@ -8,8 +7,6 @@
 	.syntax unified
 	.arm
 
-
-;@----------------------------------------------------------------------------
 	.section .text
 ;@----------------------------------------------------------------------------
 callCFunc:					;@ r0 = arg0, r1 = arg1, r2 = function.
@@ -27,7 +24,7 @@ callcRet:
 ;@----------------------------------------------------------------------------
 sngBIOSHLE:
 ;@----------------------------------------------------------------------------
-	ldr r0,[t9optbl,#tlcsLastBank]
+	ldr r0,[t9ptr,#tlcsLastBank]
 	sub r0,t9pc,r0
 	and r0,r0,#0xFF0000
 	cmp r0,#0xFF0000
@@ -62,7 +59,7 @@ asmBiosHLE:
 BiosReset:
 ;@----------------------------------------------------------------------------
 	mov r0,#0x6C00
-	str r0,[t9gprBank,#0x1C]	;@ XSP
+	str r0,[t9gprBank,#RXSP]
 	bl t9LoadL					;@ 0x6C00 Should also have the game start vector.
 	bl encode_r0_pc
 	t9fetch 24
@@ -70,10 +67,10 @@ BiosReset:
 ;@----------------------------------------------------------------------------
 BiosSWI_1:
 ;@----------------------------------------------------------------------------
-	ldr r0,[t9optbl,#tlcsLastBank]
+	ldr r0,[t9ptr,#tlcsLastBank]
 	sub r0,t9pc,r0
 	bl push32
-	add r2,t9optbl,#tlcsGprBanks
+	add r2,t9ptr,#tlcsGprBanks
 	ldrb r0,[r2,#0x20*3+1]
 	ldr r1,=0xFFFE00
 	add r0,r1,r0,lsl#2
@@ -142,6 +139,9 @@ BiosIRQ_User:
 	bl t9LoadL
 	bl encode_r0_pc
 	t9fetch 24
+;@----------------------------------------------------------------------------
+IndexConv:
+	.byte 0,0,0,0,1,2,3,0,0,0,4,5,6,0,0,0, 7,8,9,10,0,0,0,0,11,12,0,0,0,14,15,16, 17
 
 ;@----------------------------------------------------------------------------
 

@@ -4,9 +4,6 @@
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
 
-	.global run
-	.global stepFrame
-	.global cpuReset
 	.global isConsoleRunning
 	.global isConsoleSleeping
 	.global tweakCpuSpeed
@@ -17,6 +14,11 @@
 	.global setInterruptExternal
 	.global Z80_SetEnable
 	.global Z80_nmi_do
+	.global getRegAdr
+
+	.global run
+	.global stepFrame
+	.global cpuReset
 
 	.syntax unified
 	.arm
@@ -71,7 +73,7 @@ ngpFrameLoop:
 	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Now:
 ;@--------------------------------------
-	ldr t9optbl,=tlcs900HState
+	ldr t9ptr,=tlcs900HState
 	ldr r0,tlcs900hCyclesPerScanline
 	bl tlcsRestoreAndRunXCycles
 ;@--------------------------------------
@@ -131,7 +133,7 @@ ngpStepLoop:
 	stmia r0,{z80f-z80pc,z80sp}	;@ Save Z80 state
 NoZ80Step:
 ;@--------------------------------------
-	ldr t9optbl,=tlcs900HState
+	ldr t9ptr,=tlcs900HState
 	ldr r0,tlcs900hCyclesPerScanline
 	bl tlcsRestoreAndRunXCycles
 ;@--------------------------------------
@@ -173,10 +175,10 @@ isConsoleSleeping:
 setInterruptExternal:		;@ r0 = index
 	.type setInterruptExternal STT_FUNC
 ;@---------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 	bl setInterrupt
-	ldmfd sp!,{t9optbl,lr}
+	ldmfd sp!,{t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled
@@ -211,6 +213,14 @@ cpu1SetIRQ:
 	ldr z80ptr,=Z80OpTable
 	bl Z80SetIRQPin
 	ldmfd sp!,{z80ptr,pc}
+;@----------------------------------------------------------------------------
+getRegAdr:				;@ r0=register, 0x00-0x1C (current)
+	.type   getRegAdr STT_FUNC
+;@----------------------------------------------------------------------------
+	ldr r1,=tlcs900HState
+	ldr r2,[r1,#tlcsCurrentGprBank]
+	add r0,r2,r0
+	bx lr
 ;@----------------------------------------------------------------------------
 tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 	.type   tweakCpuSpeed STT_FUNC

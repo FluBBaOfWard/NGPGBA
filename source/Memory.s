@@ -1,6 +1,6 @@
 #ifdef __arm__
 
-#include "TLCS900H/TLCS900H.i"
+#include "TLCS900H/TLCS900H_mac.h"
 #include "ARMZ80/ARMZ80.i"
 
 	.global empty_IO_R
@@ -16,9 +16,7 @@
 	.global t9LoadLX
 	.global t9StoreB
 	.global t9StoreB_mem
-	.global t9StoreW
 	.global t9StoreW_mem
-	.global t9StoreL
 	.global t9StoreL_mem
 	.global t9LoadB
 	.global t9LoadB_mem
@@ -73,55 +71,57 @@ rom_W:						;@ Write ROM address (error)
 t9StoreBX:					;@ r0=value, r1=address
 	.type	t9StoreBX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 	bl t9StoreB
-	ldmfd sp!,{t9optbl,lr}
+	ldmfd sp!,{t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreWX:					;@ r0=value, r1=address
 	.type	t9StoreWX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
-	bl t9StoreW
-	ldmfd sp!,{t9optbl,lr}
+	stmfd sp!,{t9Mem,t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
+	mov t9Mem,r1
+	bl t9StoreW_mem
+	ldmfd sp!,{t9Mem,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreLX:					;@ r0=value, r1=address
 	.type	t9StoreLX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
-	bl t9StoreL
-	ldmfd sp!,{t9optbl,lr}
+	stmfd sp!,{t9Mem,t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
+	mov t9Mem,r1
+	bl t9StoreL_mem
+	ldmfd sp!,{t9Mem,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadBX:					;@ r0=address
 	.type	t9LoadBX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 	bl t9LoadB
-	ldmfd sp!,{t9optbl,lr}
+	ldmfd sp!,{t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadWX:					;@ r0=address
 	.type	t9LoadWX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 	bl t9LoadW
-	ldmfd sp!,{t9optbl,lr}
+	ldmfd sp!,{t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadLX:					;@ r0=address
 	.type	t9LoadLX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9optbl,lr}
-	ldr t9optbl,=tlcs900HState
+	stmfd sp!,{t9ptr,lr}
+	ldr t9ptr,=tlcs900HState
 	bl t9LoadL
-	ldmfd sp!,{t9optbl,lr}
+	ldmfd sp!,{t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
@@ -131,11 +131,6 @@ t9LoadLX:					;@ r0=address
 	.section .iwram, "ax", %progbits	;@ For the GBA
 #endif
 	.align 2
-;@----------------------------------------------------------------------------
-t9StoreB_32:
-;@----------------------------------------------------------------------------
-	bic r1,r1,#0xFF000000
-	b t9StoreB
 ;@----------------------------------------------------------------------------
 t9StoreB_mem:
 ;@----------------------------------------------------------------------------
@@ -157,11 +152,6 @@ t9StoreB:					;@ r0=value, r1=address
 	beq FlashWriteHI
 	b rom_W
 ;@----------------------------------------------------------------------------
-t9StoreW_32:
-;@----------------------------------------------------------------------------
-	bic r1,r1,#0xFF000000
-	b t9StoreW
-;@----------------------------------------------------------------------------
 t9StoreW_mem:
 ;@----------------------------------------------------------------------------
 	bic r1,t9Mem,#0xFF000000
@@ -179,21 +169,13 @@ t9StoreW:					;@ r0=value, r1=address
 ;@----------------------------------------------------------------------------
 t9StoreUnevenW:
 ;@----------------------------------------------------------------------------
-	sub t9cycles,t9cycles,#1*T9CYCLE
-;@----------------------------------------------------------------------------
-t9StoreWB:
-;@----------------------------------------------------------------------------
+	t9eatcycles 1
 	stmfd sp!,{r0,r1,lr}
 	bl t9StoreB
 	ldmfd sp!,{r0,r1,lr}
 	mov r0,r0,lsr#8
 	add r1,r1,#1
 	b t9StoreB
-;@----------------------------------------------------------------------------
-t9StoreL_32:
-;@----------------------------------------------------------------------------
-	bic r1,r1,#0xFF000000
-	b t9StoreL
 ;@----------------------------------------------------------------------------
 t9StoreL_mem:
 ;@----------------------------------------------------------------------------
@@ -210,46 +192,37 @@ t9StoreL:					;@ r0=value, r1=address
 ;@----------------------------------------------------------------------------
 t9StoreW_ram:				;@ Write RAM (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
-	ldr r2,=ngpRAM
-	mov r1,r1,lsl#18
-	add r2,r2,r1,lsr#18
-	strh r0,[r2]
+	ldr r2,=ngpRAM-0x4000
+	strh r0,[r2,r1]
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreB_ram:				;@ Write RAM (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
-	ldr r2,=ngpRAM
-	mov r1,r1,lsl#18
-	strb r0,[r2,r1,lsr#18]
+	ldr r2,=ngpRAM-0x4000
+	strb r0,[r2,r1]
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreW_vram:				;@ Write VRAM (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
 	tst r1,#0x007000
-	beq t9StoreWB
-	ldr r2,=k2geRAM-0x1000
-	mov r1,r1,lsl#17
-	add r2,r2,r1,lsr#17
-	strh r0,[r2]
-	ldr r2,=DIRTYTILES-0x100
-	strb r1,[r2,r1,lsr#21]		;@ Each dirty byte is 0x10 VRAM bytes
+	beq k2GE_0W_W
+	ldr r2,=k2geRAM-0x9000
+	strh r0,[r2,r1]
+	ldr r2,=DIRTYTILES-0x900
+	mov r0,#0
+	strb r0,[r2,r1,lsr#4]		;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreB_vram:				;@ Write VRAM (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
 	tst r1,#0x007000
 	beq k2GE_0W
-	ldr r2,=k2geRAM-0x1000
-	mov r1,r1,lsl#17
-	strb r0,[r2,r1,lsr#17]
-	ldr r2,=DIRTYTILES-0x100
-	strb r1,[r2,r1,lsr#21]		;@ Each dirty byte is 0x10 VRAM bytes
+	ldr r2,=k2geRAM-0x9000
+	strb r0,[r2,r1]
+	ldr r2,=DIRTYTILES-0x900
+	mov r0,#0
+	strb r0,[r2,r1,lsr#4]		;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
-;@----------------------------------------------------------------------------
-t9LoadB_32:
-;@----------------------------------------------------------------------------
-	bic r0,r0,#0xFF000000
-	b t9LoadB
 ;@----------------------------------------------------------------------------
 t9LoadB_mem:
 ;@----------------------------------------------------------------------------
@@ -267,9 +240,9 @@ t9LoadB:					;@ r0=address
 	beq tlcs_vram_R
 	mov r2,r2,lsr#7
 	cmp r2,#1
-	ldreq pc,[t9optbl,#readRomPtrLo]
+	ldreq pc,[t9ptr,#readRomPtrLo]
 	cmp r2,#4
-	ldreq pc,[t9optbl,#readRomPtrHi]
+	ldreq pc,[t9ptr,#readRomPtrHi]
 	cmp r2,#7
 	beq tlcs_bios_R
 ram_low_R:
@@ -277,11 +250,6 @@ ram_low_R:
 	mov r0,#0
 	mov r1,#0
 	bx lr
-;@----------------------------------------------------------------------------
-t9LoadW_32:
-;@----------------------------------------------------------------------------
-	bic r0,r0,#0xFF000000
-	b t9LoadW
 ;@----------------------------------------------------------------------------
 t9LoadW_mem:
 ;@----------------------------------------------------------------------------
@@ -301,17 +269,17 @@ t9LoadEvenW:				;@ r0=address
 	cmp r2,#2
 	beq tlcs_vram_W_R
 	mov r2,r2,lsr#7
-//	cmp r2,#1
-//	beq tlcs_rom_W_R
-//	cmp r2,#4
-//	beq tlcs_romH_W_R
+	cmp r2,#1
+	beq tlcs_rom_W_R
+	cmp r2,#4
+	beq tlcs_romH_W_R
 	cmp r2,#7
 	beq tlcs_bios_W_R
 	b t9LoadWAsB
 ;@----------------------------------------------------------------------------
 t9LoadUnevenW:				;@ r0=address
 ;@----------------------------------------------------------------------------
-	sub t9cycles,t9cycles,#1*T9CYCLE
+	t9eatcycles 1
 ;@----------------------------------------------------------------------------
 t9LoadWAsB:					;@ r0=address
 ;@----------------------------------------------------------------------------
@@ -324,11 +292,6 @@ t9LoadWAsB:					;@ r0=address
 	orr r0,r4,r0,lsl#8
 	ldmfd sp!,{r4,lr}
 	bx lr
-;@----------------------------------------------------------------------------
-t9LoadL_32:
-;@----------------------------------------------------------------------------
-	bic r0,r0,#0xFF000000
-	b t9LoadL
 ;@----------------------------------------------------------------------------
 t9LoadL_mem:
 ;@----------------------------------------------------------------------------
@@ -363,84 +326,71 @@ t9LoadUnevenL:				;@ r0=address
 	ldmfd sp!,{r4,r5,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_ram_R:					;@ Read ram (0x004000-0x007FFF)
+tlcs_ram_R:					;@ Read RAM byte (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,=ngpRAM
-	mov r0,r0,lsl#18
-	ldrb r0,[r1,r0,lsr#18]!
+	ldr r1,=ngpRAM-0x4000
+	ldrb r0,[r1,r0]!
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_vram_R:				;@ Read vram (0x009000-0x00BFFF)
+tlcs_vram_R:				;@ Read VRAM byte (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
 	tst r0,#0x007000
 	beq k2GE_0R
-	ldr r1,=k2geRAM-0x1000
-	mov r0,r0,lsl#18
-	ldrb r0,[r1,r0,lsr#18]!
+	ldr r1,=k2geRAM-0x9000
+	ldrb r0,[r1,r0]!
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_rom_R:					;@ Read rom (0x200000-0x3FFFFF)
+tlcs_rom_R:					;@ Read ROM byte (0x200000-0x3FFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#romBaseLo]
-	mov r0,r0,lsl#11
-	ldrb r0,[r1,r0,lsr#11]!
+	ldr r1,[t9ptr,#romBaseLo]
+	ldrb r0,[r1,r0]!
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_romH_R:				;@ Read rom (0x800000-0x9FFFFF)
+tlcs_romH_R:				;@ Read ROM byte (0x800000-0x9FFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#romBaseHi]
-	mov r0,r0,lsl#11
-	ldrb r0,[r1,r0,lsr#11]!
+	ldr r1,[t9ptr,#romBaseHi]
+	ldrb r0,[r1,r0]!
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_bios_R:				;@ Read bios (0xFF0000-0xFFFFFF)
+tlcs_bios_R:				;@ Read BIOS byte (0xFF0000-0xFFFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#biosBase]
-	mov r0,r0,lsl#16
-	ldrb r0,[r1,r0,lsr#16]!
+	ldr r1,[t9ptr,#biosBase]
+	ldrb r0,[r1,r0]!
 	bx lr
 
 ;@----------------------------------------------------------------------------
-tlcs_ram_W_R:				;@ Read ram (0x004000-0x007FFF)
+tlcs_ram_W_R:				;@ Read RAM word (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,=ngpRAM
-	mov r0,r0,lsl#18
-	add r1,r1,r0,lsr#18
-	ldrh r0,[r1]
+	ldr r1,=ngpRAM-0x4000
+	ldrh r0,[r1,r0]
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_vram_W_R:				;@ Read vram (0x009000-0x00BFFF)
+tlcs_vram_W_R:				;@ Read VRAM word (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
 	tst r0,#0x007000
-	beq t9LoadWAsB
-	ldr r1,=k2geRAM-0x1000
-	mov r0,r0,lsl#18
-	add r1,r1,r0,lsr#18
-	ldrh r0,[r1]
+	beq k2GE_0R_W
+	ldr r1,=k2geRAM-0x9000
+	ldrh r0,[r1,r0]
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_rom_W_R:				;@ Read rom (0x200000-0x3FFFFF)
+tlcs_rom_W_R:				;@ Read ROM word (0x200000-0x3FFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#romBaseLo]
-	mov r0,r0,lsl#11
-	add r1,r1,r0,lsr#11
-	ldrh r0,[r1]
+	t9eatcycles 1
+	ldr r1,[t9ptr,#romBaseLo]
+	ldrh r0,[r1,r0]
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_romH_W_R:				;@ Read rom (0x800000-0x9FFFFF)
+tlcs_romH_W_R:				;@ Read ROM word (0x800000-0x9FFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#romBaseHi]
-	mov r0,r0,lsl#11
-	add r1,r1,r0,lsr#11
-	ldrh r0,[r1]
+	t9eatcycles 1
+	ldr r1,[t9ptr,#romBaseHi]
+	ldrh r0,[r1,r0]
 	bx lr
 ;@----------------------------------------------------------------------------
-tlcs_bios_W_R:				;@ Read bios (0xFF0000-0xFFFFFF)
+tlcs_bios_W_R:				;@ Read BIOS word (0xFF0000-0xFFFFFF)
 ;@----------------------------------------------------------------------------
-	ldr r1,[t9optbl,#biosBase]
-	mov r0,r0,lsl#16
-	add r1,r1,r0,lsr#16
-	ldrh r0,[r1]
+	ldr r1,[t9ptr,#biosBase]
+	ldrh r0,[r1,r0]
 	bx lr
 
 ;@----------------------------------------------------------------------------

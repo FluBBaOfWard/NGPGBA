@@ -43,13 +43,6 @@ int ioGetStateSize(void);
 bool system_comms_read(u8 *buffer);
 
 /**
- * Peeks at any data from the other system. If no data is available or
- * no high-level communications have been established, then return FALSE.
- * If buffer is NULL, then no data is read, only status is returned
- */
-bool system_comms_poll(u8 *buffer);
-
-/**
  * Writes a byte from the other system. This function should block until
  * the data is written. USE RELIABLE COMMS! Data cannot be re-requested.
  */

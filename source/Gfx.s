@@ -28,7 +28,9 @@
 
 	.global k2GE_0
 	.global k2GE_0R
+	.global k2GE_0R_W
 	.global k2GE_0W
+	.global k2GE_0W_W
 	.global k2geRAM
 	.global DIRTYTILES
 	.global DIRTYTILES2
@@ -450,21 +452,43 @@ dmaScroll:		.long SCROLLBUFF2
 
 frameDone:		.long 0
 ;@----------------------------------------------------------------------------
-k2GE_0R:					;@ K2GE read, 0x8000-0x8FFF
+k2GE_0R:					;@ K2GE read byte, 0x8000-0x8FFF
 ;@----------------------------------------------------------------------------
 	adr geptr,k2GE_0
 	b k2GE_R
+;@----------------------------------------------------------------------------
+k2GE_0R_W:					;@ K2GE read word, 0x8000-0x8FFF
+;@----------------------------------------------------------------------------
+	adr geptr,k2GE_0
+	b k2GE_R_W
 
 ;@----------------------------------------------------------------------------
-k2GE_0W:					;@ K2GE write, 0x8000-0x8FFF
+k2GE_0W:					;@ K2GE write byte, 0x8000-0x8FFF
 ;@----------------------------------------------------------------------------
 	adr geptr,k2GE_0
 	b k2GE_W
+;@----------------------------------------------------------------------------
+k2GE_0W_W:					;@ K2GE write word, 0x8000-0x8FFF
+;@----------------------------------------------------------------------------
+	adr geptr,k2GE_0
+	b k2GE_W_W
 
 k2GE_0:
 	.space k2GESize
 ;@----------------------------------------------------------------------------
-	.section .ewram, "ax"
+GFX_DISPCNT:
+	.long 0
+GFX_BG0CNT:
+	.short 0
+GFX_BG1CNT:
+	.short 0
+
+#ifdef GBA
+	.section .sbss				;@ For the GBA
+#else
+	.section .bss
+#endif
+	.align 2
 
 gfxState:
 adjustBlend:
@@ -474,14 +498,6 @@ windowTop:
 wTop:
 	.long 0,0,0		;@ windowTop  (this label too)   L/R scrolling in unscaled mode
 
-GFX_DISPCNT:
-	.long 0
-GFX_BG0CNT:
-	.short 0
-GFX_BG1CNT:
-	.short 0
-
-	.section .sbss
 OAM_BUFFER1:
 	.space 0x400
 OAM_BUFFER2:

@@ -1,39 +1,27 @@
-//---------------------------------------------------------------------------
-// NEOPOP : Emulator as in Dreamland
 //
-// Copyright (c) 2001-2002 by neopop_uk
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-//	This program is free software; you can redistribute it and/or modify
-//	it under the terms of the GNU General Public License as published by
-//	the Free Software Foundation; either version 2 of the License, or
-//	(at your option) any later version. See also the license.txt file for
-//	additional informations.
-//---------------------------------------------------------------------------
+//  bios.c
+//  NGPGBA
+//
+//  Created by Fredrik Ahlström on 2023-11-10.
+//  Copyright © 2023 Fredrik Ahlström. All rights reserved.
+//
 
 #include <gba.h>
 #include <string.h>
 
 #include "Memory.h"
+#include "Cart.h"
 #include "bios.h"
 #include "K2GE/K2GE.h"
 #include "Shared/EmuMenu.h"
 #include "FileHandling.h"
 #include "TLCS900H/TLCS900H.h"
 
-//=============================================================================
-
-extern u32 gRomSize;			// From Cart.s
-extern u8 gLang;				// From Cart.s
-extern u8 gMachine;				// From Cart.s
-extern u8 gPaletteBank;			// From Cart.s
-extern u32 sngBIOSHLE;
+extern u32 sngBIOSHLE;			// From AsmHleBios.s
 
 //=============================================================================
 
-const u8 font[0x800] = {
-
+static const u8 font[0x800] = {
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
 	0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,
@@ -179,108 +167,101 @@ const u8 font[0x800] = {
 	0x00,0x00,0x00,0x00,0x0A,0x05,0x05,0x00,0x00,0x00,0x00,0x00,0x02,0x05,0x02,0x00
 };
 
-const u8 snkLogo[0x40] = {
+static const u8 snkLogo[0x40] = {
 	0xFF,0x3F,0xFF,0xFF,0x00,0xFC,0xFF,0xFF,0xFF,0x3F,0x03,0x00,0xFF,0xFF,0xFF,0xFF,
 	0xF0,0xF3,0xFC,0xF3,0xFF,0x03,0xFF,0xC3,0xFF,0xF3,0xF3,0xF3,0xF0,0xF3,0xF0,0xC3,
 	0xCF,0x0F,0xCF,0x0F,0xCF,0x0F,0xCF,0xCF,0xCF,0xFF,0xCF,0xFF,0xCF,0xFF,0xCF,0x3F,
 	0xFF,0xC0,0xFC,0xC3,0xF0,0xCF,0xC0,0xFF,0xC0,0xFF,0xF0,0xCF,0xFC,0xC3,0xFF,0xC0
 };
 
-bool installHleBios(u8 *ngpBios)
-{
-	// === Install the reverse engineered bios
+static const u16 callTable[0x1B] = {
+	0x27A2,		// 0x00		VECT_SHUTDOWN
+	0x1034,		// 0x01		VECT_CLOCKGEARSET
+	0x1440,		// 0x02		VECT_RTCGET
+	0x12B4,		// 0x03		VECT_RTCSET
+	0x1222,		// 0x04		VECT_INTLVSET
+	0x8D8A,		// 0x05		VECT_SYSFONTSET
+	0x6FD8,		// 0x06		VECT_FLASHWRITE
+	0x7042,		// 0x07		VECT_FLASHALLERS
+	0x7082,		// 0x08		VECT_FLASHERS
+	0x149B,		// 0x09		VECT_ALARMSET
+	0x1033,		// 0x0A		Reserved (just RET)
+	0x1487,		// 0x0B		VECT_ALARMDOWNSET
+	0x731F,		// 0x0C		Another FLASHPROTECT?
+	0x70CA,		// 0x0D		VECT_FLASHPROTECT
+	0x17C4,		// 0x0E		VECT_GEMODESET
+	0x1032,		// 0x0F		Reserved (just RET)
+
+	0x2BBD,		// 0x10		VECT_COMINIT
+	0x2C0C,		// 0x11		VECT_COMSENDSTART
+	0x2C44,		// 0x12		VECT_COMRECIVESTART
+	0x2C86,		// 0x13		VECT_COMCREATEDATA
+	0x2CB4,		// 0x14		VECT_COMGETDATA
+	0x2D27,		// 0x15		VECT_COMONRTS
+	0x2D33,		// 0x16		VECT_COMOFFRTS
+	0x2D3A,		// 0x17		VECT_COMSENDSTATUS
+	0x2D4E,		// 0x18		VECT_COMRECIVESTATUS
+	0x2D6C,		// 0x19		VECT_COMCREATEBUFDATA
+	0x2D85,		// 0x1A		VECT_COMGETBUFDATA
+};
+
+static const u16 irqTable[0x21] = {
+	0x204A,		// 0x00		SWI_0, Reset
+	0x2772,		// 0x01		SWI_1, Call handler
+	0x2305,		// 0x02		SWI_2, Illegal instruction interrupt
+	0x2202,		// 0x03		SWI_3, User controlled
+	0x220B,		// 0x04		SWI_4, User controlled
+	0x2214,		// 0x05		SWI_5, User controlled
+	0x221D,		// 0x06		SWI_6, User controlled
+	0x2226,		// 0x07		SWI_7, ?
+	0x1898,		// 0x08		NMI_PowerButton
+	0x2D98,		// 0x09		NMI_WatchDogTimer
+	0x2856,		// 0x0A		IRQ_RTCAlarm
+	0x2163,		// 0x0B		IRQ_VerticalBlanking
+	0x2282,		// 0x0C		IRQ_Z80
+	0x2B25,		// 0x0D		IRQ_INT6? unused
+	0x2DB6,		// 0x0E		IRQ_INT7? joypad interrupt?
+	0x22A4,		// 0x0F		IRQ_??? unused
+
+	0x22A5,		// 0x10		IRQ_Timer0
+	0x22AE,		// 0x11		IRQ_Timer1
+	0x22B7,		// 0x12		IRQ_Timer2
+	0x22C0,		// 0x13		IRQ_Timer3
+	0x22C9,		// 0x14		IRQ_Timer4, unused
+	0x22CA,		// 0x15		IRQ_Timer5, unused
+	0x22CB,		// 0x16		IRQ_Timer6, unused
+	0x22CC,		// 0x17		IRQ_Timer7, unused
+	0x22CD,		// 0x18		IRQ_SerialTX0
+	0x22D6,		// 0x19		IRQ_SerialRX0
+	0x22DF,		// 0x1A		IRQ_SerialTX1, unused
+	0x22E0,		// 0x1B		IRQ_SerialRX1, unused
+	0x2DCE,		// 0x1C		IRQ_INTAD, battery measure
+	0x22E1,		// 0x1D		IRQ_DMA0End
+	0x22EA,		// 0x1E		IRQ_DMA1End
+	0x22F3,		// 0x1F		IRQ_DMA2End
+	0x22FC,		// 0x20		IRQ_DMA3End
+};
+
+bool installHleBios(u8 *ngpBios) {
 	int i;
-
-	u32 callTable[] =
-	{
-		0xFF27A2,		//0x00		VECT_SHUTDOWN
-		0xFF1034,		//0x01		VECT_CLOCKGEARSET
-		0xFF1440,		//0x02		VECT_RTCGET
-		0xFF12B4,		//0x03		VECT_RTCSET
-		0xFF1222,		//0x04		VECT_INTLVSET
-		0xFF8D8A,		//0x05		VECT_SYSFONTSET
-		0xFF6FD8,		//0x06		VECT_FLASHWRITE
-		0xFF7042,		//0x07		VECT_FLASHALLERS
-		0xFF7082,		//0x08		VECT_FLASHERS
-		0xFF149B,		//0x09		VECT_ALARMSET
-		0xFF1033,		//0x0A		Reserved (just RET)
-		0xFF1487,		//0x0B		VECT_ALARMDOWNSET
-		0xFF731F,		//0x0C		Another FLASHPROTECT?
-		0xFF70CA,		//0x0D		VECT_FLASHPROTECT
-		0xFF17C4,		//0x0E		VECT_GEMODESET
-		0xFF1032,		//0x0F		Reserved (just RET)
-
-		0xFF2BBD,		//0x10		VECT_COMINIT
-		0xFF2C0C,		//0x11		VECT_COMSENDSTART
-		0xFF2C44,		//0x12		VECT_COMRECIVESTART
-		0xFF2C86,		//0x13		VECT_COMCREATEDATA
-		0xFF2CB4,		//0x14		VECT_COMGETDATA
-		0xFF2D27,		//0x15		VECT_COMONRTS
-		0xFF2D33,		//0x16		VECT_COMOFFRTS
-		0xFF2D3A,		//0x17		VECT_COMSENDSTATUS
-		0xFF2D4E,		//0x18		VECT_COMRECIVESTATUS
-		0xFF2D6C,		//0x19		VECT_COMCREATEBUFDATA
-		0xFF2D85,		//0x1A		VECT_COMGETBUFDATA
-	};
-
-	u32 irqTable[] =
-	{
-		0xFF204A,		//0x00		SWI_0, Reset
-		0xFF2772,		//0x01		SWI_1, Call handler
-		0xFF2305,		//0x02		SWI_2, Illegal instruction interrupt
-		0xFF2202,		//0x03		SWI_3, User controlled
-		0xFF220B,		//0x04		SWI_4, User controlled
-		0xFF2214,		//0x05		SWI_5, User controlled
-		0xFF221D,		//0x06		SWI_6, User controlled
-		0xFF2226,		//0x07		SWI_7, ?
-		0xFF1898,		//0x08		NMI_PowerButton
-		0xFF2D98,		//0x09		NMI_WatchDogTimer
-		0xFF2856,		//0x0A		IRQ_RTCAlarm
-		0xFF2163,		//0x0B		IRQ_VerticalBlanking
-		0xFF2282,		//0x0C		IRQ_Z80
-		0xFF2B25,		//0x0D		IRQ_INT6? unused
-		0xFF2DB6,		//0x0E		IRQ_INT7? joypad interrupt?
-		0xFF22A4,		//0x0F		IRQ_??? unused
-
-		0xFF22A5,		//0x10		IRQ_Timer0
-		0xFF22AE,		//0x11		IRQ_Timer1
-		0xFF22B7,		//0x12		IRQ_Timer2
-		0xFF22C0,		//0x13		IRQ_Timer3
-		0xFF22C9,		//0x14		IRQ_Timer4, unused
-		0xFF22CA,		//0x15		IRQ_Timer5, unused
-		0xFF22CB,		//0x16		IRQ_Timer6, unused
-		0xFF22CC,		//0x17		IRQ_Timer7, unused
-		0xFF22CD,		//0x18		IRQ_SerialTX0
-		0xFF22D6,		//0x19		IRQ_SerialRX0
-		0xFF22DF,		//0x1A		IRQ_SerialTX1, unused
-		0xFF22E0,		//0x1B		IRQ_SerialRX1, unused
-		0xFF2DCE,		//0x1C		IRQ_INTAD, battery measure
-		0xFF22E1,		//0x1D		IRQ_DMA0End
-		0xFF22EA,		//0x1E		IRQ_DMA1End
-		0xFF22F3,		//0x1F		IRQ_DMA2End
-		0xFF22FC,		//0x20		IRQ_DMA3End
-	};
-
 	// System Call Table, install iBIOSHLE instructions
-	for (i = 0; i < ARRSIZE(callTable); i++)
-	{
-		*(u32*)(ngpBios + 0xFE00 + (i * 4)) = callTable[i];
-		ngpBios[callTable[i] & 0xFFFF] = 0x1F;			// iBIOSHLE
-		ngpBios[(callTable[i] + 1) & 0xFFFF] = i;		// iBIOSHLE num
-		ngpBios[(callTable[i] + 2) & 0xFFFF] = 0x0E;	// RET
+	for (i = 0; i < ARRSIZE(callTable); i++) {
+		*(u32 *)(ngpBios + 0xFE00 + (i * 4)) = 0xFF0000 + callTable[i];
+		ngpBios[callTable[i]] = 0x1F;			// iBIOSHLE
+		ngpBios[callTable[i] + 1] = i;			// iBIOSHLE num
+		ngpBios[callTable[i] + 2] = 0x0E;		// RET
 	}
 
-	// IRQ vector Table, install
-	for (i = 0; i < ARRSIZE(irqTable); i++)
-	{
-		*(u32*)(ngpBios + 0xFF00 + (i * 4)) = irqTable[i];
-		ngpBios[irqTable[i] & 0xFFFF] = 0x1F;			// iBIOSHLE
-		ngpBios[(irqTable[i] + 1) & 0xFFFF] = i + 0x40;	// iBIOSHLE num
-		ngpBios[(irqTable[i] + 2) & 0xFFFF] = 0x07;		// RETI
+	// IRQ vector Table, install interrupt vectors
+	for (i = 0; i < ARRSIZE(irqTable); i++) {
+		*(u32 *)(ngpBios + 0xFF00 + (i * 4)) = 0xFF0000 + irqTable[i];
+		ngpBios[irqTable[i]] = 0x1F;			// iBIOSHLE
+		ngpBios[irqTable[i] + 1] = i + 0x40;	// iBIOSHLE num
+		ngpBios[irqTable[i] + 2] = 0x07;		// RETI
 	}
 
 	// System Font
-	memcpy(ngpBios + 0x8DCF, font, 0x800);
+	memcpy(ngpBios + 0x8DCF, font, sizeof(font));
 
 	// Default Interrupt handler
 	ngpBios[0x23DF] = 0x07;		// RETI
@@ -307,16 +288,12 @@ bool installHleBios(u8 *ngpBios)
 	ngpBios[0x22E0] = 0x07;		// RETI
 	ngpBios[0x2DCE] = 0x07;		// RETI
 
-	// ==========
-
 	tlcs900HRedirectOpcode(0x1F, &sngBIOSHLE);
 	return true;				// Success
 }
 
-void resetBios(NgpHeader *cartHeader)
-{
+void resetHleBios(NgpHeader *cartHeader) {
 	int i;
-
 	// Clear all RAM first
 	for (i = 0; i < 0x1000; i++) {
 		t9StoreLX(0, 0x4000 + i*4);
@@ -326,7 +303,7 @@ void resetBios(NgpHeader *cartHeader)
 //006C00 -> 006FFF	BIOS Workspace
 //==================================
 
-	t9StoreLX(cartHeader->startPC, 0x6C00);		// Start
+	t9StoreLX(cartHeader->startPC, 0x6C00);	// Start
 
 	t9StoreWX(cartHeader->catalog, 0x6C04);
 	t9StoreWX(cartHeader->catalog, 0x6E82);
@@ -354,14 +331,14 @@ void resetBios(NgpHeader *cartHeader)
 
 	t9StoreBX(0x01, 0x6C55);		// 0x01 = Commercial game
 
-	t9StoreWX(0x03FF, 0x6F80);	// Lots of battery power!
+	t9StoreWX(0x03FF, 0x6F80);		// Lots of battery power!
 
 	t9StoreBX(0x40, 0x6F84);		// "Power On" startup
 	t9StoreBX(0x00, 0x6F85);		// No shutdown request
 	t9StoreBX(0x00, 0x6F86);		// No user answer (?)
 
-	t9StoreWX(0xA5A5, 0x6C7A);	// Running mode
-	t9StoreWX(0x5AA5, 0x6C7C);	// Running mode
+	t9StoreWX(0xA5A5, 0x6C7A);		// Running mode
+	t9StoreWX(0x5AA5, 0x6C7C);		// Running mode
 
 	// Language: 0 = Japanese, 1 = English
 	if (gLang) {
@@ -381,11 +358,11 @@ void resetBios(NgpHeader *cartHeader)
 	t9StoreBX(color, 0x6F95);		// Current Displaymode
 	t9StoreBX(color, 0x6F91);		// Machine
 	if (gMachine == HW_NGPCOLOR) {
-		t9StoreBX(0x10, 0x6F91);		// Machine
+		t9StoreBX(0x10, 0x6F91);	// Machine
 	}
 	// User Interrupt table
 	for (i = 0; i < 0x12; i++) {
-		t9StoreLX(0x00FF23DF, 0x6FB8 + i * 4);
+		t9StoreLX(0xFF23DF, 0x6FB8 + i * 4);
 	}
 
 //=============================================================================
@@ -413,18 +390,26 @@ void resetBios(NgpHeader *cartHeader)
 	t9StoreBX(0x18, 0x7004);	// Z80 JR -2
 	t9StoreBX(0xFE, 0x7005);
 
-	// Enable sound
+	// Enable Z80
 	t9StoreBX(0x55, 0xB9);
 
 	// Turn on LED
 	t9StoreBX(0xFF, 0x8400);
 
 	// Do some setup for the interrupt priorities.
-	BIOSHLE_Reset();
+	for (i = 0; i < 0x8; i++) {
+		t9StoreBX(0, 0x6C24 + i);
+	}
+	for (i = 0; i < 0xB; i++) {
+		t9StoreBX(0, 0x70 + i);
+	}
+	t9StoreBX(0x0A, 0x6C24);
+	t9StoreBX(0xDC, 0x6C25);
+	t9StoreBX(0x0A, 0x70);
+	t9StoreBX(0xDC, 0x71);
 }
 
-void fixBiosSettings(void)
-{
+void fixBiosSettings(void) {
 	t9StoreBX(cfg.birthYear, 0x6F8B);
 	t9StoreBX(cfg.birthMonth, 0x6F8C);
 	t9StoreBX(cfg.birthDay, 0x6F8D);

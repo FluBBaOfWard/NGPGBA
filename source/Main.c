@@ -7,7 +7,6 @@
 #include "Shared/AsmExtra.h"
 #include "Gui.h"
 #include "FileHandling.h"
-#include "bios.h"
 #include "EmuFont.h"
 #include "NGPBorder.h"
 #include "Cart.h"
@@ -15,6 +14,7 @@
 #include "Gfx.h"
 #include "io.h"
 #include "Sound.h"
+#include "bios.h"
 
 static void checkTimeOut(void);
 static void setupGraphics(void);
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 	if (g_BIOSBASE_COLOR == NULL) {
 		installHleBios(biosSpace);
 	}
+	checkMachine();
 	machineInit();
 	loadCart(0);
 

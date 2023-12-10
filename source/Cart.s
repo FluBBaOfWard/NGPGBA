@@ -6,30 +6,30 @@
 
 	.extern reset				;@ from bios.c
 
-	.global machineInit
-	.global loadCart
-	.global tlcs9000MemInit
-	.global emuFlags
-	.global romNum
-	.global cartFlags
-	.global romStart
-	.global isBiosLoaded
-	.global ngpHeader
-	.global romSpacePtr
-
-	.global biosSpace
-	.global rawBios
-	.global g_BIOSBASE_COLOR
-	.global g_BIOSBASE_BW
-	.global ngpRAM
 	.global gRomSize
 	.global maxRomSize
+	.global emuFlags
 	.global gConfig
 	.global gMachineSet
 	.global gMachine
 	.global gSOC
 	.global gLang
 	.global gPaletteBank
+
+	.global ngpRAM
+	.global biosSpace
+	.global rawBios
+	.global romSpacePtr
+	.global ngpHeader
+	.global g_BIOSBASE_COLOR
+	.global g_BIOSBASE_BW
+	.global cartFlags
+	.global romStart
+	.global isBiosLoaded
+
+	.global machineInit
+	.global loadCart
+	.global tlcs9000MemInit
 
 
 	.syntax unified
@@ -69,13 +69,14 @@ machineInit: 				;@ Called from C
 
 	bl tlcs9000MemInit
 
-	ldr t9optbl,=tlcs900HState
+	ldr t9ptr,=tlcs900HState
 	ldr r0,=biosSpace
-	str r0,[t9optbl,#biosBase]
+	sub r0,r0,#0xFF0000
+	str r0,[t9ptr,#biosBase]
 	ldr r0,=tlcs_rom_R
-	str r0,[t9optbl,#readRomPtrLo]
+	str r0,[t9ptr,#readRomPtrLo]
 	ldr r0,=tlcs_romH_R
-	str r0,[t9optbl,#readRomPtrHi]
+	str r0,[t9ptr,#readRomPtrHi]
 
 	bl gfxInit
 //	bl ioInit
@@ -125,7 +126,7 @@ loadCart: 					;@ Called from C:  r0=emuflags
 	bl soundReset
 	bl cpuReset
 	ldr r0,ngpHeader			;@ First argument
-	ldr r1,=resetBios
+	ldr r1,=resetHleBios
 	mov lr,pc
 	bx r1
 skipHWSetup:
@@ -137,8 +138,9 @@ tlcs9000MemInit: 			;@ Called from C:  r0=rombase address
 	.type   tlcs9000MemInit STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldr r1,=tlcs900HState
-	str r0,[r1,#romBaseLo]
-	add r0,r0,#0x200000
+	sub r2,r0,#0x200000			;@ First bank is @ 0x200000
+	str r2,[r1,#romBaseLo]
+	add r0,r0,#0x200000-0x800000	;@ Second Bank @ 0x800000
 	str r0,[r1,#romBaseHi]
 	bx lr
 ;@----------------------------------------------------------------------------
@@ -186,8 +188,6 @@ z80MemLoop1:
 
 ;@----------------------------------------------------------------------------
 
-romNum:
-	.long 0						;@ romnumber
 romInfo:						;@
 emuFlags:
 	.byte 0						;@ emuflags      (label this so Gui.c can take a peek) see EmuSettings.h for bitfields

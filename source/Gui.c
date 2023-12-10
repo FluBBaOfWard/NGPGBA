@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.6 2023-06-27"
+#define EMUVERSION "V0.5.6 2023-12-10"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -40,8 +40,8 @@ static void updateGameInfo(void);
 const fptr fnMain[] = {nullUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI, subUI};
 
 const fptr fnList0[] = {uiDummy};
-const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetGame, ui10};
-const fptr fnList2[] = {selectGame, loadState, saveState, saveSettings, resetGame};
+const fptr fnList1[] = {ui2, ui3, ui4, ui5, ui6, ui7, ui8, gbaSleep, resetConsole, ui10};
+const fptr fnList2[] = {selectGame, loadState, saveState, saveSettings, resetConsole};
 const fptr fnList3[] = {autoBSet, autoASet, swapABSet};
 const fptr fnList4[] = {gammaSet, paletteChange};
 const fptr fnList5[] = {speedSet, autoStateSet, autoSettingsSet, autoPauseGameSet, ewramSet, sleepSet};
@@ -54,9 +54,9 @@ const fptr *const fnListX[] = {fnList0, fnList1, fnList2, fnList3, fnList4, fnLi
 u8 menuXItems[] = {ARRSIZE(fnList0), ARRSIZE(fnList1), ARRSIZE(fnList2), ARRSIZE(fnList3), ARRSIZE(fnList4), ARRSIZE(fnList5), ARRSIZE(fnList6), ARRSIZE(fnList7), ARRSIZE(fnList8), ARRSIZE(fnList9), ARRSIZE(fnList10)};
 const fptr drawUIX[] = {uiNullNormal, uiMainMenu, uiFile, uiController, uiDisplay, uiSettings, uiMachine, uiDebug, uiAbout, uiLoadGame, uiYesNo};
 
-u8 gGammaValue = 0;
-u8 gZ80Speed = 0;
-char gameInfoString[32];
+EWRAM_BSS u8 gGammaValue = 0;
+EWRAM_BSS u8 gZ80Speed = 0;
+EWRAM_BSS char gameInfoString[32];
 
 const char *const autoTxt[]  = {"Off", "On", "With R"};
 const char *const speedTxt[] = {"Normal", "200%", "Max", "50%"};
@@ -197,7 +197,9 @@ void nullUINormal(int key) {
 void nullUIDebug(int key) {
 }
 
-void resetGame() {
+void resetConsole() {
+	checkMachine();
+	machineInit();
 	loadCart(0);
 }
 

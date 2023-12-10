@@ -28,6 +28,11 @@ void tweakCpuSpeed(bool hack);
  */
 void tweakZ80Speed(int downShift);
 
+/**
+ * Get the address of cpu register
+ */
+void *getRegAdr(int reg);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
