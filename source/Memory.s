@@ -139,13 +139,12 @@ t9LoadLX:					;@ r0=address
 ;@----------------------------------------------------------------------------
 push8:
 ;@----------------------------------------------------------------------------
-	ldr t9mem,[t9gprBank,#RXSP]
-	sub t9mem,t9mem,#1
-	str t9mem,[t9gprBank,#RXSP]
+	ldr t9Mem,[t9gprBank,#RXSP]
+	sub t9Mem,t9Mem,#1
+	str t9Mem,[t9gprBank,#RXSP]
 ;@----------------------------------------------------------------------------
-t9StoreB_mem:				;@ r0=value, t9mem=address
+t9StoreB_mem:				;@ r0=value, t9Mem=address
 ;@----------------------------------------------------------------------------
-	bic r1,t9Mem,#0xFF000000
 	movs r2,t9Mem,lsr#8
 	beq t9StoreB_Low
 	movs r2,r2,lsr#6
@@ -155,19 +154,19 @@ t9StoreB_mem:				;@ r0=value, t9mem=address
 	beq t9StoreB_vram
 	mov r2,r2,lsr#7
 	cmp r2,#1
-	beq FlashWriteLO			;@ Still requires r1 as adr
+	beq FlashWriteLO
 	cmp r2,#4
-	beq FlashWriteHI			;@ Still requires r1 as adr
+	beq FlashWriteHI
 	bhi rom_W
 	b empty_W
 ;@----------------------------------------------------------------------------
 push16:
 ;@----------------------------------------------------------------------------
-	ldr t9mem,[t9gprBank,#RXSP]
-	sub t9mem,t9mem,#2
-	str t9mem,[t9gprBank,#RXSP]
+	ldr t9Mem,[t9gprBank,#RXSP]
+	sub t9Mem,t9Mem,#2
+	str t9Mem,[t9gprBank,#RXSP]
 ;@----------------------------------------------------------------------------
-t9StoreW_mem:				;@ r0=value, t9mem=address
+t9StoreW_mem:				;@ r0=value, t9Mem=address
 ;@----------------------------------------------------------------------------
 	tst t9Mem,#1
 	bne t9StoreUnevenW
@@ -186,16 +185,16 @@ t9StoreUnevenW:
 	bl t9StoreB_mem
 	ldmfd sp!,{r0,lr}
 	mov r0,r0,lsr#8
-	add t9mem,t9mem,#1
+	add t9Mem,t9Mem,#1
 	b t9StoreB_mem
 ;@----------------------------------------------------------------------------
 push32:						;@ Also used from interrupt
 ;@----------------------------------------------------------------------------
-	ldr t9mem,[t9gprBank,#RXSP]
-	sub t9mem,t9mem,#4
-	str t9mem,[t9gprBank,#RXSP]
+	ldr t9Mem,[t9gprBank,#RXSP]
+	sub t9Mem,t9Mem,#4
+	str t9Mem,[t9gprBank,#RXSP]
 ;@----------------------------------------------------------------------------
-t9StoreL_mem:				;@ r0=value, t9mem=address
+t9StoreL_mem:				;@ r0=value, t9Mem=address
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r0,lr}
 	tst t9Mem,#1
@@ -203,7 +202,7 @@ t9StoreL_mem:				;@ r0=value, t9mem=address
 	bl t9StoreW_even
 	ldmfd sp!,{r0,lr}
 	mov r0,r0,lsr#16
-	add t9mem,t9mem,#2
+	add t9Mem,t9Mem,#2
 	b t9StoreW_even
 ;@----------------------------------------------------------------------------
 t9StoreUnevenL:
@@ -212,45 +211,45 @@ t9StoreUnevenL:
 	bl t9StoreB_mem
 	ldmfd sp,{r0}
 	mov r0,r0,lsr#8
-	add t9mem,t9mem,#1
+	add t9Mem,t9Mem,#1
 	bl t9StoreW_even
 	ldmfd sp!,{r0,lr}
 	mov r0,r0,lsr#24
-	add t9mem,t9mem,#2
+	add t9Mem,t9Mem,#2
 	b t9StoreB_mem
 ;@----------------------------------------------------------------------------
-t9StoreB_ram:				;@ Write RAM (0x004000-0x007FFF)
+t9StoreB_ram:				;@ Write RAM byte (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
 	ldr r2,=ngpRAM-0x4000
-	strb r0,[r2,t9mem]
+	strb r0,[r2,t9Mem]
 	bx lr
 ;@----------------------------------------------------------------------------
-t9StoreB_vram:				;@ Write VRAM (0x009000-0x00BFFF)
+t9StoreB_vram:				;@ Write VRAM byte (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
-	tst t9mem,#0x007000
+	tst t9Mem,#0x007000
 	beq k2GE_0W
 	ldr r2,=k2geRAM-0x9000
-	strb r0,[r2,t9mem]
+	strb r0,[r2,t9Mem]
 	ldr r2,=DIRTYTILES-0x900
 	mov r1,#0
-	strb r1,[r2,t9mem,lsr#4]	;@ Each dirty byte is 0x10 VRAM bytes
+	strb r1,[r2,t9Mem,lsr#4]	;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
 ;@----------------------------------------------------------------------------
-t9StoreW_ram:				;@ Write RAM (0x004000-0x007FFF)
+t9StoreW_ram:				;@ Write RAM word (0x004000-0x007FFF)
 ;@----------------------------------------------------------------------------
 	ldr r2,=ngpRAM-0x4000
-	strh r0,[r2,t9mem]
+	strh r0,[r2,t9Mem]
 	bx lr
 ;@----------------------------------------------------------------------------
-t9StoreW_vram:				;@ Write VRAM (0x009000-0x00BFFF)
+t9StoreW_vram:				;@ Write VRAM word (0x009000-0x00BFFF)
 ;@----------------------------------------------------------------------------
-	tst t9mem,#0x007000
+	tst t9Mem,#0x007000
 	beq k2GE_0W_W
 	ldr r2,=k2geRAM-0x9000
-	strh r0,[r2,t9mem]
+	strh r0,[r2,t9Mem]
 	ldr r2,=DIRTYTILES-0x900
 	mov r1,#0
-	strb r1,[r2,t9mem,lsr#4]	;@ Each dirty byte is 0x10 VRAM bytes
+	strb r1,[r2,t9Mem,lsr#4]	;@ Each dirty byte is 0x10 VRAM bytes
 	bx lr
 ;@----------------------------------------------------------------------------
 //srcExB:
