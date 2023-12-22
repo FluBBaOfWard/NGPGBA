@@ -97,25 +97,25 @@ BiosIRQ_Z80:				;@ Extra work for Puyo Pop
 	bl t9LoadB
 	and r0,r0,#0x33
 	orr r0,r0,#0x04
-	mov r1,#0x28
-	bl t9StoreB
+	mov t9Mem,#0x28
+	bl t9StoreB_mem
 
 	mov r0,#0x25
 	bl t9LoadB
 	and r0,r0,#0x0F
 	orr r0,r0,#0xB0
-	mov r1,#0x25
-	bl t9StoreB
+	mov t9Mem,#0x25
+	bl t9StoreB_mem
 
 	mov r0,#0x62
-	mov r1,#0x27
-	bl t9StoreB
+	mov t9Mem,#0x27
+	bl t9StoreB_mem
 
 	mov r0,#0x20
 	bl t9LoadB
 	orr r0,r0,#0x88
-	mov r1,#0x20
-	bl t9StoreB
+	mov t9Mem,#0x20
+	bl t9StoreB_mem
 
 not3reset:
 	t9fetch 24
