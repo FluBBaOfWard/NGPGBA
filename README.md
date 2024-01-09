@@ -40,7 +40,7 @@ Now you can use the cross to navigate the menus, A to select an option, B to
 * Mono Palette: Here you can select the palette for B & W games.
 * Gamma: Lets you change the gamma ("brightness").
 
-### Machine Settings
+### Machine
 
 * Language: Select between Japanese and English.
 * Machine: Select the emulated machine.

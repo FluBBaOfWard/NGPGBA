@@ -229,7 +229,6 @@ setNoiseFreq:
 	mov r3,r3,lsl r2
 	cmp r2,#3
 	ldrheq r3,[r1,#ch1Reg]
-	moveq r3,r3,lsr#3
 	ldreq r2,[r1,#freqTablePtr]
 	ldrheq r3,[r2,r3]
 	strh r3,[r1,#ch3Frq]

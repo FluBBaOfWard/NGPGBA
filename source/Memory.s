@@ -68,6 +68,9 @@ empty_W:					;@ Write bad address (error)
 ;@----------------------------------------------------------------------------
 rom_W:						;@ Write ROM address (error)
 ;@----------------------------------------------------------------------------
+	tst t9Mem,#0xFF000000
+	bicne t9Mem,t9Mem,#0xFF000000
+	bne t9StoreB_mem
 	mov r11,r11					;@ No$GBA breakpoint
 	mov r0,#0xB0
 	bx lr
@@ -85,21 +88,21 @@ t9StoreBX:					;@ r0=value, r1=address
 t9StoreWX:					;@ r0=value, r1=address
 	.type	t9StoreWX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9Mem,t9ptr,lr}
+	stmfd sp!,{t9Mem,t9cycles,t9ptr,lr}
 	ldr t9ptr,=tlcs900HState
 	mov t9Mem,r1
 	bl t9StoreW_mem
-	ldmfd sp!,{t9Mem,t9ptr,lr}
+	ldmfd sp!,{t9Mem,t9cycles,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9StoreLX:					;@ r0=value, r1=address
 	.type	t9StoreLX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9Mem,t9ptr,lr}
+	stmfd sp!,{t9Mem,t9cycles,t9ptr,lr}
 	ldr t9ptr,=tlcs900HState
 	mov t9Mem,r1
 	bl t9StoreL_mem
-	ldmfd sp!,{t9Mem,t9ptr,lr}
+	ldmfd sp!,{t9Mem,t9cycles,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadBX:					;@ r0=address
@@ -114,19 +117,19 @@ t9LoadBX:					;@ r0=address
 t9LoadWX:					;@ r0=address
 	.type	t9LoadWX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9ptr,lr}
+	stmfd sp!,{t9ptr,t9cycles,lr}
 	ldr t9ptr,=tlcs900HState
 	bl t9LoadW
-	ldmfd sp!,{t9ptr,lr}
+	ldmfd sp!,{t9ptr,t9cycles,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadLX:					;@ r0=address
 	.type	t9LoadLX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9ptr,lr}
+	stmfd sp!,{t9ptr,t9cycles,lr}
 	ldr t9ptr,=tlcs900HState
 	bl t9LoadL
-	ldmfd sp!,{t9ptr,lr}
+	ldmfd sp!,{t9ptr,t9cycles,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
@@ -177,6 +180,9 @@ t9StoreW_even:
 	cmp r2,#2
 	beq t9StoreW_vram
 
+	tst t9Mem,#0xFF000000
+	bicne t9Mem,t9Mem,#0xFF000000
+	bne t9StoreW_even
 ;@----------------------------------------------------------------------------
 t9StoreUnevenW:
 ;@----------------------------------------------------------------------------
@@ -196,11 +202,11 @@ push32:						;@ Also used from interrupt
 ;@----------------------------------------------------------------------------
 t9StoreL_mem:				;@ r0=value, t9Mem=address
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r0,lr}
+	stmfd sp!,{r0,t9Mem,lr}
 	tst t9Mem,#1
 	bne t9StoreUnevenL
 	bl t9StoreW_even
-	ldmfd sp!,{r0,lr}
+	ldmfd sp!,{r0,t9Mem,lr}
 	mov r0,r0,lsr#16
 	add t9Mem,t9Mem,#2
 	b t9StoreW_even
@@ -213,9 +219,9 @@ t9StoreUnevenL:
 	mov r0,r0,lsr#8
 	add t9Mem,t9Mem,#1
 	bl t9StoreW_even
-	ldmfd sp!,{r0,lr}
+	ldmfd sp!,{r0,t9Mem,lr}
 	mov r0,r0,lsr#24
-	add t9Mem,t9Mem,#2
+	add t9Mem,t9Mem,#3
 	b t9StoreB_mem
 ;@----------------------------------------------------------------------------
 t9StoreB_ram:				;@ Write RAM byte (0x004000-0x007FFF)

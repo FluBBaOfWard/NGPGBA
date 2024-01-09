@@ -41,15 +41,19 @@
 ROM_Space:
 //	.incbin "ngproms/Bust-A-Move Pocket (U).ngc"
 //	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
+//	.incbin "ngproms/Densetsu no Ogre Battle Gaiden - Zenobia no Ouji (J).ngc"
 //	.incbin "ngproms/Dokodemo Mahjong (J).ngp"
 //	.incbin "ngproms/Evolution - Eternal Dungeons (E).ngc"
 //	.incbin "ngproms/Fantastic Night Dreams Cotton (E).ngc"
 //	.incbin "ngproms/Fatal Fury F-Contact (JUE) (M2).ngc"
 //	.incbin "ngproms/Last Blade, The - Beyond the Destiny (E).ngc"
 //	.incbin "ngproms/Metal Slug - 1st Mission (JUE) (M2).ngc"
+//	.incbin "ngproms/Metal Slug - 2nd Mission (JUE) (M2).ngc"
+//	.incbin "ngproms/Pocket Tennis Color - Pocket Sports Series (JUE) (M2).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
 //rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
+//	.incbin "ngproms/Super Real Mahjong - Premium Collection (J).ngc"
 
 #if GBA
 	.section .ewram, "ax", %progbits	;@ For the GBA
@@ -61,7 +65,7 @@ ROM_Space:
 machineInit: 				;@ Called from C
 	.type   machineInit STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r11,lr}
+	stmfd sp!,{r4,t9ptr,lr}
 
 //	ldr r0,=ROM_Space
 //	str r0,romSpacePtr
@@ -96,7 +100,7 @@ machineInit: 				;@ Called from C
 	mov lr,pc
 	bx r1
 skipBiosSettings:
-	ldmfd sp!,{r4-r11,lr}
+	ldmfd sp!,{r4,t9ptr,lr}
 	bx lr
 
 //	.section .ewram,"ax"
@@ -105,7 +109,7 @@ skipBiosSettings:
 loadCart: 					;@ Called from C:  r0=emuflags
 	.type   loadCart STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r11,lr}
+	stmfd sp!,{lr}
 	str r0,emuFlags
 
 	ldr r0,gRomSize
@@ -126,7 +130,7 @@ loadCart: 					;@ Called from C:  r0=emuflags
 	mov lr,pc
 	bx r1
 skipHWSetup:
-	ldmfd sp!,{r4-r11,lr}
+	ldmfd sp!,{lr}
 	bx lr
 
 ;@----------------------------------------------------------------------------

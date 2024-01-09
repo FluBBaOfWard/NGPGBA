@@ -407,6 +407,7 @@ void resetHleBios(NgpHeader *cartHeader) {
 	t9StoreBX(0xDC, 0x6C25);
 	t9StoreBX(0x0A, 0x70);
 	t9StoreBX(0xDC, 0x71);
+	t9StoreBX(0x99, 0x73);
 }
 
 void fixBiosSettings(void) {
