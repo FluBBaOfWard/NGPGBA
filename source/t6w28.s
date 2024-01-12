@@ -1,4 +1,12 @@
+;@
+;@  T6W28.s
+;@  T6W28
+;@
+;@  Created by Fredrik Ahlström on 2008-04-02.
+;@  Copyright © 2008-2024 Fredrik Ahlström. All rights reserved.
+;@
 ;@ SNK Neogeo Pocket K2Audio sound chip emulator for ARM32.
+
 #ifdef __arm__
 
 #include "t6w28.i"
@@ -32,51 +40,48 @@
 #endif
 	.align 2
 ;@----------------------------------------------------------------------------
-;@ r0 = t6ptr.
+;@ r0 = Mix length.
 ;@ r1 = Mixerbuffer L.
-;@ r2 = Mix length.
+;@ r2 = t6ptr.
 ;@ r3 -> r6 = Pos+freq.
-;@ r7 = Noise generator.
-;@ r8 = Noise feedback.
-;@ r9 = Ch volumes L.
-;@ r10 = Ch volumes R.
+;@ r7  = currentBits.
+;@ r8 = Noise generator.
+;@ r9 = Noise feedback.
 ;@ r12 = Mixer reg L.
 ;@ lr = Mixer reg R.
 ;@----------------------------------------------------------------------------
-t6W28Mixer:					;@ r0=t6ptr, r1=dest, r2=len
+t6W28Mixer:					;@ r0=len, r1=dest, r2=t6ptr
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r4-r10,lr}
-	ldmia r0,{r3-r10}			;@ Load freq,addr,rng, noisefb, volR,volL
+	stmfd sp!,{r4-r9,lr}
+	ldmia r2,{r3-r9,lr}		;@ Load freq/addr0-3, currentBits, rng, noisefb, attChg
+	tst lr,#0xff
+	blne calculateVolumes
 ;@----------------------------------------------------------------------------
 mixLoop:
-	adds r6,r6,r6,lsl#16
-	movscs r7,r7,lsr#1
-	eorcs r7,r7,r8
-	ands lr,r7,#1
-	movne lr,r9,lsr#24
-	mov r12,#0x82
-	addne r12,r12,r10,lsr#24
-
 	adds r3,r3,r3,lsl#16
-	addpl lr,lr,r9
-	addpl r12,r12,r10
+	eorcs r7,r7,#0x04
 
 	adds r4,r4,r4,lsl#16
-	addpl lr,lr,r9,lsr#8
-	addpl r12,r12,r10,lsr#8
+	eorcs r7,r7,#0x08
 
 	adds r5,r5,r5,lsl#16
-	addpl lr,lr,r9,lsr#16
-	addpl r12,r12,r10,lsr#16
+	eorcs r7,r7,#0x10
 
-	add lr,lr,#0x82
-	subs r2,r2,#1
+	adds r6,r6,r6,lsl#16
+	biccs r7,r7,#0x20
+	movscs r8,r8,lsr#1
+	eorcs r8,r8,r9
+	orrcs r7,r7,#0x20
+
+	ldr lr,[r2,r7]
+	subs r0,r0,#1
+	mov r12,lr,lsr#16
 	strbpl r12,[r1,#PCMWAVSIZE*2]
 	strbpl lr,[r1],#1
 	bhi mixLoop
 
-	stmia t6ptr,{r3-r7}			;@ Writeback freq,addr,rng
-	ldmfd sp!,{r4-r10,lr}
+	stmia r2,{r3-r8}			;@ Writeback freq,addr, currentBits,rng
+	ldmfd sp!,{r4-r9,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 
@@ -92,16 +97,20 @@ t6W28Init:					;@ t6ptr=r0=pointer to struct, r1=FREQTABLE
 t6W28Reset:					;@ t6ptr=r0=pointer to struct
 ;@----------------------------------------------------------------------------
 	mov r1,#0
-	mov r2,#(t6StateEnd-t6StateStart)/4		;@ 68/4=17
+	mov r2,#(t6StateEnd-t6StateStart)/4		;@ 64/4=16
 rLoop:
 	subs r2,r2,#1
-	strpl r1,[t6ptr,r2,lsl#2]
+	strpl r1,[r0,r2,lsl#2]
 	bhi rLoop
 
 	mov r2,#PFEED_SMS
 	strh r2,[r0,#rng]
 	mov r2,#WFEED_SMS
-	strh r2,[t6ptr,#noiseFB]
+	strh r2,[r0,#noiseFB]
+	mov r2,#calculatedVolumes
+	str r2,[r0,#currentBits]	;@ Add offset to calculatedVolumes
+	ldr r1,=0x00800080
+	str r1,[r0,r2]				;@ Clear volume 0
 
 	bx lr
 
@@ -121,8 +130,8 @@ t6W28SetFrequency:			;@ snptr=r0=ptr to struct, r1=frequency of chip.
 ;@----------------------------------------------------------------------------
 	ldr r2,[t6ptr,#mixRate]
 	mul r1,r2,r1
-	mov r1,r1,lsr#12
-	str r1,[t6ptr,#freqConv]	;@ Frequency conversion (SN76496freq*mixrate)/4096
+	mov r1,r1,lsr#10
+	str r1,[t6ptr,#freqConv]	;@ Frequency conversion (SN76496freq*mixrate)/1024
 	bx lr
 ;@----------------------------------------------------------------------------
 frequencyCalculate:			;@ t6ptr=r0=ptr to struct, r1=FREQTABLE
@@ -160,12 +169,14 @@ t6W28SaveState:				;@ In r0=destination, r1=snptr. Out r0=state size.
 t6W28LoadState:				;@ In r0=snptr, r1=source. Out r0=state size.
 	.type   sn76496LoadState STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{lr}
+	stmfd sp!,{r0,lr}
 
 	mov r2,#t6StateEnd-t6StateStart
 	bl memcpy
+	ldmfd sp!,{r0,lr}
+	mov r1,#1
+	strb r1,[r0,#snAttChg]
 
-	ldmfd sp!,{lr}
 ;@----------------------------------------------------------------------------
 t6W28GetStateSize:			;@ Out r0=state size.
 	.type   sn76496GetStateSize STT_FUNC
@@ -189,11 +200,10 @@ t6W28W:						;@ In r0 = value, r1 = struct-pointer, right ch.
 	bcc setFreq
 doVolume:
 	and r0,r0,#0x0F
-	strb r0,[r2,#ch0Att]
-	adr r2,attenuation
-	ldrb r0,[r2,r0]
-	add r2,r1,r3
-	strb r0,[r2,#ch0Vol]
+	ldrb r3,[r2,#ch0Att]
+	eors r3,r3,r0
+	strbne r0,[r2,#ch0Att]
+	strbne r3,[r1,#snAttChg]
 	bx lr
 
 setFreq:
@@ -246,11 +256,10 @@ t6W28LW:					;@ In r0 = value, r1 = struct-pointer, left ch.
 	bcc setFreqL
 doVolumeL:
 	and r0,r0,#0x0F
-	strb r0,[r2,#ch0AttL]
-	adr r2,attenuation
-	ldrb r0,[r2,r0]
-	add r2,r1,r3
-	strb r0,[r2,#ch0VolL]
+	ldrb r3,[r2,#ch0AttL]
+	eors r3,r3,r0
+	strbne r0,[r2,#ch0AttL]
+	strbne r3,[r1,#snAttChg]
 	bx lr
 
 setFreqL:
@@ -273,8 +282,57 @@ setFreqL:
 //	strheq r0,[r1,#ch3Frq]
 	bx lr
 
-attenuation:
-	.byte 0x3F,0x32,0x28,0x20,0x19,0x14,0x10,0x0D,0x0A,0x08,0x06,0x05,0x04,0x03,0x02,0x00
+;@----------------------------------------------------------------------------
+calculateVolumes:			;@ In r2 = snptr
+;@----------------------------------------------------------------------------
+	stmfd sp!,{r0,r1,r3-r7,lr}
+
+	adr r1,attenuation
+
+	ldrb r0,[r2,#ch0Att]
+	ldr r3,[r1,r0,lsl#2]
+	ldrb r0,[r2,#ch0AttL]
+	ldr r0,[r1,r0,lsl#2]
+	orr r3,r3,r0,lsl#16
+
+	ldrb r0,[r2,#ch1Att]
+	ldr r4,[r1,r0,lsl#2]
+	ldrb r0,[r2,#ch1AttL]
+	ldr r0,[r1,r0,lsl#2]
+	orr r4,r4,r0,lsl#16
+
+	ldrb r0,[r2,#ch2Att]
+	ldr r5,[r1,r0,lsl#2]
+	ldrb r0,[r2,#ch2AttL]
+	ldr r0,[r1,r0,lsl#2]
+	orr r5,r5,r0,lsl#16
+
+	ldrb r0,[r2,#ch3Att]
+	ldr r6,[r1,r0,lsl#2]
+	ldrb r0,[r2,#ch3AttL]
+	ldr r0,[r1,r0,lsl#2]
+	orr r6,r6,r0,lsl#16
+
+	add lr,r2,#calculatedVolumes
+	ldr r7,=0x00800080
+	mov r1,#15
+volLoop:
+	movs r0,r1,lsl#31
+	movmi r0,r3
+	addcs r0,r0,r4
+	teq r1,r1,lsl#29
+	addmi r0,r0,r5
+	addcs r0,r0,r6
+	add r0,r7,r0,lsr#8
+	str r0,[lr,r1,lsl#2]
+	subs r1,r1,#1
+	bne volLoop
+	strb r1,[r2,#snAttChg]
+	ldmfd sp!,{r0,r1,r3-r7,pc}
+;@----------------------------------------------------------------------------
+attenuation:						;@ each step * 0.79370053 (-2dB?)
+	.long 0x3FFF,0x32CB,0x2851,0x2000,0x1966,0x1428,0x1000,0x0CB3
+	.long 0x0A14,0x0800,0x0659,0x050A,0x0400,0x032C,0x0285,0x0000
 ;@----------------------------------------------------------------------------
 	.end
 #endif // #ifdef __arm__

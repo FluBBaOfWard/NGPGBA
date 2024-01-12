@@ -357,21 +357,13 @@ vblIrqHandler:
 	orr r4,r4,#0x100			;@ 256 words (1024 bytes)
 	stmia r1,{r2-r4}			;@ DMA3 go
 
-	adr geptr,k2GE_0
-	ldrb r0,[geptr,#kgeBGPrio]
-	tst r0,#0x80
-	ldr r0,=GFX_BG0CNT
-	ldr r0,[r0]
-	addne r0,r0,#0x00001		;@ BG 0 low prio
-	addeq r0,r0,#0x10000		;@ BG 1 low prio
-	str r0,[r6,#REG_BG0CNT]
-
 	ldr r0,=GFX_DISPCNT
 	ldr r0,[r0]
 	ldrb r2,gGfxMask
 	bic r0,r0,r2,lsl#8
 	strh r0,[r6,#REG_DISPCNT]
 
+	adr geptr,k2GE_0
 	ldr r0,[geptr,#windowData]
 	strh r0,[r6,#REG_WIN0H]
 	mov r0,r0,lsr#16

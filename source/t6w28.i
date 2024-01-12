@@ -3,7 +3,7 @@
 ;@  T6W28/NeoGeo Pocket sound chip emulator for arm32.
 ;@
 ;@  Created by Fredrik Ahlström on 2008-04-02.
-;@  Copyright © 2008-2022 Fredrik Ahlström. All rights reserved.
+;@  Copyright © 2008-2024 Fredrik Ahlström. All rights reserved.
 ;@
 ;@ ASM header for the T6W28 sound emulator
 ;@
@@ -23,18 +23,10 @@ ch2Cnt:			.short 0
 ch3Frq:			.short 0
 ch3Cnt:			.short 0
 
+currentBits:	.long 0
+
 rng:			.long 0
 noiseFB:		.long 0
-
-ch0Vol:			.byte 0
-ch1Vol:			.byte 0
-ch2Vol:			.byte 0
-ch3Vol:			.byte 0
-
-ch0VolL:		.byte 0
-ch1VolL:		.byte 0
-ch2VolL:		.byte 0
-ch3VolL:		.byte 0
 
 snAttChg:		.byte 0
 snLastReg:		.byte 0
@@ -61,6 +53,8 @@ ch3AttL:		.short 0
 
 t6StateEnd:
 
+calculatedVolumes:	.space 16*2*2
+
 mixLength:		.long 0
 mixRate:		.long 0
 freqConv:		.long 0
@@ -68,3 +62,4 @@ freqTablePtr:	.long 0
 
 t6Size:
 
+;@----------------------------------------------------------------------------

@@ -144,20 +144,20 @@ vblSound2:
 	cmp r0,#0
 	bxeq lr
 
-	mov r2,#MIX_LEN
+	mov r0,#MIX_LEN
 	ldr r1,pcmPtr0
-	ldr r0,muteSound
-	cmp r0,#0
-	ldreq r0,=t6W28_0
+	ldr r2,muteSound
+	cmp r2,#0
+	ldreq r2,=t6W28_0
 	beq t6W28Mixer
 
 ;@----------------------------------------------------------------------------
 silenceMix:					;@ r1=destination, r2=len
 ;@----------------------------------------------------------------------------
-	mov r0,#0
+	mov r2,#0
 silenceLoop:
-	subs r2,r2,#4
-	strpl r0,[r1],#4
+	subs r0,r0,#4
+	strpl r2,[r1],#4
 	bhi silenceLoop
 
 	bx lr
@@ -200,10 +200,13 @@ soundMode:
 	.byte 1
 	.space 3
 
-	.section .sbss
+	.section .bss
 	.align 2
 t6W28_0:
 	.space t6Size
+
+	.section .sbss
+	.align 2
 FREQTBL:
 	.space 1024*2
 WAVBUFFER:

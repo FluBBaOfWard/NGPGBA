@@ -1,5 +1,10 @@
-/*
-*/
+//
+//  T6W28.h
+//  T6W28
+//
+//  Created by Fredrik Ahlström on 2008-04-02.
+//  Copyright © 2008-2024 Fredrik Ahlström. All rights reserved.
+//
 
 #ifndef T6W28_HEADER
 #define T6W28_HEADER
@@ -18,18 +23,10 @@ typedef struct {
 	u16 ch3Frq;
 	u16 ch3Cnt;
 
+	u32 currentBits;
+
 	u32 rng;
 	u32 noiseFB;
-
-	u8 ch0Vol;
-	u8 ch1Vol;
-	u8 ch2Vol;
-	u8 ch3Vol;
-
-	u8 ch0VolL;
-	u8 ch1VolL;
-	u8 ch2VolL;
-	u8 ch3VolL;
 
 	u8 snAttChg;
 	u8 snLastReg;
@@ -54,11 +51,12 @@ typedef struct {
 	u16 ch3RegL;
 	u16 ch3AttL;
 
+	s16 calculatedVolumes[16*2];
+
 	u32 mixLength;
 	u32 mixRate;
 	u32 freqConv;
 	u32 freqTablePtr;
-
 } T6W28;
 
 /**

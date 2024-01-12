@@ -50,6 +50,7 @@ ROM_Space:
 //	.incbin "ngproms/Metal Slug - 1st Mission (JUE) (M2).ngc"
 //	.incbin "ngproms/Metal Slug - 2nd Mission (JUE) (M2).ngc"
 //	.incbin "ngproms/Pocket Tennis Color - Pocket Sports Series (JUE) (M2).ngc"
+//	.incbin "ngproms/Rockman - Battle & Fighters (J).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
 //rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
