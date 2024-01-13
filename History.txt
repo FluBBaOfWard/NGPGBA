@@ -2,9 +2,10 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.7 - 2024-01-12 (FluBBa)
+V0.5.7 - 2024-01-13 (FluBBa)
 	Fixed IRQ & Micro DMA handling.
 	Fixed BG priority updates mid screen (Rockman).
+	Fixed HLE BIOS some more.
 	More optimizations.
 
 V0.5.6 - 2023-12-10 (FluBBa)

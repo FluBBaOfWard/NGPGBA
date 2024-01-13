@@ -214,10 +214,12 @@ cpu1SetIRQ:
 	bl Z80SetIRQPin
 	ldmfd sp!,{z80ptr,pc}
 ;@----------------------------------------------------------------------------
-getRegAdr:				;@ r0=register, 0x00-0x1C (current)
+getRegAdr:				;@ r0=register, 0x00-0xFF
 	.type   getRegAdr STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldr r1,=tlcs900HState
+	ldr r2,[r1,#tlcsCurrentMapBank]
+	ldrsb r0,[r2,r0]
 	ldr r2,[r1,#tlcsCurrentGprBank]
 	add r0,r2,r0
 	bx lr

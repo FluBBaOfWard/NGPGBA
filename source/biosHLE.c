@@ -22,14 +22,14 @@ void iBIOSHLE(int vector) {
 
 	// VECT_CLOCKGEARSET (0xFF1034)
 	case 0x01:
-		t9StoreBX(rCodeL(0x0C), 0x80);
+		t9StoreBX(rCodeL(0x3C), 0x80);
 		break;
 
 	// VECT_RTCGET (0xFF1440)
 	case 0x02:
 	{
 		// Copy time from hardware area
-		u32 adr = rCodeL(0x0C);
+		u32 adr = rCodeL(0x3C);
 		t9StoreBX(t9LoadBX(0x91), adr + 0);
 		t9StoreWX(t9LoadWX(0x92), adr + 1);
 		t9StoreWX(t9LoadWX(0x94), adr + 3);
@@ -44,8 +44,8 @@ void iBIOSHLE(int vector) {
 	case 0x04:
 	{
 
-	u8 level = rCodeB(0x05) & 0x07; // RB
-	u8 interrupt = rCodeB(0x04);	// RC
+	u8 level = rCodeB(0x35) & 0x07; // RB
+	u8 interrupt = rCodeB(0x34);	// RC
 
 	switch(interrupt) {
 		case 0x00:	// Interrupt from RTC alarm
@@ -109,7 +109,7 @@ void iBIOSHLE(int vector) {
 	{
 		int j, i, dst = 0xA000;
 
-		u8 a = rCodeB(0x00);
+		u8 a = rCodeB(0x30);
 		u8 b = a >> 4;
 		a &= 3;
 
@@ -133,13 +133,13 @@ void iBIOSHLE(int vector) {
 		int i, bank = 0x200000;
 
 		// Select HI rom
-		if (rCodeB(0x00) == 1) {
+		if (rCodeB(0x30) == 1) {
 			bank = 0x800000;
 		}
-		int destination = rCodeL(0x08) + bank;
-		int source = rCodeL(0x0C) + bank;
+		int destination = rCodeL(0x38) + bank;
+		int source = rCodeL(0x3C) + bank;
 
-		int count = rCodeW(0x04) * 256;
+		int count = rCodeW(0x34) * 256;
 		for (i = 0; i < count; i++) {
 			t9StoreBX(0xAA, bank + 0x5555);
 			t9StoreBX(0x55, bank + 0x2AAA);
@@ -147,40 +147,40 @@ void iBIOSHLE(int vector) {
 			t9StoreBX(t9LoadBX(source + i), destination + i);
 		}
 		int block = getBlockFromAddress(destination);
-		markBlockDirty(rCodeB(0x00), block);
+		markBlockDirty(rCodeB(0x30), block);
 
-		rCodeB(0x00) = 0;		// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;		// RA3 = SYS_SUCCESS
 	}
 		break;
 
 	// VECT_FLASHALLERS (0xFF7042)
 	case 0x07:
 		// TODO
-		rCodeB(0x00) = 0;	// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 		break;
 	// VECT_FLASHERS (0xFF7082)
 	case 0x08:
 	{
 		u32 address = 0x200000;
 		// Select HI rom?
-		if (rCodeB(0x00) == 1) {
+		if (rCodeB(0x30) == 1) {
 			address = 0x800000;
 		}
-		address += getBlockOffset(rCodeB(0x04));
+		address += getBlockOffset(rCodeB(0x34));
 
 		t9StoreBX(0xAA, address + 0x5555);
 		t9StoreBX(0x55, address + 0x2AAA);
 		t9StoreBX(0x80, address + 0x5555);
 		t9StoreBX(0xAA, address + 0x5555);
 		t9StoreBX(0x55, address + 0x2AAA);
-		rCodeB(0x00) = 0;	// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 	}
 		break;
 
 	// VECT_ALARMSET (0xFF149B)
 	case 0x09:
 		// TODO
-		rCodeB(0x00) = 0;	// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 		break;
 
 	// Reserved (just RET) (0xFF1033)
@@ -189,7 +189,7 @@ void iBIOSHLE(int vector) {
 	// VECT_ALARMDOWNSET (0xFF1487)
 	case 0x0B:
 		// TODO
-		rCodeB(0x00) = 0;	// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 		break;
 
 	// ? (0xFF731F)
@@ -198,13 +198,13 @@ void iBIOSHLE(int vector) {
 	// VECT_FLASHPROTECT (0xFF70CA)
 	case 0x0D:
 		// TODO
-		rCodeB(0x00) = 0;	// RA3 = SYS_SUCCESS
+		rCodeB(0x30) = 0;	// RA3 = SYS_SUCCESS
 		break;
 
 	// VECT_GEMODESET (0xFF17C4)
 	case 0x0E:
 		t9StoreBX(0xAA, 0x87F0);		// Allow GE MODE registers to be written to
-		if (rCodeB(0x00) < 0x10) {	// Current A register.
+		if (rCodeB(0x30) < 0x10) {	// Current A register.
 			// set B/W mode
 			t9StoreBX(0x80, 0x87E2);
 			t9StoreBX(0x00, 0x6F95);
@@ -239,10 +239,10 @@ void iBIOSHLE(int vector) {
 	case 0x13:
 	{
 		// Write the byte
-		u8 data = rCodeB(0x05);
+		u8 data = rCodeB(0x35);
 		system_comms_write(data);
 		// Always COM_BUF_OK because the write call always succeeds.
-		rCodeB(0x00) = 0; // RA3 = COM_BUF_OK
+		rCodeB(0x30) = 0; // RA3 = COM_BUF_OK
 	}
 		setInterruptExternal(0x18);
 		break;
@@ -252,8 +252,8 @@ void iBIOSHLE(int vector) {
 	{
 		u8 data;
 		if (system_comms_read(&data)) {
-			rCodeB(0x00) = 0; // COM_BUF_OK
-			rCodeB(0x05) = data;
+			rCodeB(0x30) = 0; // COM_BUF_OK
+			rCodeB(0x35) = data;
 			// Comms. Read interrupt
 			t9StoreBX(data, 0x50);
 
@@ -261,7 +261,7 @@ void iBIOSHLE(int vector) {
 			return;
 		}
 		else {
-			rCodeB(0x00) = 1; // COM_BUF_EMPTY
+			rCodeB(0x30) = 1; // COM_BUF_EMPTY
 		}
 	}
 		break;
@@ -279,20 +279,20 @@ void iBIOSHLE(int vector) {
 	// VECT_COMSENDSTATUS (0xFF2D3A)
 	case 0x17:
 		// Nothing to do.
-		rCodeW(0x00) = 0; // Send Buffer Count, never any pending data!
+		rCodeW(0x30) = 0; // Send Buffer Count, never any pending data!
 		break;
 
 	// VECT_COMRECEIVESTATUS (0xFF2D4E)
 	case 0x18:
 		// Receive Buffer Count
-		rCodeW(0x00) = system_comms_read(NULL);
+		rCodeW(0x30) = system_comms_read(NULL);
 		break;
 
 	// VECT_COMCREATEBUFDATA (0xFF2D6C)
 	case 0x19:
 	{
-		u8 count = rCodeB(0x05);
-		u32 index = rCodeL(0x0C);
+		u8 count = rCodeB(0x35);
+		u32 index = rCodeL(0x3C);
 		while(count > 0) {
 			u8 data = t9LoadBX(index);
 			// Write data from (XHL3++)
@@ -300,8 +300,8 @@ void iBIOSHLE(int vector) {
 			index++; // Next data
 			count--; // RB3 = Count Left
 		}
-		rCodeL(0x0C) = index;
-		rCodeB(0x05) = count;
+		rCodeL(0x3C) = index;
+		rCodeB(0x35) = count;
 		setInterruptExternal(0x18);
 	}
 		break;
@@ -309,8 +309,8 @@ void iBIOSHLE(int vector) {
 	// VECT_COMGETBUFDATA (0xFF2D85)
 	case 0x1A:
 	{
-		u8 count = rCodeB(0x05);
-		u32 index = rCodeL(0x0C);
+		u8 count = rCodeB(0x35);
+		u32 index = rCodeL(0x3C);
 		while(count > 0) {
 			u8 data;
 			if (system_comms_read(&data)) {
@@ -327,8 +327,8 @@ void iBIOSHLE(int vector) {
 				break;
 			}
 		}
-		rCodeL(0x0C) = index;
-		rCodeB(0x05) = count;
+		rCodeL(0x3C) = index;
+		rCodeB(0x35) = count;
 	}
 		break;
 }

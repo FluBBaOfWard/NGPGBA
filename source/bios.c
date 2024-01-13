@@ -3,11 +3,10 @@
 //  NGPGBA
 //
 //  Created by Fredrik Ahlström on 2023-11-10.
-//  Copyright © 2023 Fredrik Ahlström. All rights reserved.
+//  Copyright © 2023,2024 Fredrik Ahlström. All rights reserved.
 //
 
 #include <gba.h>
-#include <string.h>
 
 #include "Memory.h"
 #include "Cart.h"
@@ -407,17 +406,21 @@ void resetHleBios(NgpHeader *cartHeader) {
 	t9StoreBX(0xDC, 0x6C25);
 	t9StoreBX(0x0A, 0x70);
 	t9StoreBX(0xDC, 0x71);
-	t9StoreBX(0x99, 0x73);
 }
 
 void fixBiosSettings(void) {
-	t9StoreBX(cfg.birthYear, 0x6F8B);
-	t9StoreBX(cfg.birthMonth, 0x6F8C);
-	t9StoreBX(cfg.birthDay, 0x6F8D);
-
 	// Setup alarm from config
 	t9StoreBX(cfg.alarmHour, 0x6C34);
 	t9StoreBX(cfg.alarmMinute, 0x6C35);
+
+	t9StoreBX(0x4E, 0x6E96);	// N
+	t9StoreBX(0x50, 0x6E95);	// P
+	t9StoreBX(0x00, 0x6F83);
+
+	// Setup birth day from config
+	t9StoreBX(cfg.birthYear, 0x6F8B);
+	t9StoreBX(cfg.birthMonth, 0x6F8C);
+	t9StoreBX(cfg.birthDay, 0x6F8D);
 
 	int check = gLang ? 0x01 : 0x00;
 	// Language: 0 = Japanese, 1 = English
@@ -432,10 +435,6 @@ void fixBiosSettings(void) {
 	}
 	check += 0xDC;		// Actualy addition of all IRQ priorities.
 	t9StoreWX(check, 0x6C14);
-
-	t9StoreBX(0x4E, 0x6E96);
-	t9StoreBX(0x50, 0x6E95);
-	t9StoreBX(0x00, 0x6F83);
 }
 
 //=============================================================================
