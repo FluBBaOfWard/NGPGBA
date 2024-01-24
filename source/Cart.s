@@ -52,9 +52,9 @@ ROM_Space:
 //	.incbin "ngproms/Pocket Tennis Color - Pocket Sports Series (JUE) (M2).ngc"
 //	.incbin "ngproms/Rockman - Battle & Fighters (J).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
+//	.incbin "ngproms/Super Real Mahjong - Premium Collection (J).ngc"
 //rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
-//	.incbin "ngproms/Super Real Mahjong - Premium Collection (J).ngc"
 
 #if GBA
 	.section .ewram, "ax", %progbits	;@ For the GBA
