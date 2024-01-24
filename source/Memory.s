@@ -117,19 +117,19 @@ t9LoadBX:					;@ r0=address
 t9LoadWX:					;@ r0=address
 	.type	t9LoadWX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9ptr,t9cycles,lr}
+	stmfd sp!,{t9cycles,t9ptr,lr}
 	ldr t9ptr,=tlcs900HState
 	bl t9LoadW
-	ldmfd sp!,{t9ptr,t9cycles,lr}
+	ldmfd sp!,{t9cycles,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 t9LoadLX:					;@ r0=address
 	.type	t9LoadLX STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{t9ptr,t9cycles,lr}
+	stmfd sp!,{t9cycles,t9ptr,lr}
 	ldr t9ptr,=tlcs900HState
 	bl t9LoadL
-	ldmfd sp!,{t9ptr,t9cycles,lr}
+	ldmfd sp!,{t9cycles,t9ptr,lr}
 	bx lr
 ;@----------------------------------------------------------------------------
 

@@ -7,6 +7,7 @@
 //
 
 #include <gba.h>
+#include <string.h>
 
 #include "Memory.h"
 #include "Cart.h"

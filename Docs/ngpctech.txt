@@ -15,14 +15,14 @@ Specs :
 - There are 146 colors possible out of 4096 (colors in 444 RGB format)
 - 16kB WorkRAM, top 4kB for the Z80.
 - 12kB VRAM plus palettes and HW regs.
-- 4 Timers.
+- 4 8-bit Timers.
 - 4 DMA channels.
-- RTC?
+- RTC.
 - Everything seem to be included in one chip, the SNK K2-Chip.
 
 
 My K2-CHIP has the designation T3W31AF-001, I've also seen T3W26AF-0103.
-- Is it a TMP95C063F ?
+- Is it a TMP95C061 ?
 
 
 
@@ -30,7 +30,7 @@ My K2-CHIP has the designation T3W31AF-001, I've also seen T3W26AF-0103.
 Memory Map Summary:
 -------------------
 
-000000 -> 0000FF	CPU Internal RAM (Timers / DMA / RTC / IO / etc.)
+000000 -> 0000BF	CPU Internal Registers (Timers / DMA / RTC / IO / etc.)
 004000 -> 006BFF	Work RAM
 006C00 -> 006FFF	Bios work RAM
 007000 -> 007FFF	Z80 Shared RAM
@@ -47,268 +47,424 @@ FF0000 -> FFFFFF	BIOS
 000000 -> 000100	CPU Internal Registers (Timers/DMA/Z80)
 =====================================================
 
-			: Port control registers?
-0001 B		: ???	0x00 Written by Bios at reset?
-0004 B		: ???	0x00 Written by Bios at reset?
-0006 B		: ???	0xFF Written by Bios at reset?
-0009 B		: ???	0xFF Written by Bios at reset?
-000D B		: ???	0x08 Written by Bios at reset?
-0010 B		: ???	0x34 Written by Bios at reset?
-0011 B		: ???	0x3C Written by Bios at reset?
-0013 B		: ???	0xFF Written by Bios at reset?
-0015 B		: ???	0x3F Written by Bios at reset?
-0016 B		: ???	0x00 Written by Bios at reset?
-0017 B		: ???	0x00 Written by Bios at reset?
-0018 B	R/W	: ??? Port 8 (Serial) Register			0x3F Written by Bios at reset?
-001A B	W	: ??? Port 8 (Serial) Control Register	0x2D Written by Bios at reset?
-001B B	W	: ??? Port 8 (Serial) Function Register	0x01 Written by Bios at reset?
-001E B		: ???	0x03 Written by Bios at reset?
-001F B		: ???	0xB2 Written by Bios at reset?
+0001 B	R/W	: Port 1 Register?				0x00 Written by Bios at reset.
+				Bit 7-0 = Data
+0004 B	W	: Port 1 Control Register?		0x00 Written by Bios at reset.
+				Bit 7-0 = 0=In/1=Out
+0006 B	R/W	: Port 2 Register?				0xFF Written by Bios at reset.
+				Bit 7-0 = Data
+0009 B	W	: Port 2 Function Register?		0xFF Written by Bios at reset.
+				Bit 7-0 = 0=Port/1=Address bus(A23-A16)
+000D B	R/W	: Port 5 Register?				0x08 Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5-2 = Data
+				Bit 1   = -
+				Bit 0   = RDE, 0 = PSRAM mode
+0010 B	W	: Port 5 Control Register?		0x34 Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5-2 = 0=In/1=Out
+				Bit 1-0 = -
+0011 B	W	: Port 5 Function Register?		0x3C Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5   = 0=Port/1=R/W
+				Bit 4   = 0=Port/1=BUSAK
+				Bit 3   = 0=Port/1=BUSRQ
+				Bit 2   = 0=Port/1=HWR
+				Bit 1-0 = -
+0012 B	R/W	: Port 6 Register?
+				Bit 7-6 = -
+				Bit 5-0 = Data
+0013 B	R/W	: Port 7 Register?				0xFF Written by Bios at reset.
+				Bit 7-0 = Data
+0015 B	W	: Port 6 Function Register?		0x3F Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5   = 0=Port65/1=REFOUT
+				Bit 4   = 0=Port64/1=RAS
+				Bit 3   = 0=Port63/1=CS3/CAS
+				Bit 2   = 0=Port62/1=CS2
+				Bit 1   = 0=Port61/1=CS1
+				Bit 0   = 0=Port60/1=CS0
+0016 B	W	: Port 7 Control Register?		0x00 Written by Bios at reset.
+				Bit 7-0 = 0=In/1=Out
+0017 B	W	: Port 7 Function Register?		0x00 Written by Bios at reset.
+				Bit 7-4 = 0=Port/1=PG1-OUT (PatternGenerator)
+				Bit 3-0 = 0=Port/1=PG0-OUT (PatternGenerator)
+0018 B	R/W	: Port 8 Register?				0x3F Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5-0 = Data
+0019 B	R	: Port 9 Register?
+				Bit 7-4 = -
+				Bit 3-0 = Data from analog inputs.
+001A B	W	: Port 8 Control Register?		0x2D Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5-0 = 0=In/1=Out
+001B B	W	: Port 8 Function Register?		0x01 Written by Bios at reset.
+				Bit 7-6 = -
+				Bit 5   = 0=Port85/1=SCLK1
+				Bit 4   = -
+				Bit 3   = 0=Port83/1=TxD1
+				Bit 2   = 0=Port82/1=SCLK0
+				Bit 1   = -
+				Bit 0   = 0=Port80/1=TxD0
+001E B	R/W	: Port A Register?				0x03 Written by Bios at reset.
+				Bit 7-4 = -
+				Bit 3-0 = Data
+001F B	R/W	: Port B Register?				0xB2 Written by Bios at reset.
+				Bit 7 = IOPB7 (INT0)
+				Bit 6 = IOPB6 (TO6)
+				Bit 5 = IOPB5 (TI7)
+				Bit 4 = IOPB4 (TI6)
+				Bit 3 = IOPB3 (TO5)
+				Bit 2 = IOPB2 (TO4)
+				Bit 1 = IOPB1 (TI5)
+				Bit 0 = IOPB0 (TI4)
 
-0020 B		: TRUN - Timer Operation Control Register
-				Bit 0 = Timer0 on/off
-				Bit 1 = Timer1 on/off
-				Bit 2 = Timer2 on/off
-				Bit 3 = Timer3 on/off
-				Bit 4 = ?
-				Bit 5 = ?
-				Bit 6 = ?
+0020 B	R/W	: TRUN - Timer Operation Control Register
 				Bit 7 = Prescaler on/off
-0022 B		: TREG0 - Time Register 0 (Write only)
-0023 B		: TREG1 - Time Register 1 (Write only)
-0024 B		: T01MOD - Timer 0,1 Mode Register
-				Bit 0-1 = Timer0 source clock.
-					00 = External input (HBlank).
-					01 = T1 Prescaler.
-					10 = T4 Prescaler.
-					11 = T16 Prescaler.
-				Bit 2-3 = Timer1 source clock.
-					00 = Input from timer0.
-					01 = T1 Prescaler.
-					10 = T16 Prescaler.
-					11 = T256 Prescaler.
-				Bit 4-5 = Select PWM0 cycle, only used in PWM mode
-					00 = Reserved
-					01 = 2^6-1 PWM
-					10 = 2^7-1 cycle
-					11 = 2^8-1
-				Bit 6-7 = Timer 0, 1 Operation mode setting
+				Bit 6 = -
+				Bit 5 = Timer5?
+				Bit 4 = Timer4?
+				Bit 3 = Timer3 on/off
+				Bit 2 = Timer2 on/off
+				Bit 1 = Timer1 on/off
+				Bit 0 = Timer0 on/off
+0022 B	W	: TREG0 - Time Register 0
+0023 B	W	: TREG1 - Time Register 1
+0024 B	R/W	: T01MOD - Timer 0,1 Mode Register
+				Bit 7-6 = Timer 0, 1 Operation mode setting
 					00 = 2 8-bit timers.
 					01 = 16-bit timer
 					10 =  8-bit Programmable Pulse Generator (square wave) output
 					11 =  8-bit PWM output (Timer0), 8-bit timer (Timer1).
-0025 B		: TFFCFR - 8 Bit Timer Flip-Flop Control Register
-		R/W		Bit 0 = Flip signal select, 0 = Flipped by Timer0, 1 = Flipped by Timer1.
-		R/W		Bit 1 = Invert on/off.
-		W		Bit 2-3 = TFF1 Control (software flip)
-					00 = Flip TFF1.
-					01 = Set TFF1 to "1".
-					10 = Set TFF1 to "0".
-					11 = Don't change.
-		R/W		Bit 4 = Flip signal select, 0 = Flipped by Timer2, 1 = Flipped by Timer3.
-		R/W		Bit 5 = Invert on/off.
-		W		Bit 6-7 = TFF3 Control (software flip)
-					00 = Flip TFF3.
-					01 = Set TFF3 to "1".
-					10 = Set TFF3 to "0".
-					11 = Don't change.
-0026 B		: TREG2 - Time Register 2 (Write only)
-0027 B		: TREG3 - Time Register 3 (Write only)
-0028 B		: T23MOD - Timer 2,3 Mode Register
-				Bit 0-1 = Timer2 source clock.
+				Bit 5-4 = Select PWM0 cycle, only used in PWM mode
 					00 = -
-					01 = T1 Prescaler.
-					10 = T4 Prescaler.
-					11 = T16 Prescaler.
-				Bit 2-3 = Timer3 source clock.
-					00 = Input from timer2.
-					01 = T1 Prescaler.
-					10 = T16 Prescaler.
-					11 = T256 Prescaler.
-				Bit 4-5 = Select PWM2 cycle, only used in PWM mode
-					00 = Reserved
 					01 = 2^6-1 PWM
 					10 = 2^7-1 cycle
 					11 = 2^8-1
-				Bit 6-7 = Timer 2, 3 Operation mode setting
+				Bit 3-2 = Timer1 source clock.
+					00 = Input from timer0.
+					01 = T1 Prescaler.
+					10 = T16 Prescaler.
+					11 = T256 Prescaler.
+				Bit 1-0 = Timer0 source clock.
+					00 = External input (HBlank).
+					01 = T1 Prescaler.
+					10 = T4 Prescaler.
+					11 = T16 Prescaler.
+0025 B		: TFFCR - 8 Bit Timer Flip-Flop Control Register
+		W		Bit 7-6 = TFF3 Control (software flip)
+					00 = Flip TFF3.
+					01 = Set TFF3 to "1".
+					10 = Set TFF3 to "0".
+					11 = Don't change. Always read as 11
+		R/W		Bit 5   = Invert on/off.
+		R/W		Bit 4   = Flip signal select, 0 = Flipped by Timer2, 1 = Flipped by Timer3.
+		W		Bit 3-2 = TFF1 Control (software flip)
+					00 = Flip TFF1.
+					01 = Set TFF1 to "1".
+					10 = Set TFF1 to "0".
+					11 = Don't change. Always read as 11
+		R/W		Bit 1   = Invert on/off.
+		R/W		Bit 0   = Flip signal select, 0 = Flipped by Timer0, 1 = Flipped by Timer1.
+0026 B	W	: TREG2 - Time Register 2
+0027 B	W	: TREG3 - Time Register 3
+0028 B	R/W	: T23MOD - Timer 2,3 Mode Register
+				Bit 7-6 = Timer 2, 3 Operation mode setting
 					00 = 2 8-bit timers.
 					01 = 16-bit timer
 					10 =  8-bit Programmable Pulse Generator (square wave) output
 					11 =  8-bit PWM output (Timer2), 8-bit timer (Timer3).
-0029 B		: TRDC - Timer Register Double Buffer Control Register
-				Bit 0 = Timer0 double buffer on/off.
-				Bit 1 = Timer2 double buffer on/off.
-				Bit 2-7 = -
+				Bit 5-4 = Select PWM2 cycle, only used in PWM mode
+					00 = -
+					01 = 2^6-1 PWM
+					10 = 2^7-1 cycle
+					11 = 2^8-1
+				Bit 3-2 = Timer3 source clock.
+					00 = Input from timer2.
+					01 = T1 Prescaler.
+					10 = T16 Prescaler.
+					11 = T256 Prescaler.
+				Bit 1-0 = Timer2 source clock.
+					00 = -
+					01 = T1 Prescaler.
+					10 = T4 Prescaler.
+					11 = T16 Prescaler.
+0029 B	R/W	: TRDC - Timer Register Double Buffer Control Register
+				Bit 7-2 = -
+				Bit 1   = Timer2 double buffer on/off.
+				Bit 0   = Timer0 double buffer on/off.
 
-002C B		: ???	0x0C Written by Bios at shutdown.
-002D B		: ???	0x0C Written by Bios at shutdown.
-002E B		: ???	0x4C Written by Bios at shutdown.
-002F B		: ???	0x4C Written by Bios at shutdown.
+002C B	W	: Port A Control Register?		0x0C Written by Bios at reset.
+				Bit 7-4 = -
+				Bit 3   = IOPA Bit 3 function: 0=In, 1=Out. (TO3)
+				Bit 2   = IOPA Bit 2 function: 0=In, 1=Out. (TO1)
+				Bit 1   = IOPA Bit 1 function: 0=In, 1=Out. (PA1/TI0)
+				Bit 0   = IOPA Bit 0 function: 0=In, 1=Out.
+002D B	W	: Port A Function Register?		0x0C Written by Bios at reset.
+				Bit 7-4 = -
+				Bit 3   = IOPA Bit 3 function: 0=Port, 1=Timer out 3.
+				Bit 2   = IOPA Bit 2 function: 0=Port, 1=Timer out 1.
+				Bit 1-0 = -
+002E B	W	: Port B Control Register?		0x4C Written by Bios at reset.
+				Bit 7 = IOPB Bit 7 function: 0=In, 1=Out. (INT0)
+				Bit 6 = IOPB Bit 6 function: 0=In, 1=Out. (TO6)
+				Bit 5 = IOPB Bit 5 function: 0=In, 1=Out. (TI7)
+				Bit 4 = IOPB Bit 4 function: 0=In, 1=Out. (TI6)
+				Bit 3 = IOPB Bit 3 function: 0=In, 1=Out. (TO5)
+				Bit 2 = IOPB Bit 2 function: 0=In, 1=Out. (TO4)
+				Bit 1 = IOPB Bit 1 function: 0=In, 1=Out. (TI5)
+				Bit 0 = IOPB Bit 0 function: 0=In, 1=Out. (T14)
+002F B	W	: Port B Function Register?		0x4C Written by Bios at reset.
+				Bit 7   = -
+				Bit 6   = IOPB Bit 6 function: 0=Port, 1=Timer out 6.
+				Bit 5-4 = -
+				Bit 3   = IOPB Bit 3 function: 0=Port, 1=Timer out 5.
+				Bit 2   = IOPB Bit 2 function: 0=Port, 1=Timer out 4.
+				Bit 1-0 = -
 
-003C B		: ??? MSAR0?	0x20 ChipSelect0 adr, 0x200000 ROM address?
-003D B		: ??? MAMR0?	0xFF ChipSelect0 mask, 2MB size?
-003E B		: ??? MSAR1?	0x80 ChipSelect1 adr, 0x800000 start address?
-003F B		: ??? MAMR1?	0x7F ChipSelect1 mask, 2MB size?
+0030 B		: TREG4L?
+0031 B		: TREG4H?
+0032 B		: TREG5L?
+0033 B		: TREG5H?
+0034 B		: CAP1L?
+0035 B		: CAP1H?
+0036 B		: CAP2L?
+0037 B		: CAP2H?
+0038 B		: T4MOD?	0x30 written by BIOS
+0039 B		: T4FFCR?
+003A B		: T45CR?
 
-0048 B		:
+003C B	R/W	: MSAR0?	0x20 ChipSelect0 adr, 0x200000 ROM address?
+				Bit 7-0 = Address bit 23-16
+003D B	R/W	: MAMR0?	0xFF ChipSelect0 mask, 2MB size?
+				Bit 7-2 = Address mask bit 20-15
+				Bit 1   = Address mask bit 14-9
+				Bit 0   = Address mask bit 8
+003E B	R/W	: MSAR1?	0x80 ChipSelect1 adr, 0x800000 start address?
+				Bit 7-0 = Address bit 23-16
+003F B	R/W	: MAMR1?	0x7F ChipSelect1 mask, 2MB size?
+				Bit 7-2 = Address mask bit 21-16
+				Bit 1   = Address mask bit 15-9
+				Bit 0   = Address mask bit 8
 
-0050 B		: Serial Buffer Data
-0051 B		: Serial Control (details ?)
-				Bit 0 = IO interface input clock selection, 0=Baud rate generator 1=SCLK0 pin input?
-				Bit 1 = Edge selection for SCLK0 pin (IO mode), 0=rising edge 1=falling edge?
-				Bit 2 = Error? Framing?
-				Bit 3 = Error? Parity?
-				Bit 4 = Error? Overrun?
-				Bit 5 = Parity addition, enable/disable?
-				Bit 6 = Parity, 0=odd 1=even?
-				Bit 7 = Received data bit8?
-0052 B		: Serial Mode Control 0 (details ?)
-				Bit 0-1 = Serial transmission clock (UART)?
-					00 = Timer 0 trigger?
-					01 = Baut rate generator?
-					10 = Internal clock f-sys?
-					11 = External clock (SCLK0 input)?
-				Bit 2-3 = Serial transmission mode?
+0040 B		: TREG6L?
+0041 B		: TREG6H?
+0042 B		: TREG7L?
+0043 B		: TREG7H?
+0044 B		: CAP3L?
+0045 B		: CAP3H?
+0046 B		: CAP4L?
+0047 B		: CAP4H?
+0048 B		: T5MOD?	0x30 written by BIOS
+0049 B		: T5FFCR?
+
+004C B		: PG0REG
+004D B		: PG1REG
+004E B		: PG01CR
+
+0050 B	R/W	: SC0BUF - Serial Buffer Data
+0051 B		: SC0CR - Serial Control
+		R		Bit 7 = Received data bit8?
+		R/W		Bit 6 = Parity, 0=odd 1=even?
+		R/W		Bit 5 = Parity addition, enable/disable?
+		R		Bit 4 = Error Overrun? cleared after reading.
+		R		Bit 3 = Error Parity? cleared after reading.
+		R		Bit 2 = Error Framing? cleared after reading.
+		R/W		Bit 1 = Edge selection for SCLK0 pin (IO mode), 0=rising edge 1=falling edge?
+		R/W		Bit 0 = IO interface input clock selection, 0=Baud rate generator 1=SCLK0 pin input?
+0052 B	R/W	: SC0MOD - Serial Mode Control 0
+				Bit 7   = Transfer data bit8?
+				Bit 6   = CTS on/off?
+				Bit 5   = Receive control, receive enable/disable?
+				Bit 4   = Wakeup function (9-bit UART), enable/disable?
+				Bit 3-2 = Serial transmission mode?
 					00 = IO interface mode?
 					01 = 7-bit mode (UART)?
 					10 = 8-bit mode (UART)?
 					11 = 9-bit mode (UART)?
-				Bit 4 = Wakeup function (9-bit UART), enable/disable?
-				Bit 5 = Receive control, receive enable/disable?
-				Bit 6 = CTS on/off?
-				Bit 7 = Transfer data bit8?
+				Bit 1-0 = Serial transmission clock (UART)?
+					00 = Timer Out 2 trigger?
+					01 = Baut rate generator?
+					10 = Internal clock f-sys?
+					11 = External clock (SCLK0 input)?
 
-0053 B		: Baud Rate Generator 1 Control Register?
-				Bit 0-3 = Divisor for Baud rate generator?
-					0000 = Divide by 16?
-					0001 = Divide by 1 (no division, only in UART mode)?
-					 to
-					1111 = Divide by 15?
-				Bit 4-5 = Baud Rate Generator 1 input clock selection?
+0053 B	R/W	: BR0CR - Baud Rate Generator 1 Control Register?
+				Bit 7   = 0?
+				Bit 6   = -?
+				Bit 5-4 = Baud Rate Generator 1 input clock selection?
 					00 = T0 (4/fc)?
 					01 = T2 (16/fc)?
 					10 = T8 (64/fc)?
 					11 = T32 (256/fc)?
-				Bit 6 = -?
-				Bit 7 = 0?
+				Bit 3-0 = Divisor for Baud rate generator?
+					0000 = Divide by 16?
+					0001 = Divide by 1 (no division, only in UART mode)?
+					 to
+					1111 = Divide by 15?
 
-005C B		: ??? MSAR2?	0xFF ChipSelect2 adr?
-005D B		: ??? MAMR2?	0xFF ChipSelect2 mask?
-005E B		: ??? MSAR3?	0xFF ChipSelect3 adr?
-005F B		: ??? MAMR3?	0xFF ChipSelect3 mask?
+0054 B	R/W	: SC1BUF?
+0055 B		: SC1CR?
+0056 B	R/W	: SC1MOD?
+0057 B		: BR1CR?
+0058 B	R/W	: ODE?
 
-0060 W	R	: Battery status (AD), this is shifted down 6 steps by the bios before written to 6F80.
-				Bit 0    = A/D conversion data storage flag, 1=conversion result stored. Cleared to 0 after read.
-				Bit 1-5  = 1.
-				Bit 6-15 = A/D conversion result.
+005A B	R/W	: DREFCR?
+005B B		: DMEMCR?
 
-0068 B		: B0CS	0x17 Written by Bios at reset?
-				Bit 0-1 = timing
-				Bit 2 = width Byte / Word
-				Bit 4 = enable
-0069 B		: B1CS	0x17 Written by Bios at reset?
-				Bit 0-1 = timing
-				Bit 2 = width Byte / Word
-				Bit 4 = enable
-006A B		: B2CS	0x03 Written by Bios at reset?
-				Bit 0-1 = timing
-				Bit 2 = width Byte / Word
-				Bit 3 = mode
-				Bit 4 = enable
-006B B		: B3CS	0x03 Written by Bios at reset?
-				Bit 0-1 = timing
-				Bit 2 = width Byte / Word
-				Bit 3 = cas
-				Bit 4 = enable
-006C B		: BEXCS	0x02 Written by Bios at reset?
-				Bit 0-1 = timing
-				Bit 2 = width Byte / Word
+005C B	R/W	: MSAR2?	0xFF ChipSelect2 adr?
+				Bit 7-0 = Address bit 23-16
+005D B	R/W	: MAMR2?	0xFF ChipSelect2 mask?
+				Bit 7-0 = Address mask bit 22-15
+005E B	R/W	: MSAR3?	0xFF ChipSelect3 adr?
+				Bit 7-0 = Address bit 23-16
+005F B	R/W	: MAMR3?	0xFF ChipSelect3 mask?
+				Bit 7-0 = Address mask bit 22-15
 
-006D B		: ADMOD 0x04 Written by Bios in VBlank, battery measure/AD/INTAD.
-				Bit 0-1 = channel
-				Bit 2 = start, reads 0
-				Bit 3 = speed
-				Bit 4 = scan
-				Bit 5 = repeat
-				Bit 6 = busy
-				Bit 7 = end
-006E B		: Watchdog Timer Mode Control (WDMOD)?
-				Bit 0 = Pin control at STOP mode, 1 drives pin even during STOP mode?
-				Bit 1 = Internal reset on runaway?
-				Bit 2-3 = Selects HALT mode?
-					00 = RUN mode?
-					01 = STOP mode?
-					10 = IDLE1 mode?
-					11 = IDEL2 mode?
-				Bit 4 = Warmup time, 0=2^14/fc, 1=2^16/fc?
-				Bit 5-6 = Selects watchdog timer detection time?
+0060 W	R	: ADREG0 - Battery status (AD), this is shifted down 6 steps by the bios before written to 6F80.
+				Bit 15-6 = A/D conversion result.
+				Bit 5-1  = 1.
+				Bit 0    = A/D conversion data storage flag? 1=conversion result stored. Cleared to 0 after read.
+
+0062 W	R	: ADREG1?
+				Bit 15-6 = A/D conversion result.
+				Bit 5-0  = 1.
+
+0064 W	R	: ADREG2?
+				Bit 15-6 = A/D conversion result.
+				Bit 5-0  = 1.
+
+0066 W	R	: ADREG3?
+				Bit 15-6 = A/D conversion result.
+				Bit 5-0  = 1.
+
+0068 B	W	: B0CS - 0x17 Written by Bios at reset?
+				Bit 7-5 = -
+				Bit 4   = enable
+				Bit 3   = -
+				Bit 2   = Width: 0=Word,1=Byte
+				Bit 1-0 = timing, 0=2Wait, 1=1Wait, 2=1Wait+n, 3=0Wait
+0069 B	W	: B1CS - 0x17 Written by Bios at reset?
+				Bit 7-5 = -
+				Bit 4   = enable
+				Bit 3   = -
+				Bit 2   = Width: 0=Word,1=Byte
+				Bit 1-0 = timing
+006A B	W	: B2CS - 0x03 Written by Bios at reset?
+				Bit 7-5 = -
+				Bit 4   = enable
+				Bit 3   = mode, 0=16M Area, 1=Set MREG
+				Bit 2   = Width: 0=Word,1=Byte
+				Bit 1-0 = timing
+006B B	W	: B3CS - 0x03 Written by Bios at reset?
+				Bit 7-5 = -
+				Bit 4   = enable
+				Bit 3   = CS3/CAS
+				Bit 2   = Width: 0=Word,1=Byte
+				Bit 1-0 = timing
+006C B	W	: BEXCS - 0x02 Written by Bios at reset?
+				Bit 7-3 = -
+				Bit 2   = Width: 0=Word,1=Byte
+				Bit 1-0 = timing
+
+006D B		: ADMOD - 0x04 Written by Bios in VBlank, battery measure/AD/INTAD.
+		R		Bit 7 = end
+		R		Bit 6 = busy
+		R/W		Bit 5 = repeat
+		R/W		Bit 4 = scan mode, 0=fixed 1=Channel Scan mode.
+		R/W		Bit 3 = speed, 0=high speed (160 states), 1=low speed (320 states).
+		R/W		Bit 2 = start, reads 0
+		R/W		Bit 1-0 = channel
+006E B	R/W	: WDMOD - Watchdog Timer Mode Control.
+				Bit 7   = Watchdog enable/disable?
+				Bit 6-5 = Selects watchdog timer detection time?
 					00 = 2^16/fc?
 					01 = 2^18/fc?
 					10 = 2^20/fc?
 					11 = 2^22/fc?
-				Bit 7 = Watchdog enable/disable?
+				Bit 4   = Warmup time after STOP, 0=2^14/fc, 1=2^16/fc?
+				Bit 3-2 = Selects HALT mode?
+					00 = RUN mode?
+					01 = STOP mode?
+					10 = IDLE1 mode?
+					11 = IDEL2 mode?
+				Bit 1   = Internal reset on runaway?
+				Bit 0   = Pin control at STOP mode, 1 drives pin even during STOP mode?
 
 				0xF0 Written by Bios at game bootup?
 				0x14 Written by Bios at startup.
 				0x04 Written by Bios at reset?
 				AND 0xF2, OR 0x14...
-				Bit 4 = Tested by vector 0x08 IRQ.
+				Bit 4 = Tested by NMI (PowerButton).
 
-006F B		: Watch Dog Timer (WDCR).
-				Requires 0x4E to be written every 100ms otherwise the NGPC will reset.
+006F B	W	: WDCR - Watch Dog Timer Control Register.
+				Requires 0x4E to be written every 2^xx/fc clocks otherwise the NGPC will reset.
 				0xB1   = Disable code.
 				0x4E   = Clear code.
 				Others = Dont care.
 
-0070 B		: RTC alarm/INTAD interrupt level
-				Bit 0-3 = RTC
-				Bit 4-7 = INTAD AD conversion (battery level) finished.
-0071 B		: VBL/Z80 interrupt level
-				Bit 0-3 = Vertical Blanking
-				Bit 4-7 = Z80
-0072 B		: INT7??? interrupt level
-				Bit 0-3 = ??? Not used.
-				Bit 4-7 = INT 0x0E? Used by "Auto clock speed regeneration with button presses", (Clock Gear Set).
-0073 B		: Timer 01 interrupt level:
-				Bit 0-3 = Timer 0
-				Bit 4-7 = Timer 1
-0074 B		: Timer 23 interrupt level:
-				Bit 0-3 = Timer 2
-				Bit 4-7 = Timer 3
-0075 B		: Timer 45 interrupt level?:
-				Bit 0-3 = Timer R 4?
-				Bit 4-7 = Timer R 5?
-0076 B		: Timer 67 interrupt level?:
-				Bit 0-3 = Timer R 6?
-				Bit 4-7 = Timer R 7?
-0077 B		: Serial0 interrupt level:
-				Bit 0-3 = Serial0 Transmit
-				Bit 4-7 = Serial0 Receive
-0078 B		: Serial1 interrupt level?:
-				Bit 0-3 = Serial1 Transmit?
-				Bit 4-7 = Serial1 Receive?
-0079 B		: DMA end interrupt level:
-				Bit 0-3 = Channel 0
-				Bit 4-7 = Channel 1
-007A B		: DMA end interrupt level:
-				Bit 0-3 = Channel 2
-				Bit 4-7 = Channel 3
-007B B		: Power button interrupt control	0x04 Written by Bios at reset/powerdown/illegal instr.?
-				Bit 0 = nmi.edge.rising
-				Bit 1 = int0.level.high
-				Bit 2 = int0.enable
+Interrupt priority registers:
+Bit 7 & 3 are read/write, all other bits are write only.
+Bit 7 & 3 indicate if interrupt is pending, writing a 0 clears the pending interrupt.
+Bit 6-4 & 2-0 is the priority, a value of 7 is the same as 0.
 
-007C B		: Micro DMA0 start vector
-007D B		: Micro DMA1 start vector
-007E B		: Micro DMA2 start vector
-007F B		: Micro DMA3 start vector
+0070 B		: INTE0AD - Interrupt Enable 0 & AD (RTC alarm/INTAD)
+				Bit 7-4 = INTAD AD conversion (battery level).
+				Bit 3-0 = INT0 (RTC alarm)
+0071 B		: INTE45 - Interrupt Enable 4/5 (VBL/Z80)
+				Bit 7-4 = INT5 (Z80)
+				Bit 3-0 = INT4 (Vertical Blanking)
+0072 B		: INTE67 - Interrupt Enable 6/7
+				Bit 7-4 = INT7 Used by "Auto clock speed regeneration with button presses", (Clock Gear Set).
+				Bit 3-0 = INT6 Not used.
+0073 B		: INTET01 - Interrupt Enable Timer 0/1
+				Bit 7-4 = Timer 1
+				Bit 3-0 = Timer 0
+0074 B		: INTET23 - Interrupt Enable Timer 2/3
+				Bit 7-4 = Timer 3
+				Bit 3-0 = Timer 2
+0075 B		: INTET45 - Interrupt Enable Timer 4/5?
+				Bit 7-4 = Timer R 5?
+				Bit 3-0 = Timer R 4?
+0076 B		: INTET67 - Interrupt Enable Timer 6/7?
+				Bit 7-4 = Timer R 7?
+				Bit 3-0 = Timer R 6?
+0077 B		: INTES0 - Interrupt Enable Serial 0
+				Bit 7-4 = Serial0 Transmit
+				Bit 3-0 = Serial0 Receive
+0078 B		: INTES1 - Interrupt Enable Serial 1?
+				Bit 7-4 = Serial1 Transmit?
+				Bit 3-0 = Serial1 Receive?
+0079 B		: INTETC01 - Interrupt Enable DMA 0/1 end
+				Bit 7-4 = Channel 1
+				Bit 3-0 = Channel 0
+007A B		: INTETC23 - Interrupt Enable DMA 2/3 end
+				Bit 7-4 = Channel 3
+				Bit 3-0 = Channel 2
+
+007B B	W	: IIMC - Interrupt Input Mode Control Register. Power button interrupt control 0x04 Written by Bios at reset/powerdown/illegal instr.?
+				Bit 2 = INT0 0=Disable, 1=Enable.
+				Bit 1 = INT0 0=Rising edge, 1=level high.
+				Bit 0 = NMI 0=falling edge, 1=rising/falling edge.
+
+007C B		: DMA0V Micro DMA0 start vector
+				Bit 7-3 = -
+		W		Bit 4-0 = Vector
+007D B		: DMA1V Micro DMA1 start vector
+				Bit 7-3 = -
+		W		Bit 4-0 = Vector
+007E B		: DMA2V Micro DMA2 start vector
+				Bit 7-3 = -
+		W		Bit 4-0 = Vector
+007F B		: DMA3V Micro DMA3 start vector
+				Bit 7-3 = -
+		W		Bit 4-0 = Vector
 
 0080 B		: CPU Speed. Value 0-4 = 6.144MHz - 384KHz.
 
 0090 B		: RTC Control:
-				Bit 0 = Enable?
-				Bit 1 = Preserved during time set.
-				Bit 5-7 = Set after time set.
+				Bit 7-5 = Set after time set.
+				Bit 1   = Preserved during time set.
+				Bit 0   = Enable?
 0091 B		: RTC: Years (BCD)
 0092 B/W	: RTC: Months (BCD), Bios reads word, writes byte
 0093 B		: RTC: Days (BCD)
@@ -316,10 +472,10 @@ FF0000 -> FFFFFF	BIOS
 0095 B		: RTC: Minutes (BCD)
 0096 B/W	: RTC: Seconds (BCD)
 0097 B		: RTC: Weekday / Leap Year
-				Bit 0-2 = Weekday (0=sunday, 6=saturday)
-				Bit 3	= -
-				Bit 4-5 = (Years % 4)
-				Bit 6-7 = -
+				Bit 7-6 = -
+				Bit 5-4 = (Years % 4)
+				Bit 3   = -
+				Bit 2-0 = Weekday (0=sunday, 6=saturday)
 0098 B		: ALARM: Day (BCD)
 0099 B		: ALARM: Hour (BCD)
 009A B		: ALARM: Minute (BCD)
@@ -331,33 +487,34 @@ FF0000 -> FFFFFF	BIOS
 00A3 B		: Right DAC output
 
 00B0 B		: Controller Status, 1 = pressed?
-				Bit 0 = "Up"
-				Bit 1 = "Down"
-				Bit 2 = "Left"
-				Bit 3 = "Right"
-				Bit 4 = "A"
-				Bit 5 = "B"
-				Bit 6 = "Option" (C button NeoGeo controller when connected)
 				Bit 7 = - (D button NeoGeo controller when connected)
+				Bit 6 = "Option" (C button NeoGeo controller when connected)
+				Bit 5 = "B"
+				Bit 4 = "A"
+				Bit 3 = "Right"
+				Bit 2 = "Left"
+				Bit 1 = "Down"
+				Bit 0 = "Up"
 
-00B1 B		: Power Button?
-				Bit 0	= Power Button? 1=normal, 0=pushed
-				Bit 1	= Sub battery ok? 1=ok, 0=fail.
-				Bit 2-7 = ???
+00B1 B		: Power Button
+				Bit 7-2 = ???
+				Bit 1   = Sub battery ok? 1=ok, 0=fail.
+				Bit 0   = Power Button? 1=normal, 0=pushed
 
 00B2 B		: COMM status
+				Bit 7-1 = -
 				Bit 0	= RTS: 1 = OFF, 0 = ON
-				Bit 1-7 = -
 
 00B3 B 		: ???
-				Bit 0-1	= ???
-				Bit 2	= Power button NMI on/off.
-				Bit 3-7 = ???
+				Bit 7-3 = ???
+				Bit 2   = Power button NMI on/off.
+				Bit 1-0	= ???
 
 00B4 W 		: ???	0x000A Written by Bios at startup.
 					0x00A0 written at Shutdown.
 
 00B6 W 		: ???	0x0050 compared, 0x0050 and 0x0005 set by Bios.
+					0x0005 set before measuring battery.
 
 00B8 B		: Sound Chip Activation, 
 				0x55 = ON,
@@ -367,7 +524,7 @@ FF0000 -> FFFFFF	BIOS
 				0x55 = ON,
 				0xAA = OFF
 
-00BA B		: Z80 NMI. When written to causes a NMI on the Z80.
+00BA B		: Z80 NMI. When written to, causes an NMI on the Z80.
 
 00BC B		: Z80 <-> TLCS-900h Communication Interface (See Z80 - 0x8000)
 
@@ -391,8 +548,8 @@ FF0000 -> FFFFFF	BIOS
 
 6C14 W		: Addition of 6C25-6C2B, 6F87 & 6F94. Check to see if setup is needed
 6C16 W		: Frame counter for "inactive" shutdown.
-6C18 W		: Frame counter for battery measure.
-6C1A W		: Frame compare for battery measure.
+6C18 W		: Frame counter for next battery measure.
+6C1A W		: Frame compare for next battery measure (how many frames between measures).
 6C1C W		: Counter for shutdown?
 6C1E W		: ?
 
@@ -416,6 +573,7 @@ FF0000 -> FFFFFF	BIOS
 6C2C B		: ??? 0x00 written everytime CPU speed (0x0080) is set.
 
 6C2D B		: 0x60?
+
 6C34 B		: RTC Alarm hour, BCD, used during setting.
 6C35 B		: RTC Alarm minute, BCD, used during setting.
 6C36 B		: RTC Alarm day of week
@@ -441,14 +599,14 @@ FF0000 -> FFFFFF	BIOS
 				01 = Alarm is setting/ongoing?
 				02 = Alarm is set/on.
 
-6C49-6C4C	: SWI 1 function pointer.
+6C49-6C4C	: Used during SWI 1 as function pointer.
 
 6C55 B		: Game Type 
 				00 = Bios Menu (Catalogue == 0xFFFF)
 				01 = Game
 				02 = Developer mode? (Catalogue == 0xFFFE)
 
-6C57 B		: Copy of CPU Speed?
+6C57 B		: Copy of CPU Speed
 				Bit 0-2 = Value 0-4 = 6.144MHz - 384KHz
 				Bit 3-5 = - ?
 				Bit 6-7 = !0 = Auto clock speed regeneration with panel switch input
@@ -469,6 +627,8 @@ FF0000 -> FFFFFF	BIOS
 6C5D B		: Copy of byte from 0x9FFFF8, compared to 0x33
 
 6C5F B		: Used by joypad reading routine (last value?).
+
+6C61 B		: Set to 0xFF during battery measure, set to 0 after.
 
 6C62 B		: Something during alarm set.
 6C63 B		: RTC month during alarm set.
@@ -491,7 +651,7 @@ FF0000 -> FFFFFF	BIOS
 
 6D00 B		: Serial Comms Transmit buffer count.
 6D01 B		: Serial Comms Receive buffer count.
-6D02 B		: Serial Comms flag?
+6D02 B		: Serial Comms counter?
 6D03 B		: Serial Comms flag?
 6D04 B		: Serial Comms flag?
 6D05 B		: Serial Comms status flag? 0xFF is Error?
@@ -530,10 +690,16 @@ FF0000 -> FFFFFF	BIOS
 6E8B B		: ???	Function pointer for System VBlank 7?
 				00 - 07 = Function
 
-6E95 W		: Reset RTC and more if not 0x4E50(/"NP"?)
+6E95 W		: Run setup if not 0x4E50(/"NP"?)
 
 
 6F80 W		: Battery Voltage, Maximum value 0x3FF, see 0x0060.
+				;@ Max = 0x3FF
+				;@ To start > 0x210
+				;@ Low < 0x200
+				;@ Bad < 0x1E2
+				;@ Shutdown <= 0x1D3
+				;@ Alarm minimum = 0x16E
 
 6F82 B		: Joypad Status
 				Bit 0 = "Up"
@@ -662,7 +828,7 @@ FF0000 -> FFFFFF	BIOS
 
 8000 B	: Z80 <-> TLCS-900h Communication Interface (See TLCS900h - 0x00BC)
 
-C000 B	: Write any value to this address to start the Z80 interrupt
+C000 B	: Write any value to this address to cause an INT4 (Z80) interrupt
 			in the TLCS-900h code.
 
 
@@ -681,7 +847,7 @@ C000 B	: Write any value to this address to start the Z80 interrupt
 8004 B		: Window X Size (0xA0 at reset)
 8005 B		: Window Y Size (0x98 at reset)
 
-8006 B		: Frame Rate Register (0xC6 at reset, readonly)
+8006 B		: Frame Rate Register (0xC6 at reset, readonly?)
 
 8008 B		: Raster Position Horizontal
 8009 B		: Raster Position Vertical
@@ -852,37 +1018,37 @@ Interrupt sources:
 	SWI 0,				vector 0x00,	address 0xFFFF00, Reset vector.
 	SWI 1,				vector 0x01,	address 0xFFFF04, default vector interrupt.
 	SWI 2,				vector 0x02,	address 0xFFFF08, illegal instruction interrupt.
-	SWI 3,				vector 0x03,	address 0xFFFF0C
-	SWI 4,				vector 0x04,	address 0xFFFF10
-	SWI 5,				vector 0x05,	address 0xFFFF14
-	SWI 6,				vector 0x06,	address 0xFFFF18
-	SWI 7,				vector 0x07,	address 0xFFFF1C
+	SWI 3,				vector 0x03,	address 0xFFFF0C, User controlled through 0x6FB8
+	SWI 4,				vector 0x04,	address 0xFFFF10, User controlled through 0x6FBC
+	SWI 5,				vector 0x05,	address 0xFFFF14, User controlled through 0x6FC0
+	SWI 6,				vector 0x06,	address 0xFFFF18, User controlled through 0x6FC4
+	SWI 7,				vector 0x07,	address 0xFFFF1C, Debugging? Fetches adr from 0x3FFF1C
 
-	PowerButton,		vector 0x08,	address 0xFFFF20, NMI
-	INTWD?,				vector 0x09,	address 0xFFFF24, watch dog timer (NMI)?
-	RTC Alarm,			vector 0x0A,	address 0xFFFF28
-	Vertical Blanking,	vector 0x0B,	address 0xFFFF2C
-	Z80,				vector 0x0C,	address 0xFFFF30
-	INT6? unused,		vector 0x0D,	address 0xFFFF34
-	INT7?,				vector 0x0E,	address 0xFFFF38, joypad interrupt?
-	??? unused,			vector 0x0F,	address 0xFFFF3C
-	Timer 0,			vector 0x10,	address 0xFFFF40
-	Timer 1,			vector 0x11,	address 0xFFFF44
-	Timer 2,			vector 0x12,	address 0xFFFF48
-	Timer 3,			vector 0x13,	address 0xFFFF4C
-	INTTR4? unused,		vector 0x14,	address 0xFFFF50
-	INTTR5? unused,		vector 0x15,	address 0xFFFF54
-	INTTR6? unused,		vector 0x16,	address 0xFFFF58
-	INTTR7? unused,		vector 0x17,	address 0xFFFF5C
-	Serial TX0,			vector 0x18,	address 0xFFFF60
-	Serial RX0,			vector 0x19,	address 0xFFFF64
-	Serial TX1 unused,	vector 0x1A,	address 0xFFFF68
-	Serial RX1 unused,	vector 0x1B,	address 0xFFFF6C
-	INTAD,				vector 0x1C,	address 0xFFFF70, battery AD interrupt.
-	DMA0 End,			vector 0x1D,	address 0xFFFF74
-	DMA1 End,			vector 0x1E,	address 0xFFFF78
-	DMA2 End,			vector 0x1F,	address 0xFFFF7C
-	DMA3 End,			vector 0x20,	address 0xFFFF80
+	NMI (PowerButton),	vector 0x08,	address 0xFFFF20, NMI
+	INTWD,				vector 0x09,	address 0xFFFF24, Watchdog timer (NMI)
+	INT0 (RTC Alarm),	vector 0x0A,	address 0xFFFF28
+	INT4 (V-Blanking),	vector 0x0B,	address 0xFFFF2C
+	INT5 (Z80),			vector 0x0C,	address 0xFFFF30
+	INT6 unused,		vector 0x0D,	address 0xFFFF34
+	INT7,				vector 0x0E,	address 0xFFFF38, joypad interrupt?
+	Reserved,			vector 0x0F,	address 0xFFFF3C
+	INTT0 Timer 0,		vector 0x10,	address 0xFFFF40
+	INTT1 Timer 1,		vector 0x11,	address 0xFFFF44
+	INTT2 Timer 2,		vector 0x12,	address 0xFFFF48
+	INTT3 Timer 3,		vector 0x13,	address 0xFFFF4C
+	INTT4? unused,		vector 0x14,	address 0xFFFF50
+	INTT5? unused,		vector 0x15,	address 0xFFFF54
+	INTT6? unused,		vector 0x16,	address 0xFFFF58
+	INTT7? unused,		vector 0x17,	address 0xFFFF5C
+	INTRX0 Serial 0 rx,	vector 0x18,	address 0xFFFF60
+	INTTX0 Serial 0 tc,	vector 0x19,	address 0xFFFF64
+	INTRX1? unused,		vector 0x1A,	address 0xFFFF68
+	INTTX1? unused,		vector 0x1B,	address 0xFFFF6C
+	INTAD,				vector 0x1C,	address 0xFFFF70, Battery AD interrupt.
+	INTTC0 DMA0 End,	vector 0x1D,	address 0xFFFF74
+	INTTC1 DMA1 End,	vector 0x1E,	address 0xFFFF78
+	INTTC2 DMA2 End,	vector 0x1F,	address 0xFFFF7C
+	INTTC3 DMA3 End,	vector 0x20,	address 0xFFFF80
 
 NEOGEO POCKET SYSTEM CALL (BIOS CALL)
 =====================================

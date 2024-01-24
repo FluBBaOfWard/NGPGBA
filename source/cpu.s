@@ -62,8 +62,8 @@ runStart:
 ;@----------------------------------------------------------------------------
 ngpFrameLoop:
 ;@----------------------------------------------------------------------------
-	ldrh r0,z80Enabled
-	ands r0,r0,r0,lsr#8
+	ldrb r0,z80Enabled
+	cmp r0,#0
 	beq NoZ80Now
 
 	ldr z80ptr,=Z80OpTable
@@ -111,8 +111,7 @@ waitCountOut:		.byte 0
 waitMaskOut:		.byte 0
 
 z80Enabled:			.byte 0
-gZ80OnOff:			.byte 1
-					.byte 0,0
+					.byte 0,0,0
 
 ;@----------------------------------------------------------------------------
 stepFrame:					;@ Return after 1 frame
@@ -122,8 +121,8 @@ stepFrame:					;@ Return after 1 frame
 ;@----------------------------------------------------------------------------
 ngpStepLoop:
 ;@----------------------------------------------------------------------------
-	ldrh r0,z80Enabled
-	ands r0,r0,r0,lsr#8
+	ldrb r0,z80Enabled
+	cmp r0,#0
 	beq NoZ80Step
 
 	ldr z80ptr,=Z80OpTable
@@ -228,11 +227,11 @@ tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 	.type   tweakCpuSpeed STT_FUNC
 ;@----------------------------------------------------------------------------
 	cmp r0,#0
-;@---Speed - 6.144MHz / 60Hz / 198 lines	;NGP TLCS-900H.
+;@---Speed - 6.144MHz / 59.95Hz / 199 lines	;NGP TLCS-900H.
 	ldr r0,=T9_HINT_RATE				;@ 515
 	movne r0,r0,lsr#1
 	str r0,tlcs900hCyclesPerScanline
-;@---Speed - 3.072MHz / 60Hz / 198 lines	;NGP Z80.
+;@---Speed - 3.072MHz / 59.95Hz / 199 lines	;NGP Z80.
 	mov r0,r0,lsr#1
 	str r0,z80CyclesPerScanline
 	bx lr
@@ -240,7 +239,7 @@ tweakCpuSpeed:				;@ in r0=0 normal / !=0 half speed.
 tweakZ80Speed:				;@ in r0=0 normal, 1=half speed, 2=1/4 speed...
 	.type   tweakZ80Speed STT_FUNC
 ;@----------------------------------------------------------------------------
-;@---Speed - 3.072MHz / 60Hz / 198 lines	;NGP Z80.
+;@---Speed - 3.072MHz / 59.95Hz / 199 lines	;NGP Z80.
 	ldr r1,=T9_HINT_RATE/2				;@ 515/2
 	mov r1,r1,lsr r0
 	str r1,z80CyclesPerScanline
