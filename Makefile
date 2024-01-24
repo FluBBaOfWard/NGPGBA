@@ -34,7 +34,6 @@ SOURCES		:=	source \
 DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	graphics \
-				source/Shared/graphics
 
 #---------------------------------------------------------------------------------
 # options for code generation
