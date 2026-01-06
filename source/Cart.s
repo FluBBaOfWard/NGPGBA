@@ -1,5 +1,7 @@
 #ifdef __arm__
 
+//#define EMBEDDED_ROM
+
 #include "TLCS900H/TLCS900H.i"
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
@@ -38,6 +40,7 @@
 	.section .rodata
 	.align 2
 
+#ifdef EMBEDDED_ROM
 ROM_Space:
 //	.incbin "ngproms/Bust-A-Move Pocket (U).ngc"
 //	.incbin "ngproms/Dark Arms - Beast Buster 1999 (JUE) (M2).ngc"
@@ -53,8 +56,9 @@ ROM_Space:
 //	.incbin "ngproms/Rockman - Battle & Fighters (J).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
 //	.incbin "ngproms/Super Real Mahjong - Premium Collection (J).ngc"
-//rawBios:
-//	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
+rawBios:
+	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
+#endif
 
 #if GBA
 	.section .ewram, "ax", %progbits	;@ For the GBA
@@ -68,8 +72,10 @@ machineInit: 				;@ Called from C
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4,t9ptr,lr}
 
-//	ldr r0,=ROM_Space
-//	str r0,romSpacePtr
+#ifdef EMBEDDED_ROM
+	ldr r0,=ROM_Space
+	str r0,romSpacePtr
+#endif
 	ldr r0,romSpacePtr
 
 	bl tlcs9000MemInit
@@ -226,7 +232,11 @@ romSize:
 maxRomSize:
 	.long 0
 
-	.section .sbss
+#ifdef GBA
+	.section .sbss				;@ This is EWRAM on GBA with devkitARM
+#else
+	.section .bss
+#endif
 ngpRAM:
 	.space 0x4000
 biosSpace:

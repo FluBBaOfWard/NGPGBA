@@ -1,6 +1,6 @@
-# NGPGBA V0.5.7
+# NGPGBA V0.5.8
 
-<img align="right" width="220" src="./logo.png" />
+<img align="right" width="220" src="./logo.png" alt="The NGP logo"/>
 
 This is a SNK Neogeo Pocket (Color) emulator for the Nintendo GBA.
 
@@ -119,6 +119,8 @@ Dwedit for help and inspiration with a lot of things.
 
 Fredrik Ahlström
 
-Twitter @TheRealFluBBa
+<https://bsky.app/profile/therealflubba.bsky.social>
 
-http://www.github.com/FluBBaOfWard
+<https://www.github.com/FluBBaOfWard>
+
+Twitter @TheRealFluBBa

@@ -23,7 +23,7 @@
 	.syntax unified
 	.arm
 
-#if GBA
+#ifdef GBA
 	.section .ewram, "ax", %progbits	;@ For the GBA
 #else
 	.section .text						;@ For anything else
@@ -188,32 +188,24 @@ Z80_SetEnable:				;@ Address 0xB9 of the TLCS-900H, r0=enabled
 	and r0,r0,#1
 	strb r0,z80Enabled
 	eor r0,r0,#1
-	stmfd sp!,{z80ptr,lr}
-	ldr z80ptr,=Z80OpTable
-	bl Z80SetResetPin
-	ldmfd sp!,{z80ptr,lr}
-	bx lr
+	ldr r1,=Z80OpTable
+	b Z80SetResetPin
 ;@----------------------------------------------------------------------------
 Z80_nmi_do:					;@ Address 0xBA of the TLCS-900H
 ;@----------------------------------------------------------------------------
 	ldrb r1,z80Enabled
 	cmp r1,#0
 	bxeq lr
-	stmfd sp!,{z80ptr,lr}
-	ldr z80ptr,=Z80OpTable
+	ldr r1,=Z80OpTable
 	mov r0,#1
-	bl Z80SetNMIPin
-	ldmfd sp!,{z80ptr,lr}
-	bx lr
+	b Z80SetNMIPin
 ;@----------------------------------------------------------------------------
-cpu1SetIRQ:
+cpu1SetIRQ:					;@ r0=pin state
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{z80ptr,lr}
-	ldr z80ptr,=Z80OpTable
-	bl Z80SetIRQPin
-	ldmfd sp!,{z80ptr,pc}
+	ldr r1,=Z80OpTable
+	b Z80SetIRQPin
 ;@----------------------------------------------------------------------------
-getRegAdr:				;@ r0=register, 0x00-0xFF
+getRegAdr:					;@ r0=register, 0x00-0xFF
 	.type   getRegAdr STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldr r1,=tlcs900HState

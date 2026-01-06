@@ -5,6 +5,9 @@
 
 #define MIX_LEN (528)
 
+	.global t6W28_0
+	.global soundMode
+
 	.global soundInit
 	.global soundReset
 	.global vblSound1
@@ -15,8 +18,6 @@
 	.global T6W28_R_W
 	.global T6W28_DAC_L_W
 	.global T6W28_DAC_R_W
-	.global t6W28_0
-	.global soundMode
 
 	.extern pauseEmulation
 
@@ -38,8 +39,8 @@ soundInit:
 ;@	orr r0,r0,#0x8000			;@ PWM 7-bit 131.072kHz
 ;@	strh r0,[r5,#REG_SGBIAS]
 
-	ldrb r2,soundMode			;@ If r2=0, no sound.
-	cmp r2,#1
+	ldrb r4,soundMode
+	cmp r4,#1					;@ If r4=0, no sound.
 
 	movmi r0,#0
 	ldreq r0,=0x0b040000		;@ Stop all channels, output ratio=100% dsA.  use directsound A for L&R, timer 0
@@ -73,8 +74,7 @@ soundInit:
 	bl t6W28Init				;@ Sound
 
 
-	ldrb r2,soundMode			;@ If r2=0, no sound.
-	cmp r2,#1
+	cmp r4,#1					;@ If r4=0, no sound.
 
 	mov r2,#0					;@ Timer 0 controls sample rate:
 	str r2,[r5,#REG_TM0CNT_L]	;@ Stop timer 0
@@ -205,7 +205,11 @@ soundMode:
 t6W28_0:
 	.space t6Size
 
-	.section .sbss
+#ifdef GBA
+	.section .sbss				;@ This is EWRAM on GBA with devkitARM
+#else
+	.section .bss
+#endif
 	.align 2
 FREQTBL:
 	.space 1024*2

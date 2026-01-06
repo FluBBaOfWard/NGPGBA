@@ -5,8 +5,9 @@
 ;@  Created by Fredrik Ahlström on 2008-04-02.
 ;@  Copyright © 2008-2024 Fredrik Ahlström. All rights reserved.
 ;@
-;@ ASM header for the T6W28 sound emulator
-;@
+#if !__ASSEMBLER__
+	#error This header file is only for use in assembly files!
+#endif
 
 	t6ptr			.req r0
 
