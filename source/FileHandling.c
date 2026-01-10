@@ -12,12 +12,66 @@
 #include "cpu.h"
 #include "Gfx.h"
 #include "io.h"
+#include "Memory.h"
 #include "NGPHeader.h"
 
 EWRAM_BSS int selectedGame = 0;
 EWRAM_BSS ConfigData cfg;
 
 //---------------------------------------------------------------------------------
+bool updateSettingsFromNGP() {
+	if (g_BIOSBASE_COLOR == NULL && g_BIOSBASE_BNW == NULL) {
+		return false;
+	}
+
+	bool changed = false;
+	int val;
+	val = t9LoadBX(0x6F8B);
+	if (cfg.birthYear != val) {
+		cfg.birthYear = val;
+		changed = true;
+	}
+	val = t9LoadBX(0x6F8C);
+	if (cfg.birthMonth != val) {
+		cfg.birthMonth = val;
+		changed = true;
+	}
+	val = t9LoadBX(0x6F8D);
+	if (cfg.birthDay != val) {
+		cfg.birthDay = val;
+		changed = true;
+	}
+
+	val = t9LoadBX(0x6C34);
+	if (cfg.alarmHour != val) {
+		cfg.alarmHour = val;
+		changed = true;
+	}
+	val = t9LoadBX(0x6C35);
+	if (cfg.alarmMinute != val) {
+		cfg.alarmMinute = val;
+		changed = true;
+	}
+
+	val = t9LoadBX(0x6F87) & 1;
+	if (cfg.language != val) {
+		cfg.language = val;
+		gLang = val;
+		changed = true;
+	}
+	if (gMachine == HW_NGPCOLOR) {
+		val = t9LoadBX(0x6F94) & 7;
+		if (cfg.palette != val) {
+			cfg.palette = val;
+			gPaletteBank = val;
+			changed = true;
+		}
+	}
+	settingsChanged |= changed;
+
+	return changed;
+}
+
 int loadSettings() {
 //	FILE *file;
 /*
@@ -37,7 +91,13 @@ int loadSettings() {
 		return 1;
 	}
 */
-	gGammaValue = cfg.gammaValue;
+	gGammaValue  = cfg.gammaValue;
+	gLang        = cfg.language;
+	gPaletteBank = cfg.palette;
+	gConfig      = cfg.config;
+	int mach     = gConfig & 3;
+	if (mach == 3) mach = 0;
+	gMachineSet  = mach;
 	emuSettings  = cfg.emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
 	sleepTime    = cfg.sleepTime;
 	joyCfg       = (joyCfg&~0x400)|((cfg.controller&1)<<10);
@@ -53,7 +113,7 @@ void saveSettings() {
 	cfg.gammaValue  = gGammaValue;
 	cfg.emuSettings = emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
 	cfg.sleepTime   = sleepTime;
-	cfg.controller  = (joyCfg>>10)&1;
+	cfg.controller  = (joyCfg>>10) & 1;
 //	strlcpy(cfg.currentPath, currentDir, sizeof(currentDir));
 /*
 	if (findFolder(folderName)) {
@@ -189,10 +249,10 @@ int loadColorBIOS(void) {
 
 int loadBWBIOS(void) {
 	if (loadBIOS(biosSpace)) {
-		g_BIOSBASE_BW = biosSpace;
+		g_BIOSBASE_BNW = biosSpace;
 		return 1;
 	}
-	g_BIOSBASE_BW = NULL;
+	g_BIOSBASE_BNW = NULL;
 	return 0;
 }
 

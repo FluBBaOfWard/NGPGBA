@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.8 2026-01-06"
+#define EMUVERSION "V0.5.8 2026-01-10"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -197,7 +197,6 @@ void nullUIDebug(int key) {
 
 void resetConsole() {
 	checkMachine();
-	machineInit();
 	loadCart(0);
 }
 
@@ -291,7 +290,7 @@ void paletteChange() {
 		gPaletteBank = 0;
 	}
 	settingsChanged = true;
-	monoPalInit();
+	monoPalInit(gPaletteBank);
 	paletteTxAll();
 	fixBiosSettings();
 }

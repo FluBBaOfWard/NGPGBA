@@ -2,8 +2,8 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.8 - 2026-01-06 (FluBBa)
-	Optimized/destroyed BS1B opcode.
+V0.5.8 - 2026-01-10 (FluBBa)
+	Optimized reset/init.
 
 V0.5.7 - 2024-01-24 (FluBBa)
 	Fixed IRQ & Micro DMA handling.

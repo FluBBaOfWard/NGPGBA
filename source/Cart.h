@@ -23,7 +23,7 @@ extern const u8 rawBios[0x10000];
 extern const u8 *romSpacePtr;
 extern const NgpHeader *ngpHeader;
 extern const void *g_BIOSBASE_COLOR;
-extern const void *g_BIOSBASE_BW;
+extern const void *g_BIOSBASE_BNW;
 
 void machineInit(void);
 void loadCart(int emuFlags);

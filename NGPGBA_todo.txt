@@ -1,5 +1,7 @@
 NGPGBA Todo
 
+	Add eject game, BIOS setting Auto/Off.
+	Patch BIOS to not do flash write-check.
 	Add speedhacks for the Z80?
 	Fix savestates!
 	Save settings for Swap A-B.
@@ -28,7 +30,6 @@ CPU:
 	See TLCS900H Todo.
 
 Sound T6W28:
-	Rewrite mixer with per channel eor.
 	Add sample playing?
 	Sample Darkarms from HW.
 

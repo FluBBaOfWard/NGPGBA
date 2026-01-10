@@ -50,9 +50,8 @@ void myVBlank(void) {
 //---------------------------------------------------------------------------------
 int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
-	irqInit();
-
 	enableExit = true;
+	irqInit();
 	irqSet(IRQ_VBLANK, myVBlank);
 	irqEnable(IRQ_VBLANK);
 	setupGraphics();

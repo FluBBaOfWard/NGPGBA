@@ -25,7 +25,7 @@
 	.syntax unified
 	.arm
 
-	.section .ewram, "ax"
+	.section .ewram, "ax", %progbits
 	.align 2
 ;@----------------------------------------------------------------------------
 soundInit:
@@ -200,7 +200,13 @@ soundMode:
 	.byte 1
 	.space 3
 
+#ifdef NDS
+	.section .sbss				;@ This is DTCM on NDS with devkitARM
+#elif GBA
+	.section .bss				;@ This is IWRAM on GBA with devkitARM
+#else
 	.section .bss
+#endif
 	.align 2
 t6W28_0:
 	.space t6Size

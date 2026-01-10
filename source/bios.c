@@ -3,7 +3,7 @@
 //  NGPGBA
 //
 //  Created by Fredrik Ahlström on 2023-11-10.
-//  Copyright © 2023,2024 Fredrik Ahlström. All rights reserved.
+//  Copyright © 2023-2026 Fredrik Ahlström. All rights reserved.
 //
 
 #include <gba.h>
@@ -17,7 +17,7 @@
 #include "FileHandling.h"
 #include "TLCS900H/TLCS900H.h"
 
-extern u32 sngBIOSHLE;			// From AsmHleBios.s
+extern void sngBIOSHLE(void);		// From AsmHleBios.s
 
 //=============================================================================
 
@@ -340,26 +340,18 @@ void resetHleBios(NgpHeader *cartHeader) {
 	t9StoreWX(0xA5A5, 0x6C7A);		// Running mode
 	t9StoreWX(0x5AA5, 0x6C7C);		// Running mode
 
-	// Language: 0 = Japanese, 1 = English
-	if (gLang) {
-		t9StoreBX(0x01, 0x6F87);
-	}
-	else {
-		t9StoreBX(0x00, 0x6F87);
-	}
-	t9StoreBX(gPaletteBank, 0x6F94);
-
 	// Color Mode Selection: 0x00 = B&W, 0x10 = Colour
 	int color = cartHeader->mode;
 	if (gMachine == HW_NGPMONO) {
 		color = 0;
+		t9StoreBX(color, 0x6F91);	// Machine
+	}
+	else {
+		t9StoreBX(0x10, 0x6F91);	// Machine
 	}
 	t9StoreBX(color, 0x6F90);		// Game Displaymode
 	t9StoreBX(color, 0x6F95);		// Current Displaymode
-	t9StoreBX(color, 0x6F91);		// Machine
-	if (gMachine == HW_NGPCOLOR) {
-		t9StoreBX(0x10, 0x6F91);	// Machine
-	}
+
 	// User Interrupt table
 	for (i = 0; i < 0x12; i++) {
 		t9StoreLX(0xFF23DF, 0x6FB8 + i * 4);
@@ -407,6 +399,7 @@ void resetHleBios(NgpHeader *cartHeader) {
 	t9StoreBX(0xDC, 0x6C25);
 	t9StoreBX(0x0A, 0x70);
 	t9StoreBX(0xDC, 0x71);
+	fixBiosSettings();
 }
 
 void fixBiosSettings(void) {

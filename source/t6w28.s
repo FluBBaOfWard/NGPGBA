@@ -6,7 +6,6 @@
 ;@  Copyright © 2008-2024 Fredrik Ahlström. All rights reserved.
 ;@
 ;@ SNK Neogeo Pocket K2Audio sound chip emulator for ARM32.
-
 #ifdef __arm__
 
 #include "t6w28.i"
@@ -32,7 +31,7 @@
 	.arm
 
 #ifdef NDS
-	.section .itcm						;@ For the NDS
+	.section .itcm, "ax", %progbits		;@ For the NDS ARM9
 #elif GBA
 	.section .iwram, "ax", %progbits	;@ For the GBA
 #else
@@ -185,7 +184,7 @@ t6W28GetStateSize:			;@ Out r0=state size.
 	bx lr
 
 ;@----------------------------------------------------------------------------
-	.section .ewram,"ax"
+	.section .ewram, "ax", %progbits
 	.align 2
 ;@----------------------------------------------------------------------------
 t6W28W:						;@ In r0 = value, r1 = struct-pointer, right ch.
@@ -285,7 +284,7 @@ setFreqL:
 ;@----------------------------------------------------------------------------
 calculateVolumes:			;@ In r2 = snptr
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r0,r1,r3-r7,lr}
+	stmfd sp!,{r0,r1,r3-r6,lr}
 
 	adr r1,attenuation
 
@@ -313,8 +312,8 @@ calculateVolumes:			;@ In r2 = snptr
 	ldr r0,[r1,r0,lsl#2]
 	orr r6,r6,r0,lsl#16
 
-	add lr,r2,#calculatedVolumes
-	ldr r7,=0x00800080
+	add r12,r2,#calculatedVolumes
+	ldr lr,=0x00800080
 	mov r1,#15
 volLoop:
 	movs r0,r1,lsl#31
@@ -323,12 +322,12 @@ volLoop:
 	teq r1,r1,lsl#29
 	addmi r0,r0,r5
 	addcs r0,r0,r6
-	add r0,r7,r0,lsr#8
-	str r0,[lr,r1,lsl#2]
+	add r0,lr,r0,lsr#8
+	str r0,[r12,r1,lsl#2]
 	subs r1,r1,#1
 	bne volLoop
 	strb r1,[r2,#snAttChg]
-	ldmfd sp!,{r0,r1,r3-r7,pc}
+	ldmfd sp!,{r0,r1,r3-r6,pc}
 ;@----------------------------------------------------------------------------
 attenuation:						;@ each step * 0.79370053 (-2dB?)
 	.long 0x3FFF,0x32CB,0x2851,0x2000,0x1966,0x1428,0x1000,0x0CB3

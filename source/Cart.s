@@ -1,10 +1,10 @@
 #ifdef __arm__
 
-//#define EMBEDDED_ROM
-
 #include "TLCS900H/TLCS900H.i"
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
+
+//#define EMBEDDED_ROM
 
 	.extern reset				;@ from bios.c
 
@@ -24,7 +24,7 @@
 	.global romSpacePtr
 	.global ngpHeader
 	.global g_BIOSBASE_COLOR
-	.global g_BIOSBASE_BW
+	.global g_BIOSBASE_BNW
 	.global cartFlags
 	.global romStart
 	.global isBiosLoaded
@@ -56,8 +56,10 @@ ROM_Space:
 //	.incbin "ngproms/Rockman - Battle & Fighters (J).ngc"
 //	.incbin "ngproms/Sonic the Hedgehog - Pocket Adventure (JUE).ngc"
 //	.incbin "ngproms/Super Real Mahjong - Premium Collection (J).ngc"
+ROM_SpaceEnd:
 rawBios:
-	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
+//	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket (J).ngp"
+//	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
 #endif
 
 #if GBA
@@ -75,9 +77,15 @@ machineInit: 				;@ Called from C
 #ifdef EMBEDDED_ROM
 	ldr r0,=ROM_Space
 	str r0,romSpacePtr
+	mov r0,#ROM_SpaceEnd-ROM_Space
+	str r0,gRomSize
+	ldr r0,=biosSpace
+//	str r0,g_BIOSBASE_COLOR
+	ldr r1,=rawBios
+	mov r2,#0x10000
+//	bl memcpy					;@ Can't run Games with BIOS on GBA, needs to write and read from game.
 #endif
 	ldr r0,romSpacePtr
-
 	bl tlcs9000MemInit
 
 	ldr t9ptr,=tlcs900HState
@@ -110,7 +118,7 @@ skipBiosSettings:
 	ldmfd sp!,{r4,t9ptr,lr}
 	bx lr
 
-//	.section .ewram,"ax"
+//	.section .ewram, "ax", %progbits
 //	.align 2
 ;@----------------------------------------------------------------------------
 loadCart: 					;@ Called from C:  r0=emuflags
@@ -161,7 +169,7 @@ z80MemInit:
 	mov r3,#8
 z80MemLoop0:
 	str r2,[r0,#32]				;@ z80WriteTbl
-	str r1,[r0],#4
+	str r1,[r0],#4				;@ z80ReadTbl
 	subs r3,r3,#1
 	bne z80MemLoop0
 
@@ -204,7 +212,7 @@ emuFlags:
 cartFlags:
 	.byte 0 					;@ cartflags
 gConfig:
-	.byte 0						;@ Config, bit 7=BIOS on/off
+	.byte 0						;@ Config, bit 0,1=machine, 7=BIOS auto/off
 gMachineSet:
 	.byte HW_AUTO
 gMachine:
@@ -224,7 +232,7 @@ romSpacePtr:
 	.long 0
 g_BIOSBASE_COLOR:
 	.long 0
-g_BIOSBASE_BW:
+g_BIOSBASE_BNW:
 	.long 0
 gRomSize:
 romSize:
