@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.8 2026-01-10"
+#define EMUVERSION "V0.5.8 2026-01-12"
 
 #define HALF_CPU_SPEED		(1<<16)
 #define ALLOW_SPEED_HACKS	(1<<17)
@@ -149,6 +149,10 @@ void setupGUI() {
 
 /// This is called when going from emu to ui.
 void enterGUI() {
+	if (updateSettingsFromNGP() && (emuSettings & AUTOSAVE_SETTINGS)) {
+		saveSettings();
+		settingsChanged = false;
+	}
 }
 
 /// This is called going from ui to emu.
@@ -171,7 +175,7 @@ void uiAbout() {
 	updateGameInfo();
 	drawText("B:        NGP A Button", 3);
 	drawText("A:        NGP B Button", 4);
-	drawText("L:        NGP D Button", 5);
+	drawText("L:        NG  D Button", 5);
 	drawText("Start:    Option Button", 6);
 	drawText("Select:   Power Button", 7);
 	drawText("DPad:     Joystick", 8);

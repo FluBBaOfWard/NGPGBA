@@ -33,8 +33,8 @@ Now you can use the cross to navigate the menus, A to select an option, B to
 
 ### Controller
 
-* Autofire: Select if you want autofire.
-* Controller: 2P start a 2 player game.
+* B Autofire: Select if you want autofire on button B.
+* A Autofire: Select if you want autofire on button A.
 * Swap A-B: Swap which GBA button is mapped to which NGP button.
 
 ### Display

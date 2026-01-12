@@ -2,8 +2,10 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.5.8 - 2026-01-10 (FluBBa)
+V0.5.8 - 2026-01-12 (FluBBa)
 	Optimized reset/init.
+	Fixed saving of settings.
+	Added scrolling to menus.
 
 V0.5.7 - 2024-01-24 (FluBBa)
 	Fixed IRQ & Micro DMA handling.

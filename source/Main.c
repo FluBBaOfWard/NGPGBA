@@ -53,10 +53,12 @@ int main(int argc, char **argv) {
 	enableExit = true;
 	irqInit();
 	irqSet(IRQ_VBLANK, myVBlank);
-	irqEnable(IRQ_VBLANK);
+	irqEnable(IRQ_VBLANK | IRQ_KEYPAD);
 	setupGraphics();
 	setupGUI();
 	getInput();
+	initSettings();
+	loadSettings();
 	if (initFileHelper(NGPID)) {
 		loadColorBIOS();
 		const RomHeader *rh = findRom(0);

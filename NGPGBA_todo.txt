@@ -1,10 +1,11 @@
 NGPGBA Todo
 
-	Add eject game, BIOS setting Auto/Off.
-	Patch BIOS to not do flash write-check.
+	Add eject game.
+	Fix writing to flash, reserve 64kB EWRAM.
+	Patch BIOS to not do flash write-check?
 	Add speedhacks for the Z80?
 	Fix savestates!
-	Save settings for Swap A-B.
+	BIOS setting Auto/Off?
 
 	Add SWI & Interrupt to BiosHLE.
 	Rewrite BiosHLE to asm?
@@ -20,10 +21,6 @@ GUI:
 	Remove... Done.
 
 Mem:
-	Flash memory located @ 0x070000 and forward? Picture Puzzle.
-	Flash memory located @ 0x0FA000 and forward? Puyo Puyo 2.
-	Flash memory located @ 0x1D0000 and forward? Darkarms.
-	Flash memory located @ 0x1E0000 and forward? Metal Slug 1.
 	Fix ReadMem_Word & WriteMem_Word
 
 CPU:
