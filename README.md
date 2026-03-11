@@ -8,7 +8,8 @@ This is a SNK Neogeo Pocket (Color) emulator for the Nintendo GBA.
 
 On Windows run NGPGBA.exe to add roms to the emulator, you can also add a real bios.
 Do no overwrite the original .gba file!
-There is no builder included for other platforms yet.
+On other platforms you can use the [HTML Builder](./Builder.html).
+
 The header is defined in Emubase.h, it's 64 bytes long, the size field is in
 little endian, the 32bit id is 0x1A50474E (LE).
 The name field can be 31 bytes plus a terminating zero.
@@ -69,7 +70,8 @@ Now you can use the cross to navigate the menus, A to select an option, B to
  are made.
 * Autopause Game: Toggle if the game should pause when opening the menu.
 * Overclock EWRAM: Changes the waitstates on EWRAM between 2 and 1, might
- damage your GBA and uses more power, around 10% speedgain. Use at your own risk!
+ damage your GBA and uses more power, around 10% speedgain. Doesn't work on
+ Gameboy Micro. Use at your own risk!
 * Autosleep: Change the autosleep time, also see Sleep.
 
 ### Debug

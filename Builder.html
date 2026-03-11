@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>NGPGBA Builder</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+			background-color: #f5f5f5;
+		}
+		.container {
+			background-color: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+		h1 {
+			color: #333;
+			text-align: center;
+		}
+		.upload-section {
+			margin-bottom: 20px;
+			padding: 15px;
+			border: 2px dashed #ccc;
+			border-radius: 5px;
+			text-align: center;
+		}
+		.file-input {
+			margin: 10px 0;
+		}
+		.file-list {
+			margin: 20px 0;
+			max-height: 300px;
+			overflow-y: auto;
+		}
+		.file-item {
+			padding: 10px;
+			margin: 5px 0;
+			background-color: #f9f9f9;
+			border-radius: 3px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.file-name {
+			flex-grow: 1;
+			word-break: break-all;
+		}
+		.remove-btn {
+			background-color: #ff4444;
+			color: white;
+			border: none;
+			padding: 5px 10px;
+			border-radius: 3px;
+			cursor: pointer;
+		}
+		.remove-btn:hover {
+			background-color: #cc0000;
+		}
+		.action-buttons {
+			display: flex;
+			gap: 10px;
+			justify-content: center;
+			margin-top: 20px;
+		}
+		button {
+			padding: 10px 20px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-weight: bold;
+		}
+		#concatBtn {
+			background-color: #4CAF50;
+			color: white;
+		}
+		#concatBtn:hover {
+			background-color: #45a049;
+		}
+		#clearBtn {
+			background-color: #f44336;
+			color: white;
+		}
+		#clearBtn:hover {
+			background-color: #da190b;
+		}
+		.status {
+			margin-top: 20px;
+			padding: 10px;
+			border-radius: 4px;
+			text-align: center;
+		}
+		.success {
+			background-color: #d4edda;
+			color: #155724;
+			border: 1px solid #c3e6cb;
+		}
+		.error {
+			background-color: #f8d7da;
+			color: #721c24;
+			border: 1px solid #f5c6cb;
+		}
+		.instructions {
+			background-color: #e7f3ff;
+			padding: 15px;
+			border-radius: 5px;
+			margin-bottom: 20px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>NGPGBA Builder</h1>
+
+		<div class="instructions">
+			<p><strong>How to use:</strong></p>
+			<ol>
+				<li>Select the GBA emulator file</li>
+				<li>Add additional NeoGeo Pocket files</li>
+				<li>Click "Build ROM" to create the output</li>
+			</ol>
+		</div>
+
+		<div class="upload-section">
+			<h3>Select GBA emulator File</h3>
+			<input type="file" id="mainFile" class="file-input" accept=".gba">
+			<p>Only one file can be selected as the main file</p>
+		</div>
+
+		<div class="upload-section">
+			<h3>Select NeoGeo Pocket Files</h3>
+			<input type="file" id="additionalFiles" class="file-input" multiple accept=".ngp,.ngc">
+			<p>Additional files will be concatenated after the main file</p>
+		</div>
+
+		<div class="file-list" id="fileList">
+			<p>No files selected yet</p>
+		</div>
+
+		<div class="action-buttons">
+			<button id="concatBtn">Build ROM</button>
+			<button id="clearBtn">Clear All Files</button>
+		</div>
+
+		<div id="status" class="status" style="display: none;"></div>
+	</div>
+
+	<script>
+		// DOM elements
+		const mainFileInput = document.getElementById('mainFile');
+		const additionalFilesInput = document.getElementById('additionalFiles');
+		const fileListContainer = document.getElementById('fileList');
+		const concatBtn = document.getElementById('concatBtn');
+		const clearBtn = document.getElementById('clearBtn');
+		const statusDiv = document.getElementById('status');
+
+		// Store selected files
+		let selectedFiles = [];
+
+		// Format bytes to readable string
+		function formatBytes(bytes) {
+			if (bytes === 0) return '0 Bytes';
+			const k = 1024;
+			const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+			const i = Math.floor(Math.log(bytes) / Math.log(k));
+			return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		}
+
+		// Display selected files
+		function displayFileList() {
+			fileListContainer.innerHTML = '';
+
+			if (selectedFiles.length === 0) {
+				fileListContainer.innerHTML = '<p>No files selected yet</p>';
+				return;
+			}
+
+			selectedFiles.forEach((file, index) => {
+				const fileItem = document.createElement('div');
+				fileItem.className = 'file-item';
+
+				const fileNameSpan = document.createElement('span');
+				fileNameSpan.className = 'file-name';
+				fileNameSpan.textContent = `${index === 0 ? 'Main File: ' : 'File: '}${file.name}`;
+
+				const fileSizeSpan = document.createElement('span');
+				fileSizeSpan.textContent = formatBytes(file.size);
+
+				const removeBtn = document.createElement('button');
+				removeBtn.className = 'remove-btn';
+				removeBtn.textContent = 'Remove';
+				removeBtn.onclick = () => {
+					selectedFiles.splice(index, 1);
+					displayFileList();
+				};
+
+				fileItem.appendChild(fileNameSpan);
+				fileItem.appendChild(fileSizeSpan);
+				fileItem.appendChild(removeBtn);
+
+				fileListContainer.appendChild(fileItem);
+			});
+		}
+
+		// Handle file selection
+		function handleFileSelection(event, isMain) {
+			const files = Array.from(event.files);
+
+			if (isMain && files.length > 0) {
+				// Clear any existing main file and set the new one
+				selectedFiles = Array.of(files[0]);
+			}
+			else if (!isMain && files.length > 0) {
+				// Add additional files to the list
+				selectedFiles.push(...files);
+			}
+
+			displayFileList();
+		}
+
+		// Update file list when files are selected
+		mainFileInput.addEventListener('change', () => handleFileSelection(mainFileInput, true));
+		additionalFilesInput.addEventListener('change', () => handleFileSelection(additionalFilesInput, false));
+
+		// Clear all files
+		clearBtn.addEventListener('click', () => {
+			selectedFiles = [];
+			mainFileInput.value = '';
+			additionalFilesInput.value = '';
+			displayFileList();
+			statusDiv.style.display = 'none';
+		});
+
+		// Create ROM header structure
+		function createRomHeader(identifier, fileSize, flags, spritefollow, bios, name) {
+			// Create a buffer for the header (64 bytes total)
+			const headerBuffer = new ArrayBuffer(64);
+			const view = new DataView(headerBuffer);
+
+			// Set fields according to the structure
+			let offset = 0;
+
+			// identifier (u32)
+			view.setUint32(offset, identifier, true);
+			offset += 4;
+
+			// filesize (u32)
+			view.setUint32(offset, fileSize, true);
+			offset += 4;
+
+			// flags (u32)
+			view.setUint32(offset, flags, true);
+			offset += 4;
+
+			// spritefollow (u32)
+			view.setUint32(offset, spritefollow, true);
+			offset += 4;
+
+			// bios (u8)
+			view.setUint8(offset, bios);
+			offset += 1;
+
+			// reserved[15] - set to zero
+			for (let i = 0; i < 15; i++) {
+				view.setUint8(offset, 0);
+				offset += 1;
+			}
+
+			// name[32] - string with null padding
+			const nameBuffer = new TextEncoder().encode(name);
+			for (let i = 0; i < 32; i++) {
+				if (i < nameBuffer.length) {
+					view.setUint8(offset + i, nameBuffer[i]);
+				}
+				else {
+					view.setUint8(offset + i, 0); // null terminate
+				}
+			}
+
+			return headerBuffer;
+		}
+
+		// Concatenate files with headers
+		async function concatenateFiles() {
+			if (selectedFiles.length === 0) {
+				showStatus('Please select at least one file', 'error');
+				return;
+			}
+
+			try {
+				showStatus('Processing files...', 'success');
+
+				// Create a new array to hold the final data
+				const finalArray = [];
+
+				// Process each file with appropriate header
+				for (let i = 0; i < selectedFiles.length; i++) {
+					const file = selectedFiles[i];
+
+					// Read file as array buffer
+					const fileBuffer = await file.arrayBuffer();
+
+					// Create header for all files except the first (which has no header)
+					if (i > 0) {
+						// Create header for additional files
+						const header = createRomHeader(
+							0x1A50474E, // "NGP",0x1A
+							fileBuffer.byteLength, // File size in bytes
+							i === 1 ? 0x04 : 0x00, // Flags - set bit 2 for first additional file (color)
+							0x00, // spritefollow
+							i === 0 ? 0x01 : 0x00, // bios - set bit 0 for first additional file
+							file.name.substring(0, 32) // Name truncated to 32 chars
+						);
+
+						// Add header to the array
+						finalArray.push(new Uint8Array(header));
+					}
+
+					// Add file content to the array
+					finalArray.push(new Uint8Array(fileBuffer));
+				}
+
+				// Create final concatenated array
+				const totalSize = finalArray.reduce((sum, arr) => sum + arr.length, 0);
+				const finalBuffer = new Uint8Array(totalSize);
+				let offset = 0;
+
+				for (const arr of finalArray) {
+					finalBuffer.set(arr, offset);
+					offset += arr.length;
+				}
+
+				// Create blob and download
+				const blob = new Blob([finalBuffer], { type: 'application/octet-stream' });
+				const url = URL.createObjectURL(blob);
+
+				// Create download link
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'concatenated_output.gba';
+				document.body.appendChild(a);
+				a.click();
+
+				// Clean up
+				setTimeout(() => {
+					document.body.removeChild(a);
+					URL.revokeObjectURL(url);
+				}, 100);
+
+				showStatus('Files concatenated successfully!', 'success');
+			} catch (error) {
+				console.error('Error concatenating files:', error);
+				showStatus('Error concatenating files: ' + error.message, 'error');
+			}
+		}
+
+		// Show status message
+		function showStatus(message, type) {
+			statusDiv.textContent = message;
+			statusDiv.className = 'status ' + type;
+			statusDiv.style.display = 'block';
+		}
+
+		// Add event listener to concatenate button
+		concatBtn.addEventListener('click', concatenateFiles);
+
+		// Initialize file list display
+		displayFileList();
+	</script>
+</body>
+</html>
