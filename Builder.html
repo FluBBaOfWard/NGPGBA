@@ -128,13 +128,13 @@
 		<div class="upload-section">
 			<h3>Select GBA emulator File</h3>
 			<input type="file" id="mainFile" class="file-input" accept=".gba">
-			<p>Only one file can be selected as the main file</p>
+			<p>Only one file can be selected as the emulator file</p>
 		</div>
 
 		<div class="upload-section">
 			<h3>Select NeoGeo Pocket Files</h3>
 			<input type="file" id="additionalFiles" class="file-input" multiple accept=".ngp,.ngc">
-			<p>Additional files will be concatenated after the main file</p>
+			<p>Additional files will be concatenated after the emulator file</p>
 		</div>
 
 		<div class="file-list" id="fileList">
@@ -185,7 +185,7 @@
 
 				const fileNameSpan = document.createElement('span');
 				fileNameSpan.className = 'file-name';
-				fileNameSpan.textContent = `${index === 0 ? 'Main File: ' : 'File: '}${file.name}`;
+				fileNameSpan.textContent = `${index === 0 ? 'Emulator File: ' : 'File: '}${file.name}`;
 
 				const fileSizeSpan = document.createElement('span');
 				fileSizeSpan.textContent = formatBytes(file.size);
@@ -207,12 +207,12 @@
 		}
 
 		// Handle file selection
-		function handleFileSelection(event, isMain) {
-			const files = Array.from(event.files);
+		function handleFileSelection(fileInput, isMain) {
+			const files = fileInput.files;
 
 			if (isMain && files.length > 0) {
 				// Clear any existing main file and set the new one
-				selectedFiles = Array.of(files[0]);
+				selectedFiles[0] = files[0];
 			}
 			else if (!isMain && files.length > 0) {
 				// Add additional files to the list
@@ -239,34 +239,34 @@
 		function createRomHeader(identifier, fileSize, flags, spritefollow, bios, name) {
 			// Create a buffer for the header (64 bytes total)
 			const headerBuffer = new ArrayBuffer(64);
-			const view = new DataView(headerBuffer);
+			const headerView = new DataView(headerBuffer);
 
 			// Set fields according to the structure
 			let offset = 0;
 
 			// identifier (u32)
-			view.setUint32(offset, identifier, true);
+			headerView.setUint32(offset, identifier, true);
 			offset += 4;
 
 			// filesize (u32)
-			view.setUint32(offset, fileSize, true);
+			headerView.setUint32(offset, fileSize, true);
 			offset += 4;
 
 			// flags (u32)
-			view.setUint32(offset, flags, true);
+			headerView.setUint32(offset, flags, true);
 			offset += 4;
 
 			// spritefollow (u32)
-			view.setUint32(offset, spritefollow, true);
+			headerView.setUint32(offset, spritefollow, true);
 			offset += 4;
 
 			// bios (u8)
-			view.setUint8(offset, bios);
+			headerView.setUint8(offset, bios);
 			offset += 1;
 
 			// reserved[15] - set to zero
 			for (let i = 0; i < 15; i++) {
-				view.setUint8(offset, 0);
+				headerView.setUint8(offset, 0);
 				offset += 1;
 			}
 
@@ -274,10 +274,10 @@
 			const nameBuffer = new TextEncoder().encode(name);
 			for (let i = 0; i < 32; i++) {
 				if (i < nameBuffer.length) {
-					view.setUint8(offset + i, nameBuffer[i]);
+					headerView.setUint8(offset + i, nameBuffer[i]);
 				}
 				else {
-					view.setUint8(offset + i, 0); // null terminate
+					headerView.setUint8(offset + i, 0); // null terminate
 				}
 			}
 
@@ -303,6 +303,7 @@
 
 					// Read file as array buffer
 					const fileBuffer = await file.arrayBuffer();
+					const fileView = new DataView(fileBuffer);
 
 					// Create header for all files except the first (which has no header)
 					if (i > 0) {
@@ -310,9 +311,9 @@
 						const header = createRomHeader(
 							0x1A50474E, // "NGP",0x1A
 							fileBuffer.byteLength, // File size in bytes
-							i === 1 ? 0x04 : 0x00, // Flags - set bit 2 for first additional file (color)
+							fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00, // Flags - set bit 2 for color
 							0x00, // spritefollow
-							i === 0 ? 0x01 : 0x00, // bios - set bit 0 for first additional file
+							0x00, // bios - set bit 0 for first bios files
 							file.name.substring(0, 32) // Name truncated to 32 chars
 						);
 
@@ -341,7 +342,7 @@
 				// Create download link
 				const a = document.createElement('a');
 				a.href = url;
-				a.download = 'concatenated_output.gba';
+				a.download = 'ngpgba_output.gba';
 				document.body.appendChild(a);
 				a.click();
 
@@ -352,7 +353,8 @@
 				}, 100);
 
 				showStatus('Files concatenated successfully!', 'success');
-			} catch (error) {
+			}
+			catch (error) {
 				console.error('Error concatenating files:', error);
 				showStatus('Error concatenating files: ' + error.message, 'error');
 			}

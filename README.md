@@ -100,7 +100,7 @@ Tries to reset the Flashcart and reboots the GBA.
 * GBA Start is mapped to NeoGeo Pocket Option.
 * GBA Select is mapped to NeoGeo Pocket Power.
 * GBA d-pad is mapped to NeoGeo Pocket d-pad.
-* GBA L button is mapped to NeoGeo Pocket D (debug).
+* GBA L button is mapped to NeoGeo D (debug).
 
 ## Games
 
