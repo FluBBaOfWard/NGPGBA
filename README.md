@@ -8,7 +8,7 @@ This is a SNK Neogeo Pocket (Color) emulator for the Nintendo GBA.
 
 On Windows run NGPGBA.exe to add roms to the emulator, you can also add a real bios.
 Do no overwrite the original .gba file!
-On other platforms you can use the [HTML Builder](./Builder.html).
+On other platforms you can use the [HTML Builder](https://flubbaofward.github.io/NGPGBA/Builder.html).
 
 The header is defined in Emubase.h, it's 64 bytes long, the size field is in
 little endian, the 32bit id is 0x1A50474E (LE).
