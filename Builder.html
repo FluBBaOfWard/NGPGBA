@@ -215,9 +215,12 @@
 		function handleFileSelection(event) {
 			const files = event.target.files;
 
-			if (files.length > 0) {
-				// Add additional files to the list
-				selectedFiles.push(...files);
+			for (const file of files) {
+				if (file.name.toUpperCase().includes( "BIOS")
+						&& file.size === 0x10000) {
+					file.bios = true;
+				}
+				selectedFiles.push(file);
 			}
 
 			displayFileList();
@@ -300,21 +303,19 @@
 				finalArray.push(new Uint8Array(fileBuf));
 
 				// Process each file with appropriate header
-				for (let i = 0; i < selectedFiles.length; i++) {
-					const file = selectedFiles[i];
+				for (const file of selectedFiles) {
 
-				// Read file as array buffer
-				const fileBuffer = await file.arrayBuffer();
-				const fileView = new DataView(fileBuffer);
+					// Read file as array buffer
+					const fileBuffer = await file.arrayBuffer();
+					const fileView = new DataView(fileBuffer);
 
-				// Create header for all ROM files
-					// Create header for additional files
+					// Create header for all ROM files
 					const header = createRomHeader(
 						0x1A50474E, // "NGP",0x1A
 						fileBuffer.byteLength, // File size in bytes
 						fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00, // Flags - set bit 2 for color
 						0x00, // spritefollow
-						0x00, // bios - set bit 0 for first bios files
+						file.bios ? 0x01 : 0x00, // bios - set bit 0 for bios files
 						file.name.substring(0, 32) // Name truncated to 32 chars
 					);
 
