@@ -174,8 +174,13 @@
 		function displayFileList() {
 			fileListContainer.innerHTML = '';
 
+			if (mainFileInput.files.length === 0) {
+				fileListContainer.innerHTML = '<p>No emulator file selected yet</p>';
+				return;
+			}
+
 			if (selectedFiles.length === 0) {
-				fileListContainer.innerHTML = '<p>No files selected yet</p>';
+				fileListContainer.innerHTML = '<p>No ROM files selected yet</p>';
 				return;
 			}
 
@@ -185,7 +190,7 @@
 
 				const fileNameSpan = document.createElement('span');
 				fileNameSpan.className = 'file-name';
-				fileNameSpan.textContent = `${index === 0 ? 'Emulator File: ' : 'File: '}${file.name}`;
+				fileNameSpan.textContent = `${'File: '}${file.name}`;
 
 				const fileSizeSpan = document.createElement('span');
 				fileSizeSpan.textContent = formatBytes(file.size);
@@ -206,15 +211,11 @@
 			});
 		}
 
-		// Handle file selection
-		function handleFileSelection(fileInput, isMain) {
+		// Handle ROM file selection
+		function handleFileSelection(fileInput) {
 			const files = fileInput.files;
 
-			if (isMain && files.length > 0) {
-				// Clear any existing main file and set the new one
-				selectedFiles[0] = files[0];
-			}
-			else if (!isMain && files.length > 0) {
+			if (files.length > 0) {
 				// Add additional files to the list
 				selectedFiles.push(...files);
 			}
@@ -223,13 +224,13 @@
 		}
 
 		// Update file list when files are selected
-		mainFileInput.addEventListener('change', () => handleFileSelection(mainFileInput, true));
-		additionalFilesInput.addEventListener('change', () => handleFileSelection(additionalFilesInput, false));
+		mainFileInput.addEventListener('change', () => displayFileList());
+		additionalFilesInput.addEventListener('change', () => handleFileSelection(additionalFilesInput));
 
 		// Clear all files
 		clearBtn.addEventListener('click', () => {
 			selectedFiles = [];
-			mainFileInput.value = '';
+//			mainFileInput.value = '';
 			additionalFilesInput.value = '';
 			displayFileList();
 			statusDiv.style.display = 'none';
@@ -296,30 +297,30 @@
 
 				// Create a new array to hold the final data
 				const finalArray = [];
+				const fileBuf = await mainFileInput.files[0].arrayBuffer();
+				finalArray.push(new Uint8Array(fileBuf));
 
 				// Process each file with appropriate header
 				for (let i = 0; i < selectedFiles.length; i++) {
 					const file = selectedFiles[i];
 
-					// Read file as array buffer
-					const fileBuffer = await file.arrayBuffer();
-					const fileView = new DataView(fileBuffer);
+				// Read file as array buffer
+				const fileBuffer = await file.arrayBuffer();
+				const fileView = new DataView(fileBuffer);
 
-					// Create header for all files except the first (which has no header)
-					if (i > 0) {
-						// Create header for additional files
-						const header = createRomHeader(
-							0x1A50474E, // "NGP",0x1A
-							fileBuffer.byteLength, // File size in bytes
-							fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00, // Flags - set bit 2 for color
-							0x00, // spritefollow
-							0x00, // bios - set bit 0 for first bios files
-							file.name.substring(0, 32) // Name truncated to 32 chars
-						);
+				// Create header for all ROM files
+					// Create header for additional files
+					const header = createRomHeader(
+						0x1A50474E, // "NGP",0x1A
+						fileBuffer.byteLength, // File size in bytes
+						fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00, // Flags - set bit 2 for color
+						0x00, // spritefollow
+						0x00, // bios - set bit 0 for first bios files
+						file.name.substring(0, 32) // Name truncated to 32 chars
+					);
 
-						// Add header to the array
-						finalArray.push(new Uint8Array(header));
-					}
+					// Add header to the array
+					finalArray.push(new Uint8Array(header));
 
 					// Add file content to the array
 					finalArray.push(new Uint8Array(fileBuffer));
