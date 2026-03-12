@@ -212,8 +212,8 @@
 		}
 
 		// Handle ROM file selection
-		function handleFileSelection(fileInput) {
-			const files = fileInput.files;
+		function handleFileSelection(event) {
+			const files = event.target.files;
 
 			if (files.length > 0) {
 				// Add additional files to the list
@@ -224,13 +224,12 @@
 		}
 
 		// Update file list when files are selected
-		mainFileInput.addEventListener('change', () => displayFileList());
-		additionalFilesInput.addEventListener('change', () => handleFileSelection(additionalFilesInput));
+		mainFileInput.addEventListener('change', displayFileList);
+		additionalFilesInput.addEventListener('change', handleFileSelection);
 
 		// Clear all files
 		clearBtn.addEventListener('click', () => {
 			selectedFiles = [];
-//			mainFileInput.value = '';
 			additionalFilesInput.value = '';
 			displayFileList();
 			statusDiv.style.display = 'none';
