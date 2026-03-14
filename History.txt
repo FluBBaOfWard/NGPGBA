@@ -2,6 +2,10 @@ NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.5.9 - 2026-03-14 (FluBBa)
+	Fixed noise channel period.
+	Fixed starting games with BIOS.
+
 V0.5.8 - 2026-01-12 (FluBBa)
 	Optimized reset/init.
 	Fixed saving of settings.

@@ -16,10 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.8 2026-01-12"
-
-#define HALF_CPU_SPEED		(1<<16)
-#define ALLOW_SPEED_HACKS	(1<<17)
+#define EMUVERSION "V0.5.8 2026-03-14"
 
 void hacksInit(void);
 
@@ -72,6 +69,7 @@ const MItem fileItems[] = {
 	{"Load State", loadState},
 	{"Save State", saveState},
 	{"Save Settings", saveSettings},
+	{"Eject Game", ejectCart},
 	{"Reset Game", resetConsole},
 };
 const MItem ctrlItems[] = {
@@ -141,7 +139,6 @@ const char *const cpuSpeedTxt[]  = {"Full Speed", "Half Speed", "1/4 Speed", "1/
 
 /// This is called at the start of the emulator
 void setupGUI() {
-	emuSettings = AUTOPAUSE_EMULATION | ALLOW_SPEED_HACKS;
 //	keysSetRepeat(25, 4);	// Delay, repeat.
 	menu1.itemCount = ARRSIZE(mainItems) - (enableExit?0:1);
 	closeMenu();

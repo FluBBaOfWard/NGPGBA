@@ -1,11 +1,10 @@
 NGPGBA Todo
 
-	Add eject game.
+	Find speed hacks for bios.
 	Fix writing to flash, reserve 64kB EWRAM.
-	Patch BIOS to not do flash write-check?
 	Add speedhacks for the Z80?
 	Fix savestates!
-	BIOS setting Auto/Off?
+	BIOS setting Auto/Off.
 
 	Add SWI & Interrupt to BiosHLE.
 	Rewrite BiosHLE to asm?

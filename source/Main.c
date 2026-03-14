@@ -52,8 +52,10 @@ int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
 	enableExit = true;
 	irqInit();
-	irqSet(IRQ_VBLANK, myVBlank);
 	irqEnable(IRQ_VBLANK | IRQ_KEYPAD);
+	showSplash(getSplashScreen(NGPID));
+	irqSet(IRQ_VBLANK, myVBlank);
+
 	setupGraphics();
 	setupGUI();
 	getInput();
@@ -61,8 +63,6 @@ int main(int argc, char **argv) {
 	loadSettings();
 	if (initFileHelper(NGPID)) {
 		loadColorBIOS();
-		const RomHeader *rh = findRom(0);
-		loadGame(rh);
 	}
 	else {
 		infoOutput("No roms found.");
@@ -72,15 +72,19 @@ int main(int argc, char **argv) {
 	}
 	checkMachine();
 	machineInit();
-	loadCart(0);
+	patchColorBios(biosSpace);
+	if (romsAvailable > 0) {
+		const RomHeader *rh = findRom(0);
+		loadGame(rh);
+	}
 
 	while (1) {
 		waitVBlank();
-		checkTimeOut();
 		guiRunLoop();
 		if (!pauseEmulation) {
 			run();
 		}
+		checkTimeOut();
 	}
 }
 

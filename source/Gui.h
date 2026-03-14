@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+#define HALF_CPU_SPEED		(1<<16)
+#define ALLOW_SPEED_HACKS	(1<<17)
+
 void setupGUI(void);
 void enterGUI(void);
 void exitGUI(void);

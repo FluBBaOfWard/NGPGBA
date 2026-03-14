@@ -242,6 +242,11 @@ static const u16 irqTable[0x21] = {
 	0x22FC,		// 0x20		IRQ_DMA3End
 };
 
+void patchColorBios(u8 *ngpBios) {
+	// Remove check for writeable flash mem
+	ngpBios[0x3015] = 0x0E;		// RET
+}
+
 bool installHleBios(u8 *ngpBios) {
 	int i;
 	// System Call Table, install iBIOSHLE instructions

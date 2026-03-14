@@ -11,7 +11,7 @@ extern "C" {
 
 extern ConfigData cfg;
 
-int initSettings(void);
+void initSettings(void);
 bool updateSettingsFromNGP(void);
 int loadSettings(void);
 void saveSettings(void);
@@ -21,6 +21,7 @@ int loadNVRAM(void);
 void saveNVRAM(void);
 void loadState(void);
 void saveState(void);
+void ejectCart(void);
 void selectGame(void);
 int loadColorBIOS(void);
 int loadBWBIOS(void);

@@ -11,4 +11,6 @@ void resetHleBios(NgpHeader *cartHeader);
 
 void fixBiosSettings(void);
 
+void patchColorBios(u8 *ngpBios);
+
 #endif

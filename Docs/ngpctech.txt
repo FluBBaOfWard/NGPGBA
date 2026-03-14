@@ -668,7 +668,7 @@ Bit 6-4 & 2-0 is the priority, a value of 7 is the same as 0.
 6DA3 B		: ??? not used?
 6DA4 B		: Inverted value of command sent to Z80?
 
-6E80 B		: ??? Watchdog running? Something to do with Gametype & Watchdog?
+6E80 B		: Watchdog running. 0xFF = disabled.
 
 6E82 W		: Copy of catalogue id (0x6C04)
 6E84 B		: Copy of sub-catalogue id (0x6C06)
