@@ -24,10 +24,22 @@
 		}
 		.upload-section {
 			margin-bottom: 20px;
-			padding: 15px;
+			padding: 5px;
 			border: 2px dashed #ccc;
 			border-radius: 5px;
 			text-align: center;
+		}
+		input[type=file]::file-selector-button {
+			border: 2px solid #b1bcc6;
+			padding: 5px;
+			border-radius: 3px;
+			background-color: #e7f3ff;
+			font-weight: bold;
+		}
+
+		input[type=file]::file-selector-button:hover {
+			background-color: #ced8e4;
+			border: 2px solid #51555a;
 		}
 		.file-input {
 			margin: 10px 0;
@@ -81,6 +93,10 @@
 		#concatBtn:hover {
 			background-color: #45a049;
 		}
+		#concatBtn:disabled {
+			background-color: #878f84;
+			color: #E2E2E2;
+		}
 		#clearBtn {
 			background-color: #f44336;
 			color: white;
@@ -120,6 +136,7 @@
 			<p><strong>How to use:</strong></p>
 			<ol>
 				<li>Select the GBA emulator file</li>
+				<li>Optionaly add a splash screen</li>
 				<li>Add additional NeoGeo Pocket files</li>
 				<li>Click "Build ROM" to create the output</li>
 			</ol>
@@ -128,13 +145,16 @@
 		<div class="upload-section">
 			<h3>Select GBA emulator File</h3>
 			<input type="file" id="mainFile" class="file-input" accept=".gba">
-			<p>Only one file can be selected as the emulator file</p>
+		</div>
+
+		<div class="upload-section">
+			<h3>Select Splash Screen</h3>
+			<input type="file" id="splashFile" class="file-input" accept=".raw,.bin">
 		</div>
 
 		<div class="upload-section">
 			<h3>Select NeoGeo Pocket Files</h3>
 			<input type="file" id="additionalFiles" class="file-input" multiple accept=".ngp,.ngc">
-			<p>Additional files will be concatenated after the emulator file</p>
 		</div>
 
 		<div class="file-list" id="fileList">
@@ -152,6 +172,7 @@
 	<script>
 		// DOM elements
 		const mainFileInput = document.getElementById('mainFile');
+		const splashFileInput = document.getElementById('splashFile');
 		const additionalFilesInput = document.getElementById('additionalFiles');
 		const fileListContainer = document.getElementById('fileList');
 		const concatBtn = document.getElementById('concatBtn');
@@ -173,6 +194,7 @@
 		// Display selected files
 		function displayFileList() {
 			fileListContainer.innerHTML = '';
+			concatBtn.disabled = true;
 
 			if (mainFileInput.files.length === 0) {
 				fileListContainer.innerHTML = '<p>No emulator file selected yet</p>';
@@ -183,6 +205,7 @@
 				fileListContainer.innerHTML = '<p>No ROM files selected yet</p>';
 				return;
 			}
+			concatBtn.disabled = false;
 
 			selectedFiles.forEach((file, index) => {
 				const fileItem = document.createElement('div');
@@ -289,6 +312,10 @@
 
 		// Concatenate files with headers
 		async function concatenateFiles() {
+			if (mainFileInput.files.length === 0) {
+				showStatus('Please select the emulator file', 'error');
+				return;
+			}
 			if (selectedFiles.length === 0) {
 				showStatus('Please select at least one file', 'error');
 				return;
@@ -301,6 +328,11 @@
 				const finalArray = [];
 				const fileBuf = await mainFileInput.files[0].arrayBuffer();
 				finalArray.push(new Uint8Array(fileBuf));
+
+				if (splashFileInput.files.length != 0) {
+					const imageBuf = await splashFileInput.files[0].arrayBuffer();
+					finalArray.push(new Uint8Array(imageBuf));
+				}
 
 				// Process each file with appropriate header
 				for (const file of selectedFiles) {
@@ -370,6 +402,7 @@
 
 		// Add event listener to concatenate button
 		concatBtn.addEventListener('click', concatenateFiles);
+		concatBtn.disabled = true;
 
 		// Initialize file list display
 		displayFileList();
