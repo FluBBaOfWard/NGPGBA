@@ -35,6 +35,7 @@
 			border-radius: 3px;
 			background-color: #e7f3ff;
 			font-weight: bold;
+			cursor: pointer;
 		}
 
 		input[type=file]::file-selector-button:hover {
@@ -96,6 +97,7 @@
 		#concatBtn:disabled {
 			background-color: #878f84;
 			color: #E2E2E2;
+			cursor: not-allowed;
 		}
 		#clearBtn {
 			background-color: #f44336;
@@ -136,8 +138,8 @@
 			<p><strong>How to use:</strong></p>
 			<ol>
 				<li>Select the GBA emulator file</li>
-				<li>Optionaly add a splash screen</li>
-				<li>Add additional NeoGeo Pocket files</li>
+				<li>Optionally add a splash screen (240x160 pixels or 3:2 ratio).</li>
+				<li>Add NeoGeo Pocket ROM files</li>
 				<li>Click "Build ROM" to create the output</li>
 			</ol>
 		</div>
@@ -149,7 +151,7 @@
 
 		<div class="upload-section">
 			<h3>Select Splash Screen</h3>
-			<input type="file" id="splashFile" class="file-input" accept=".raw,.bin">
+			<input type="file" id="splashFile" class="file-input" accept=".png,.jpg,.gif,.bmp,.raw,.bin">
 		</div>
 
 		<div class="upload-section">
@@ -310,6 +312,53 @@
 			return headerBuffer;
 		}
 
+		// Get pixels from image file
+		function processImage(imageFile, destArray) {
+			return new Promise(function (resolve) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+
+					const img = new Image();
+					img.onload = function() {
+						// Create a canvas to decode the image
+						const canvas = new OffscreenCanvas(240, 160);
+						const ctx = canvas.getContext('2d');
+
+						// Draw the image to the canvas
+						ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+
+						// Get image data (RGB format)
+						const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+						const totalPixels = canvas.width * canvas.height;
+
+						const rgbBytes = new Uint8Array(totalPixels*2);
+						for (let i = 0; i < totalPixels; i++) {
+							const pixelIndex = i * 4; // RGBA has 4 components per pixel
+
+							// Extract RGB values
+							let r = imageData.data[pixelIndex];
+							let g = imageData.data[pixelIndex + 1];
+							let b = imageData.data[pixelIndex + 2];
+							const a = imageData.data[pixelIndex + 3];
+							r = ((r * a) / 255) + 255 - a;
+							g = ((g * a) / 255) + 255 - a;
+							b = ((b * a) / 255) + 255 - a;
+
+							// Convert to 15-bits BGR for the GBA
+							let bgrWord = ((b & 0xF8) << 7) | ((g & 0xF8)<<2) | (r>>3);
+							rgbBytes[i*2] = bgrWord ;
+							rgbBytes[i*2 + 1] = bgrWord >> 8;
+						}
+						destArray.push(rgbBytes);
+						resolve();
+					};
+					img.src = reader.result;
+				}
+				reader.readAsDataURL(imageFile);
+			})
+		}
+
 		// Concatenate files with headers
 		async function concatenateFiles() {
 			if (mainFileInput.files.length === 0) {
@@ -329,9 +378,16 @@
 				const fileBuf = await mainFileInput.files[0].arrayBuffer();
 				finalArray.push(new Uint8Array(fileBuf));
 
+				// Handle splash screen
 				if (splashFileInput.files.length != 0) {
-					const imageBuf = await splashFileInput.files[0].arrayBuffer();
-					finalArray.push(new Uint8Array(imageBuf));
+					const imgFile = splashFileInput.files[0];
+					if (imgFile.type.startsWith("image/")) {
+						await processImage(imgFile, finalArray);
+					}
+					else {
+						const imageBuf = await imgFile.arrayBuffer();
+						finalArray.push(new Uint8Array(imageBuf));
+					}
 				}
 
 				// Process each file with appropriate header
