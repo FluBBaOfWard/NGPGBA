@@ -186,31 +186,36 @@ static void turnPowerOn(void) {
 //---------------------------------------------------------------------------------
 bool loadGame(const RomHeader *rh) {
 	if (rh) {
-		selectedGame = selected;
-		cls(0);
-		if (isConsoleRunning()) {
-			drawText("     Please wait, power off.", 9);
-			turnPowerOff();
-		}
-		gRomSize = rh->filesize;
-		romSpacePtr = (u8 *)rh + sizeof(RomHeader);
-		tlcs9000MemInit(romSpacePtr);
-		checkMachine();
-		setEmuSpeed(0);
-		loadCart(0);
-		gameInserted = true;
-		if (emuSettings & AUTOLOAD_NVRAM) {
-			loadNVRAM();
-		}
-		if (emuSettings & AUTOLOAD_STATE) {
-			loadState();
-		}
-		drawText("     Please wait, power on.", 9);
-		turnPowerOn();
-		closeMenu();
-		return false;
+		return loadROM((const u8 *)rh + sizeof(RomHeader), rh->filesize);
 	}
 	return true;
+}
+
+//---------------------------------------------------------------------------------
+bool loadROM(const u8 *rom, int size) {
+	selectedGame = selected;
+	cls(0);
+	if (isConsoleRunning()) {
+		drawText("     Please wait, power off.", 9);
+		turnPowerOff();
+	}
+	gRomSize = size;
+	romSpacePtr = rom;
+	tlcs9000MemInit(romSpacePtr);
+	checkMachine();
+	setEmuSpeed(0);
+	loadCart();
+	gameInserted = true;
+	if (emuSettings & AUTOLOAD_NVRAM) {
+		loadNVRAM();
+	}
+	if (emuSettings & AUTOLOAD_STATE) {
+		loadState();
+	}
+	drawText("     Please wait, power on.", 9);
+	turnPowerOn();
+	closeMenu();
+	return false;
 }
 
 void selectGame() {

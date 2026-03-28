@@ -1,4 +1,4 @@
-# NGPGBA V0.5.8
+# NGPGBA V0.5.9
 
 <img align="right" width="220" src="./logo.png" alt="The NGP logo"/>
 
@@ -59,8 +59,8 @@ Now you can use the cross to navigate the menus, A to select an option, B to
 
 * Speed: Switch between speed modes.
   * Normal: Game runs at it's normal speed.
-  * 200%: Game runs at double speed.
-  * Max: Games can run up to 4 times normal speed (might change).
+  * 200%: Game can run up to double speed.
+  * Max: Games can run up to 4 times normal speed.
   * 50%: Game runs at half speed.
 * Autoload State: Toggle Savestate autoloading. Automagically load the
  savestate associated with the current game.
@@ -104,11 +104,20 @@ Tries to reset the Flashcart and reboots the GBA.
 
 ## Games
 
+* All games that require saving to work will not work correctly.
 * Memories of - Pure: Glitches everywhere.
 * Neo Poke Pro Yakyuu: Sprite multiplexing doesn't work.
-* Puzzle Link/Puzzle Link 2 (USA, EU) sometimes softlocks when a level ends
-* Sonic The Hedgehog: First boss sometimes disappear.
-* Super Real Mahjong - Premium Collection: Graphic bugs on intro.
+* Pachi-Slot Aruze Oukoku Pocket - Azteca (J)			: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Dekahel 2 (J)		: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Delsol 2 (J)			: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - e-Cup (J)			: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Hanabi (J) (v1.02)	: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Hanabi (J) (v1.04)	: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Oohanabi (J)			: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Porcano 2 (J)		: Palette glitches.
+* Pachi-Slot Aruze Oukoku Pocket - Ward of Lights (J)	: Palette glitches.
+* Sonic The Hedgehog: First boss sometimes disappear, try to use a save state soon before the boss and reload and try again.
+* Super Real Mahjong - Premium Collection: Sprite multiplexing & palette updates doesn't' work, game play locks up.
 
 ## Credits
 

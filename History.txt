@@ -1,10 +1,12 @@
 NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
-
-V0.5.9 - 2026-03-14 (FluBBa)
+V0.5.9 - 2026-03-28 (FluBBa)
 	Fixed noise channel period.
 	Fixed starting games with BIOS.
+	Added a HTML builder.
+	Added PogoShell support.
+	Fixed exit from emulator.
 
 V0.5.8 - 2026-01-12 (FluBBa)
 	Optimized reset/init.

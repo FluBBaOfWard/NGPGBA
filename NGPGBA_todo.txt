@@ -40,10 +40,18 @@ Games Non Working:
 Games With Glitches:
 	Memories of - Pure: Glitches everywhere.
 	Neo Poke Pro Yakyuu: Sprite multiplexing doesn't work.
-	Puzzle Link/Puzzle Link 2 (USA, EU) sometimes softlocks when a level ends
+	Pachi-Slot Aruze Oukoku Pocket - Azteca (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Dekahel 2 (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Delsol 2 (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - e-Cup (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Hanabi (J) (v1.02): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Hanabi (J) (v1.04): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Oohanabi (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Porcano 2 (J): Palette glitches.
+	Pachi-Slot Aruze Oukoku Pocket - Ward of Lights (J): Palette glitches.
+	Puzzle Link/Puzzle Link 2 (USA, EU): sometimes softlocks when a level ends.
 	Sonic The Hedgehog: First boss sometimes disappear.
-	Super Real Mahjong - Premium Collection: Graphic bugs on intro.
-	...
+	Super Real Mahjong - Premium Collection: Sprite multiplexing & palette updates doesn't' work, game play locks up.
 
 Speedhacks:
 	"Bakumatsu Rouman Tokubetsu"		- JR (0x65,0xF8) @0x2002
@@ -209,6 +217,4 @@ OoooOooooOoooOooooOoooOooooOoooO
 43210__76543210__76543210__76543210
 OoooOooooOoooOooooOoooOooooOoooO
        .       .       .       .
-
-
 

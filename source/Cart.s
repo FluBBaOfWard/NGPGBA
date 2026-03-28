@@ -10,7 +10,6 @@
 
 	.global gRomSize
 	.global maxRomSize
-	.global emuFlags
 	.global gConfig
 	.global gMachineSet
 	.global gMachine
@@ -121,11 +120,10 @@ skipBiosSettings:
 //	.section .ewram, "ax", %progbits
 //	.align 2
 ;@----------------------------------------------------------------------------
-loadCart: 					;@ Called from C:  r0=emuflags
+loadCart: 					;@ Called from C
 	.type   loadCart STT_FUNC
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{lr}
-	str r0,emuFlags
 
 	ldr r0,gRomSize
 	ldr r1,romSpacePtr

@@ -64,9 +64,6 @@ int main(int argc, char **argv) {
 	if (initFileHelper(NGPID)) {
 		loadColorBIOS();
 	}
-	else {
-		infoOutput("No roms found.");
-	}
 	if (g_BIOSBASE_COLOR == NULL) {
 		installHleBios(biosSpace);
 	}
@@ -76,6 +73,16 @@ int main(int argc, char **argv) {
 	if (romsAvailable > 0) {
 		const RomHeader *rh = findRom(0);
 		loadGame(rh);
+	}
+	else {
+		const PogoFile *pogoFile = getPogoFile();
+		if (pogoFile != NULL) {
+			loadROM(pogoFile->romPtr, pogoFile->size);
+		}
+		else {
+			infoOutput("No roms found.");
+			loadCart();
+		}
 	}
 
 	while (1) {

@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.8 2026-03-14"
+#define EMUVERSION "V0.5.9 2026-03-28"
 
 void hacksInit(void);
 
@@ -198,7 +198,7 @@ void nullUIDebug(int key) {
 
 void resetConsole() {
 	checkMachine();
-	loadCart(0);
+	loadCart();
 }
 
 void updateGameInfo() {
