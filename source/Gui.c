@@ -16,7 +16,7 @@
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
 
-#define EMUVERSION "V0.5.9 2026-03-28"
+#define EMUVERSION "V0.6.0 2026-08-12"
 
 void hacksInit(void);
 
@@ -139,7 +139,7 @@ const char *const cpuSpeedTxt[]  = {"Full Speed", "Half Speed", "1/4 Speed", "1/
 
 /// This is called at the start of the emulator
 void setupGUI() {
-//	keysSetRepeat(25, 4);	// Delay, repeat.
+	setRepeat(25, 4);	// Delay, repeat.
 	menu1.itemCount = ARRSIZE(mainItems) - (enableExit?0:1);
 	closeMenu();
 }

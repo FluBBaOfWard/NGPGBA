@@ -1,18 +1,19 @@
 #ifdef __arm__
 
 #include "Shared/gba_asm.h"
-#include "t6w28.i"
+#include "SN76496/SN76496.i"
 
+// Low (18157Hz) is 304, high (31536Hz) is 528
 #define MIX_LEN (528)
 
-	.global t6W28_0
 	.global soundMode
+	.global t6W28_0
 
 	.global soundInit
 	.global soundReset
-	.global vblSound1
-	.global vblSound2
-	.global setMuteSoundGUI
+	.global soundSwapBuffers
+	.global soundRender
+	.global soundSetMuteGUI
 	.global setMuteT6W28
 	.global T6W28_L_W
 	.global T6W28_R_W
@@ -31,7 +32,7 @@
 soundInit:
 	.type soundInit STT_FUNC
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r3-r5,lr}
+	stmfd sp!,{r4-r5,lr}
 	mov r5,#REG_BASE
 
 ;@	ldrh r0,[r5,#REG_SGBIAS]
@@ -43,8 +44,8 @@ soundInit:
 	cmp r4,#1					;@ If r4=0, no sound.
 
 	movmi r0,#0
-	ldreq r0,=0x0b040000		;@ Stop all channels, output ratio=100% dsA.  use directsound A for L&R, timer 0
-//	ldreq r0,=0x9a0c0000		;@ use directsound A&B, timer 0
+//	ldreq r0,=0x0b040000		;@ Stop all channels, output ratio=100% dsA.  use directsound A for L&R, timer 0
+	ldreq r0,=0x9a0c0000		;@ use directsound A&B, timer 0
 	str r0,[r5,#REG_SGCNT_L]
 
 	moveq r0,#0x80
@@ -65,38 +66,39 @@ soundInit:
 	add r2,r2,#MIX_LEN*2
 	str r2,[r5,#REG_DMA2SAD]	;@ DMA2 src=..
 
-	ldr t6ptr,=t6W28_0
+	ldr r0,=t6W28_0
 	mov r1,#1
-	bl t6W28SetMixrate			;@ Sound, 0=low, 1=high mixrate
-	ldr r1,=1536000				;@ 1.536MHz
-	bl t6W28SetFrequency		;@ Sound, chip frequency
+	bl sn76496SetMixrate			;@ Sound, 0=low, 1=high mixrate
+	ldr r1,=3072000				;@ 3.072MHz
+	bl sn76496SetFrequency		;@ Sound, chip frequency
 	ldr r1,=FREQTBL
-	bl t6W28Init				;@ Sound
+	bl sn76496Init				;@ Sound
 
 
 	cmp r4,#1					;@ If r4=0, no sound.
 
 	mov r2,#0					;@ Timer 0 controls sample rate:
 	str r2,[r5,#REG_TM0CNT_L]	;@ Stop timer 0
-	ldreq r2,[t6ptr,#mixRate]	;@ 924=Low, 532=High.
-	rsbeq r2,r2,#0x810000		;@ Timer 0 on. Frequency = 0x1000000/r3 Hz
+	ldreq r2,[r0,#mixRate]		;@ 924=Low, 532=High.
+	rsbeq r2,r2,#0x810000		;@ Timer 0 on. Frequency = 0x1000000/r2 Hz
 	streq r2,[r5,#REG_TM0CNT_L]
 
-	ldmfd sp!,{r3-r5,lr}
+	ldmfd sp!,{r4-r5,lr}
 	bx lr
 
 ;@----------------------------------------------------------------------------
 soundReset:
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{lr}
-	ldr t6ptr,=t6W28_0
-	bl t6W28Reset				;@ sound
+	mov r0,#0
+	ldr r1,=t6W28_0
+	bl sn76496Reset				;@ sound
 	ldmfd sp!,{lr}
 	bx lr
 
 ;@----------------------------------------------------------------------------
-setMuteSoundGUI:
-	.type   setMuteSoundGUI STT_FUNC
+soundSetMuteGUI:
+	.type   soundSetMuteGUI STT_FUNC
 ;@----------------------------------------------------------------------------
 	ldr r1,=pauseEmulation		;@ Output silence when emulation paused.
 	ldrb r0,[r1]
@@ -112,8 +114,7 @@ setMuteT6W28:
 	strbeq r0,muteSoundChip
 	bx lr
 ;@----------------------------------------------------------------------------
-vblSound1:
-	.type   vblSound1 STT_FUNC
+soundSwapBuffers:
 ;@----------------------------------------------------------------------------
 	ldrb r0,soundMode			;@ if r0=0, no sound.
 	cmp r0,#0
@@ -136,28 +137,28 @@ vblSound1:
 
 	bx lr
 ;@----------------------------------------------------------------------------
-vblSound2:
-	.type   vblSound2 STT_FUNC
+soundRender:
 ;@----------------------------------------------------------------------------
 	;@ Update DMA buffer for PCM
 	ldrb r0,soundMode			;@ if r0=0, no sound.
 	cmp r0,#0
 	bxeq lr
 
-	mov r0,#MIX_LEN
-	ldr r1,pcmPtr0
+	mov r1,#MIX_LEN
+	ldr r0,pcmPtr0
 	ldr r2,muteSound
 	cmp r2,#0
 	ldreq r2,=t6W28_0
-	beq t6W28Mixer
+	beq sn76496Mixer
 
 ;@----------------------------------------------------------------------------
-silenceMix:					;@ r1=destination, r2=len
+silenceMix:					;@ r0=destination, r1=len
 ;@----------------------------------------------------------------------------
 	mov r2,#0
 silenceLoop:
-	subs r0,r0,#4
-	strpl r2,[r1],#4
+	subs r1,r1,#4
+	strpl r2,[r0,#MIX_LEN*2]
+	strpl r2,[r0],#4
 	bhi silenceLoop
 
 	bx lr
@@ -171,19 +172,13 @@ T6W28_DAC_R_W:
 ;@----------------------------------------------------------------------------
 T6W28_R_W:					;@ Sound right write
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r3,lr}
 	ldr r1,=t6W28_0
-	bl t6W28W
-	ldmfd sp!,{r3,lr}
-	bx lr
+	b sn76496W
 ;@----------------------------------------------------------------------------
 T6W28_L_W:					;@ Sound left write
 ;@----------------------------------------------------------------------------
-	stmfd sp!,{r3,lr}
 	ldr r1,=t6W28_0
-	bl t6W28LW
-	ldmfd sp!,{r3,lr}
-	bx lr
+	b sn76496LW
 
 
 ;@----------------------------------------------------------------------------
@@ -209,7 +204,7 @@ soundMode:
 #endif
 	.align 2
 t6W28_0:
-	.space t6Size
+	.space snSize
 
 #ifdef GBA
 	.section .sbss				;@ This is EWRAM on GBA with devkitARM
@@ -223,4 +218,4 @@ WAVBUFFER:
 	.space MIX_LEN*2*2
 ;@----------------------------------------------------------------------------
 	.end
-#endif // #ifdef __arm__
+#endif // __arm__

@@ -13,4 +13,4 @@ void fixBiosSettings(void);
 
 void patchColorBios(u8 *ngpBios);
 
-#endif
+#endif // !__BIOS__

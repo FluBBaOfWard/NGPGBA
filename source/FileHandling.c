@@ -32,8 +32,8 @@ void applyConfigData(void) {
 	int mach     = gConfig & 3;
 	if (mach == 3) mach = 0;
 	gMachineSet  = mach;
-	sleepTime    = cfg.sleepTime;
 	joyCfg       = (joyCfg & ~0x400) | ((cfg.controller & 1) << 10);
+	setSleepValue(emuSettings & AUTOSLEEP_MASK);
 }
 
 void updateConfigData(void) {
@@ -43,14 +43,12 @@ void updateConfigData(void) {
 	cfg.language    = gLang;
 	cfg.palette     = gPaletteBank;
 	cfg.config      = (cfg.config & ~3)|gMachineSet;
-	cfg.sleepTime   = sleepTime;
 	cfg.controller  = (joyCfg >> 10) & 1;
 }
 
 void initSettings(void) {
 	memset(&cfg, 0, sizeof(ConfigData));
-	cfg.emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM | ALLOW_SPEED_HACKS;
-	cfg.sleepTime = 60*60*5;
+	cfg.emuSettings = AUTOPAUSE_EMULATION | AUTOLOAD_NVRAM | AUTOSLEEP_OFF | ALLOW_SPEED_HACKS;
 	cfg.birthYear = 99;
 	cfg.language = 1;
 

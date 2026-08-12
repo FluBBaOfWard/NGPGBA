@@ -11,6 +11,13 @@ extern u32 gSubBatteryLevel;
 extern u32 batteryLevel;
 
 /**
+ * Convert device input keys to target keys.
+ * @param input NDS/GBA keys
+ * @return The converted input.
+ */
+int convertInput(int input);
+
+/**
  * Copies the time from the GBA RTC to the NGP RTC.
  */
 void transferTime(void);
@@ -52,4 +59,4 @@ void system_comms_write(u8 data);
 } // extern "C"
 #endif
 
-#endif	// IO_HEADER
+#endif // !IO_HEADER

@@ -1,3 +1,10 @@
+//
+//  cpu.s
+//  NGPDS
+//
+//  Created by Fredrik Ahlström on 2008-07-04.
+//  Copyright © 2008-2026 Fredrik Ahlström. All rights reserved.
+//
 #ifdef __arm__
 
 #include "TLCS900H/TLCS900H.i"
@@ -264,4 +271,4 @@ cpuReset:					;@ Called by loadCart/resetGame
 	bx lr
 ;@----------------------------------------------------------------------------
 	.end
-#endif // #ifdef __arm__
+#endif // __arm__

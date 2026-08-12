@@ -29,4 +29,4 @@ void refreshGfx(void);
 } // extern "C"
 #endif
 
-#endif // GFX_HEADER
+#endif // !GFX_HEADER

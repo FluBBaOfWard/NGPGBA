@@ -3,6 +3,7 @@
 #include "TLCS900H/TLCS900H.i"
 #include "ARMZ80/ARMZ80.i"
 #include "K2GE/K2GE.i"
+#include "Shared/EmuMenu.i"
 
 	.global joyCfg
 	.global EMUinput
@@ -12,9 +13,12 @@
 
 	.global ioReset
 	.global refreshEMUjoypads
+	.global convertInput
 	.global transferTime
 	.global Z80In
+	.global Z80InBC
 	.global Z80Out
+	.global Z80OutBC
 	.global ioSaveState
 	.global ioLoadState
 	.global ioGetStateSize
@@ -83,6 +87,14 @@ ioGetStateSize:				;@ Out r0=state size.
 	.type   ioGetStateSize STT_FUNC
 ;@----------------------------------------------------------------------------
 	mov r0,#0x100
+	bx lr
+;@----------------------------------------------------------------------------
+convertInput:			;@ Convert from device keys to target r0=input/output
+	.type convertInput STT_FUNC
+;@----------------------------------------------------------------------------
+	mvn r1,r0
+	tst r1,#KEY_L|KEY_R				;@ Keys to open menu
+	orreq r0,r0,#ACT_OPEN_MENU
 	bx lr
 ;@----------------------------------------------------------------------------
 transferTime:
@@ -336,11 +348,17 @@ ADStart:
 	b setInterrupt
 
 ;@----------------------------------------------------------------------------
+Z80InBC:
+;@----------------------------------------------------------------------------
+;@----------------------------------------------------------------------------
 Z80In:
 ;@----------------------------------------------------------------------------
 	mov r11,r11					;@ No$GBA breakpoint
 	mov r0,#0
 	bx lr
+;@----------------------------------------------------------------------------
+Z80OutBC:
+;@----------------------------------------------------------------------------
 ;@----------------------------------------------------------------------------
 Z80Out:
 ;@----------------------------------------------------------------------------
@@ -367,4 +385,4 @@ rtcTimer:
 
 ;@----------------------------------------------------------------------------
 	.end
-#endif // #ifdef __arm__
+#endif // __arm__

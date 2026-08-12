@@ -20,6 +20,7 @@
 	.global ngpRAM
 	.global biosSpace
 	.global rawBios
+	.global SCRATCH_BUFF
 	.global romSpacePtr
 	.global ngpHeader
 	.global g_BIOSBASE_COLOR
@@ -59,7 +60,7 @@ ROM_SpaceEnd:
 rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket (J).ngp"
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
-#endif
+#endif // EMBEDDED_ROM
 
 #if GBA
 	.section .ewram, "ax", %progbits	;@ For the GBA
@@ -79,11 +80,11 @@ machineInit: 				;@ Called from C
 	mov r0,#ROM_SpaceEnd-ROM_Space
 	str r0,gRomSize
 	ldr r0,=biosSpace
-//	str r0,g_BIOSBASE_COLOR
+	str r0,g_BIOSBASE_COLOR
 	ldr r1,=rawBios
 	mov r2,#0x10000
-//	bl memcpy					;@ Can't run Games with BIOS on GBA, needs to write and read from game.
-#endif
+	bl memcpy					;@ Can't run Games with BIOS on GBA, needs to write and read from game.
+#endif // EMBEDDED_ROM
 	ldr r0,romSpacePtr
 	bl tlcs9000MemInit
 
@@ -247,6 +248,8 @@ ngpRAM:
 	.space 0x4000
 biosSpace:
 	.space 0x10000
+SCRATCH_BUFF:
+	.space 0x10000
 ;@----------------------------------------------------------------------------
 	.end
-#endif // #ifdef __arm__
+#endif // __arm__

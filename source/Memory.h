@@ -17,4 +17,4 @@ void t9StoreLX(u32 data, u32 address);
 } // extern "C"
 #endif
 
-#endif	// MEMORY_HEADER
+#endif // !MEMORY_HEADER

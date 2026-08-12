@@ -30,6 +30,7 @@ SOURCES		:=	source \
 				source/TLCS900H \
 				source/ARMZ80 \
 				source/K2GE \
+				source/SN76496 \
 				source/NGPFlash
 DATA		:=	data
 INCLUDES	:=	include
@@ -39,7 +40,7 @@ GRAPHICS	:=	graphics \
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -march=armv4t -mcpu=arm7tdmi -mtune=arm7tdmi
-FLAGS	:=	-DGBA -DZ80_FAST
+FLAGS	:=	-DGBA -DZ80_FAST -DSN_NGP
 
 ifeq ($(DEBUG),1)
 	CFLAGS	:=	-gdwarf-2 -Wall -ffast-math $(ARCH)

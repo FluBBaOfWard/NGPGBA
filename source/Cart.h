@@ -18,6 +18,7 @@ extern u8 gPaletteBank;
 
 extern u8 ngpRAM[0x4000];
 extern u8 biosSpace[0x10000];
+extern u8 SCRATCH_BUFF[0x10000];
 extern const u8 rawBios[0x10000];
 extern const u8 *romSpacePtr;
 extern const NgpHeader *ngpHeader;
@@ -32,4 +33,4 @@ void tlcs9000MemInit(const u8 *romBase);
 } // extern "C"
 #endif
 
-#endif // CART_HEADER
+#endif // !CART_HEADER

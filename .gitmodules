@@ -13,3 +13,6 @@
 [submodule "source/NGPFlash"]
 	path = source/NGPFlash
 	url = https://github.com/FluBBaOfWard/NGPFlash.git
+[submodule "source/SN76496"]
+	path = source/SN76496
+	url = https://github.com/FluBBaOfWard/SN76496.git

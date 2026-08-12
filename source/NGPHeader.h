@@ -17,4 +17,4 @@ typedef struct
 	const u32  reserved4;		// 0x3C - 0x3F
 } NgpHeader;
 
-#endif	// NGPHEADER
+#endif // !NGPHEADER

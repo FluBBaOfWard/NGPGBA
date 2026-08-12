@@ -1,3 +1,10 @@
+//
+//  cpu.h
+//  NGPDS
+//
+//  Created by Fredrik Ahlström on 2008-07-04.
+//  Copyright © 2008-2026 Fredrik Ahlström. All rights reserved.
+//
 #ifndef CPU_HEADER
 #define CPU_HEADER
 
@@ -37,4 +44,4 @@ void *getRegAdr(int reg);
 } // extern "C"
 #endif
 
-#endif // CPU_HEADER
+#endif // !CPU_HEADER

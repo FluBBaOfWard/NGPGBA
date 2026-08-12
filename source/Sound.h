@@ -5,19 +5,17 @@
 extern "C" {
 #endif
 
-#include "t6w28.h"
+#include "SN76496/SN76496.h"
 
-extern T6W28 k2Audio_0;
+extern SN76496 k2Audio_0;
 extern u8 soundMode;
 
 void soundInit(void);
 void soundSetFrequency(void);
-void setMuteSoundGUI(void);
-void vblSound1(void);
-void vblSound2(void);
+void soundSetMuteGUI(void);
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // SOUND_HEADER
+#endif // !SOUND_HEADER

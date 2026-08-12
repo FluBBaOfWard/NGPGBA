@@ -9,3 +9,6 @@
 
 # standard 8bpp tilereduction
 -mR8
+
+# palette options
+-pn192

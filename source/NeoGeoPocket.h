@@ -18,4 +18,4 @@ int getStateSize(void);
 } // extern "C"
 #endif
 
-#endif // NEOGEOPOCKET_HEADER
+#endif // !NEOGEOPOCKET_HEADER
