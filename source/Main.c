@@ -62,14 +62,10 @@ int main(int argc, char **argv) {
 	initSettings();
 	loadSettings();
 	if (initFileHelper(NGPID)) {
-		loadColorBIOS();
-	}
-	if (g_BIOSBASE_COLOR == NULL) {
-		installHleBios(biosSpace);
+		loadBioses();
 	}
 	checkMachine();
 	machineInit();
-	patchColorBios(biosSpace);
 	if (romsAvailable > 0) {
 		const RomHeader *rh = findRom(0);
 		loadGame(rh);

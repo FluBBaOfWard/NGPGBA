@@ -15,8 +15,9 @@
 #include "TLCS900H/Version.h"
 #include "ARMZ80/Version.h"
 #include "K2GE/Version.h"
+#include "SN76496/Version.h"
 
-#define EMUVERSION "V0.6.0 2026-08-12"
+#define EMUVERSION "V0.6.0 2026-08-16"
 
 void hacksInit(void);
 
@@ -47,6 +48,8 @@ static const char *getBgrLayerText(void);
 static void sprLayerSet(void);
 static const char *getSprLayerText(void);
 
+static void uiAbout(void);
+
 static void updateGameInfo(void);
 
 const MItem dummyItems[] = {
@@ -68,9 +71,10 @@ const MItem fileItems[] = {
 	{"Load Game->", selectGame},
 	{"Load State", loadState},
 	{"Save State", saveState},
+	{"Manage States->", viewSStates},
 	{"Save Settings", saveSettings},
 	{"Eject Game", ejectCart},
-	{"Reset Game", resetConsole},
+	{"Reset Console", resetConsole},
 };
 const MItem ctrlItems[] = {
 	{"B Autofire: ", autoBSet, getAutoBText},
@@ -123,10 +127,11 @@ const Menu menu5 = MENU_M("Machine Settings", uiAuto, machineItems);
 const Menu menu6 = MENU_M("Other Settings", uiAuto, setItems);
 const Menu menu7 = MENU_M("Debug", uiAuto, debugItems);
 const Menu menu8 = MENU_M("About", uiAbout, dummyItems);
-const Menu menu9 = MENU_M("Load game", uiLoadGame, fnList9);
+const Menu menu9 = MENU_M("Load game", setupSubMenuText, fnList9);
 const Menu menu10 = MENU_M("Quit Emulator?", uiAuto, quitItems);
+const Menu menu13 = MENU_M("Delete States", setupSubMenuText, dummyItems);
 
-const Menu *const menus[] = {&menu0, &menu1, &menu2, &menu3, &menu4, &menu5, &menu6, &menu7, &menu8, &menu9, &menu10 };
+const Menu *const menus[] = {&menu0, &menu1, &menu2, &menu3, &menu4, &menu5, &menu6, &menu7, &menu8, &menu9, &menu10, &menu13, &menu13, &menu13 };
 
 EWRAM_BSS u8 gZ80Speed = 0;
 EWRAM_BSS char gameInfoString[32];
@@ -146,9 +151,8 @@ void setupGUI() {
 
 /// This is called when going from emu to ui.
 void enterGUI() {
-	if (updateSettingsFromNGP() && (emuSettings & AUTOSAVE_SETTINGS)) {
+	if ((emuSettings & AUTOSAVE_SETTINGS) && updateSettingsFromNGP()) {
 		saveSettings();
-		settingsChanged = false;
 	}
 }
 
@@ -161,6 +165,10 @@ void quickSelectGame() {
 	openMenu();
 	selectGame();
 	closeMenu();
+}
+
+void ui13() {
+	enterMenu(13);
 }
 
 void uiNullNormal() {
@@ -183,11 +191,7 @@ void uiAbout() {
 	drawText("ARMZ80      " ARMZ80VERSION, 16);
 	drawText("ARMTLCS900H " TLCS900VERSION, 17);
 	drawText("ARMK2GE     " K2GEVERSION, 18);
-	drawText("ARMK2Audio  " , 19);
-}
-
-void uiLoadGame() {
-	setupSubMenuText();
+	drawText("ARMSN76496  " ARMSN76496VERSION, 19);
 }
 
 void nullUINormal(int key) {

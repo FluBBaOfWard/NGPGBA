@@ -20,7 +20,6 @@ typedef struct {
 } RomHeader;
 
 typedef struct {				//(config struct)
-	char magic[4];				//="CFG",0
 	int emuSettings;
 	int unused;					// unused
 	u8 gammaValue;				// from gfx.s

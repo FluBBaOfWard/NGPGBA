@@ -28,6 +28,19 @@
 		9C4C21DE26E54754007D0280 /* FileHandling.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FileHandling.c; sourceTree = "<group>"; };
 		9C4C21E126E54754007D0280 /* FileHandling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHandling.h; sourceTree = "<group>"; };
 		9C4C21E226E7DE86007D0280 /* gba_asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gba_asm.h; sourceTree = "<group>"; };
+		9C4E04C5302CD3DD0071F527 /* CONTRIBUTION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTION.md; sourceTree = "<group>"; };
+		9C4E04C6302CD3DD0071F527 /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
+		9C4E04C7302CD3DD0071F527 /* ECL_common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ECL_common.c; sourceTree = "<group>"; };
+		9C4E04C8302CD3DD0071F527 /* ECL_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ECL_config.h; sourceTree = "<group>"; };
+		9C4E04C9302CD3DD0071F527 /* ECL_JH_States.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ECL_JH_States.h; sourceTree = "<group>"; };
+		9C4E04CA302CD3DD0071F527 /* ECL_NanoLZ.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ECL_NanoLZ.h; sourceTree = "<group>"; };
+		9C4E04CB302CD3DD0071F527 /* ECL_NanoLZ.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ECL_NanoLZ.c; sourceTree = "<group>"; };
+		9C4E04CC302CD3DD0071F527 /* ECL_NanoLZ_schemes_inline.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ECL_NanoLZ_schemes_inline.h; sourceTree = "<group>"; };
+		9C4E04CD302CD3DD0071F527 /* ECL_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ECL_utils.h; sourceTree = "<group>"; };
+		9C4E04CF302CD3DD0071F527 /* EmuMenu.i */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c.preprocessed; path = EmuMenu.i; sourceTree = "<group>"; };
+		9C4E04D0302CD3DD0071F527 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		9C4E04D1302CD3DD0071F527 /* SRAMHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SRAMHandler.h; sourceTree = "<group>"; };
+		9C4E04D2302CD3DD0071F527 /* SRAMHandler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SRAMHandler.c; sourceTree = "<group>"; };
 		9C5081E825D314C900A8E1BA /* ARMZ80_todo.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ARMZ80_todo.txt; sourceTree = "<group>"; };
 		9C50820525D45A9A00A8E1BA /* Cart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cart.h; sourceTree = "<group>"; };
 		9C50820625D45A9A00A8E1BA /* Sound.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = Sound.s; sourceTree = "<group>"; };
@@ -139,6 +152,22 @@
 			name = makefile;
 			sourceTree = "<group>";
 		};
+		9C4E04CE302CD3DD0071F527 /* ECL */ = {
+			isa = PBXGroup;
+			children = (
+				9C4E04C5302CD3DD0071F527 /* CONTRIBUTION.md */,
+				9C4E04C6302CD3DD0071F527 /* COPYING */,
+				9C4E04C7302CD3DD0071F527 /* ECL_common.c */,
+				9C4E04C8302CD3DD0071F527 /* ECL_config.h */,
+				9C4E04C9302CD3DD0071F527 /* ECL_JH_States.h */,
+				9C4E04CA302CD3DD0071F527 /* ECL_NanoLZ.h */,
+				9C4E04CB302CD3DD0071F527 /* ECL_NanoLZ.c */,
+				9C4E04CC302CD3DD0071F527 /* ECL_NanoLZ_schemes_inline.h */,
+				9C4E04CD302CD3DD0071F527 /* ECL_utils.h */,
+			);
+			path = ECL;
+			sourceTree = "<group>";
+		};
 		9C5081E425D314C900A8E1BA /* ARMZ80 */ = {
 			isa = PBXGroup;
 			children = (
@@ -228,13 +257,18 @@
 		A47F092A20863AF5004E1DA6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				9C4E04CE302CD3DD0071F527 /* ECL */,
 				9CD304DF28E22CBF00ACD6A7 /* README.md */,
+				9C4E04D0302CD3DD0071F527 /* LICENSE.txt */,
 				9C4C21E226E7DE86007D0280 /* gba_asm.h */,
 				9C1FFFA72684A277005851ED /* EmuSettings.h */,
+				9C4E04CF302CD3DD0071F527 /* EmuMenu.i */,
 				A47F092B20863AF5004E1DA6 /* EmuMenu.h */,
 				A47F092C20863AF5004E1DA6 /* EmuMenu.c */,
 				9CD304DE28E22CBF00ACD6A7 /* FileHelper.h */,
 				9CD304E028E22CBF00ACD6A7 /* FileHelper.c */,
+				9C4E04D1302CD3DD0071F527 /* SRAMHandler.h */,
+				9C4E04D2302CD3DD0071F527 /* SRAMHandler.c */,
 				A4D0E11D2089E28D00401463 /* AsmExtra.h */,
 				A4D0E11C2089E28D00401463 /* AsmExtra.s */,
 				9CD304F428F70F9900ACD6A7 /* FlashCart.s */,

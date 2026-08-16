@@ -15,7 +15,7 @@ int packState(void *statePtr) {
 	memcpy(statePtr+size, ngpRAM, sizeof(ngpRAM));
 	size += sizeof(ngpRAM);
 	size += ioSaveState(statePtr+size);
-	size += sn76496SaveState(statePtr+size, &k2Audio_0);
+	size += sn76496SaveState(statePtr+size, &t6W28_0);
 	size += k2GESaveState(statePtr+size, &k2GE_0);
 	size += Z80SaveState(statePtr+size, &Z80OpTable);
 	size += tlcs900HSaveState(statePtr+size, &tlcs900HState);
@@ -27,7 +27,7 @@ void unpackState(const void *statePtr) {
 	memcpy(ngpRAM, statePtr+size, sizeof(ngpRAM));
 	size += sizeof(ngpRAM);
 	size += ioLoadState(statePtr+size);
-	size += sn76496LoadState(&k2Audio_0, statePtr+size);
+	size += sn76496LoadState(&t6W28_0, statePtr+size);
 	size += k2GELoadState(&k2GE_0, statePtr+size);
 	size += Z80LoadState(&Z80OpTable, statePtr+size);
 	tlcs900HLoadState(&tlcs900HState, statePtr+size);

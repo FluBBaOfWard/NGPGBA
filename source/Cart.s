@@ -19,7 +19,6 @@
 
 	.global ngpRAM
 	.global biosSpace
-	.global rawBios
 	.global SCRATCH_BUFF
 	.global romSpacePtr
 	.global ngpHeader
@@ -27,7 +26,7 @@
 	.global g_BIOSBASE_BNW
 	.global cartFlags
 	.global romStart
-	.global isBiosLoaded
+	.global isRealBios
 
 	.global machineInit
 	.global loadCart
@@ -60,6 +59,7 @@ ROM_SpaceEnd:
 rawBios:
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket (J).ngp"
 //	.incbin "ngproms/[BIOS] SNK Neo Geo Pocket Color (JE).ngp"
+rawBiosEnd:
 #endif // EMBEDDED_ROM
 
 #if GBA
@@ -80,10 +80,15 @@ machineInit: 				;@ Called from C
 	mov r0,#ROM_SpaceEnd-ROM_Space
 	str r0,gRomSize
 	ldr r0,=biosSpace
-	str r0,g_BIOSBASE_COLOR
 	ldr r1,=rawBios
+	str r1,g_BIOSBASE_COLOR
+//	str r1,g_BIOSBASE_BNW
 	mov r2,#0x10000
-	bl memcpy					;@ Can't run Games with BIOS on GBA, needs to write and read from game.
+	bl memcpy
+	ldr r0,=biosSpace
+	bl patchColorBios			;@ Can't run Games with Color BIOS on GBA, needs to write and read from game.
+	mov r0,#1
+	strb r0,isRealBios
 #endif // EMBEDDED_ROM
 	ldr r0,romSpacePtr
 	bl tlcs9000MemInit
@@ -104,8 +109,8 @@ machineInit: 				;@ Called from C
 	bl soundReset
 	bl cpuReset
 
-	ldr r0,=g_BIOSBASE_COLOR
-	ldr r0,[r0]
+	ldr r0,=isRealBios
+	ldrb r0,[r0]
 	cmp r0,#0
 	beq skipBiosSettings
 
@@ -131,7 +136,7 @@ loadCart: 					;@ Called from C
 	bl ngpFlashReset
 	bl hacksInit
 
-	ldr r0,g_BIOSBASE_COLOR
+	ldrb r0,isRealBios
 	cmp r0,#0
 	bne skipHWSetup
 
@@ -222,7 +227,7 @@ gLang:
 	.byte 1						;@ language
 gPaletteBank:
 	.byte 0						;@ palettebank
-isBiosLoaded:
+isRealBios:
 	.byte 0
 //	.space 1					;@ alignment.
 
@@ -246,9 +251,9 @@ maxRomSize:
 #endif
 ngpRAM:
 	.space 0x4000
-biosSpace:
-	.space 0x10000
 SCRATCH_BUFF:
+	.space 0x10000
+biosSpace:
 	.space 0x10000
 ;@----------------------------------------------------------------------------
 	.end

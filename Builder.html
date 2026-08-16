@@ -241,10 +241,16 @@
 			const files = event.target.files;
 
 			for (const file of files) {
-				if (file.name.toUpperCase().includes( "BIOS")
+				let flags = 0;
+				const lowerName = file.name.toLowerCase();
+				if (lowerName.includes('bios')
 						&& file.size === 0x10000) {
 					file.bios = true;
+					if (lowerName.includes('color') {
+						flags |= 0x04;
+					}
 				}
+				file.flags = flags;
 				selectedFiles.push(file);
 			}
 
@@ -381,12 +387,13 @@
 				// Handle splash screen
 				if (splashFileInput.files.length != 0) {
 					const imgFile = splashFileInput.files[0];
-					if (imgFile.type.startsWith("image/")) {
-						await processImage(imgFile, finalArray);
-					}
-					else {
+					const imgName = imgFile.name.toLowerCase()
+					if (imgName.endsWith(".raw") || imgName.endsWith(".bin")) {
 						const imageBuf = await imgFile.arrayBuffer();
 						finalArray.push(new Uint8Array(imageBuf));
+					}
+					else if (imgFile.type.startsWith("image/")) {
+						await processImage(imgFile, finalArray);
 					}
 				}
 
@@ -396,12 +403,14 @@
 					// Read file as array buffer
 					const fileBuffer = await file.arrayBuffer();
 					const fileView = new DataView(fileBuffer);
+					let emuFlags = file.flags;
+					emuFlags |= fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00;
 
 					// Create header for all ROM files
 					const header = createRomHeader(
 						0x1A50474E, // "NGP",0x1A
 						fileBuffer.byteLength, // File size in bytes
-						fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00, // Flags - set bit 2 for color
+						emuFlags, // Flags - set bit 2 for color
 						0x00, // spritefollow
 						file.bios ? 0x01 : 0x00, // bios - set bit 0 for bios files
 						file.name.substring(0, 32) // Name truncated to 32 chars

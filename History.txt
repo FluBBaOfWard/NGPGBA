@@ -1,6 +1,9 @@
 NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
+V0.6.0 - 2026-08-16 (FluBBa)
+	Added saving/loading of config/States.
+
 V0.5.9 - 2026-03-28 (FluBBa)
 	Fixed noise channel period.
 	Fixed starting games with BIOS.

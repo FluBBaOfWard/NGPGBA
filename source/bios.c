@@ -248,6 +248,7 @@ void patchColorBios(u8 *ngpBios) {
 }
 
 bool installHleBios(u8 *ngpBios) {
+	memset(ngpBios, 0, 0x10000);
 	int i;
 	// System Call Table, install iBIOSHLE instructions
 	for (i = 0; i < ARRSIZE(callTable); i++) {

@@ -7,7 +7,7 @@ extern "C" {
 
 #include "SN76496/SN76496.h"
 
-extern SN76496 k2Audio_0;
+extern SN76496 t6W28_0;
 extern u8 soundMode;
 
 void soundInit(void);

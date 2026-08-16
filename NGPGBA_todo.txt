@@ -3,7 +3,6 @@ NGPGBA Todo
 	Find speed hacks for bios.
 	Fix writing to flash, reserve 64kB EWRAM.
 	Add speedhacks for the Z80?
-	Fix savestates!
 	BIOS setting Auto/Off.
 
 	Add SWI & Interrupt to BiosHLE.

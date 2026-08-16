@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "Emubase.h"
+#include "NeoGeoPocket.h"
 
 #define FILEEXTENSIONS ".ngp.ngc"
 
@@ -24,8 +25,9 @@ void loadState(void);
 void saveState(void);
 void ejectCart(void);
 void selectGame(void);
-int loadColorBIOS(void);
-int loadBWBIOS(void);
+void loadBioses(void);
+void installBIOS(void *dest);
+void viewSStates(void);
 
 #ifdef __cplusplus
 } // extern "C"

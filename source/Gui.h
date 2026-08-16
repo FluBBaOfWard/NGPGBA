@@ -17,8 +17,7 @@ void nullUIDebug(int key);
 void resetConsole(void);
 
 void uiNullNormal(void);
-void uiAbout(void);
-void uiLoadGame(void);
+void ui13(void);
 
 void debugIOUnimplR(u16 port);
 void debugIOUnimplW(u8 val, u16 port);

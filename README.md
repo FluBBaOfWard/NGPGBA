@@ -1,4 +1,4 @@
-# NGPGBA V0.5.9
+# NGPGBA V0.6.0
 
 <img align="right" width="220" src="./logo.png" alt="The NGP logo"/>
 
@@ -27,10 +27,10 @@ Now you can use the cross to navigate the menus, A to select an option, B to
 * Load Game: Select a game to load.
 * Load State: Load a previously saved state of the currently running game.
 * Save State: Save a state of the currently running game.
-* Load Flash RAM: Load flash ram for the currently running game.
-* Save Flash RAM: Save flash ram for the currently running game.
+* Manage States: Delete unwanted state files.
 * Save Settings: Save the current settings.
-* Reset Game: Reset the currently running game.
+* Eject Game: With no game inserted you can access the BIOS settings.
+* Reset Console: Reset the currently running game.
 
 ### Controller
 
@@ -64,14 +64,12 @@ Now you can use the cross to navigate the menus, A to select an option, B to
   * 50%: Game runs at half speed.
 * Autoload State: Toggle Savestate autoloading. Automagically load the
  savestate associated with the current game.
-* Autoload Flash RAM: Toggle flash/save ram autoloading. Automagically load
- the flash ram associated with the current game.
 * Autosave Settings: This will save settings when leaving menu if any changes
  are made.
 * Autopause Game: Toggle if the game should pause when opening the menu.
-* Overclock EWRAM: Changes the waitstates on EWRAM between 2 and 1, might
- damage your GBA and uses more power, around 10% speedgain. Doesn't work on
- Gameboy Micro. Use at your own risk!
+* EWRAM Overclock: Changes the waitstates on EWRAM between 2 and 1, uses more
+ power, around 10% speedgain. Doesn't work on Gameboy Micro, might damage your
+ GBA. Use at your own risk!
 * Autosleep: Change the autosleep time, also see Sleep.
 
 ### Debug

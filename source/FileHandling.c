@@ -7,12 +7,14 @@
 #include "Shared/EmuMenu.h"
 #include "Shared/EmuSettings.h"
 #include "Shared/FileHelper.h"
+#include "Shared/SRAMHandler.h"
 #include "Shared/AsmExtra.h"
 #include "Gui.h"
 #include "Cart.h"
 #include "cpu.h"
 #include "Gfx.h"
 #include "io.h"
+#include "bios.h"
 #include "Memory.h"
 #include "NGPHeader.h"
 
@@ -24,7 +26,7 @@ EWRAM_BSS ConfigData cfg;
 
 //---------------------------------------------------------------------------------
 void applyConfigData(void) {
-	emuSettings  = cfg.emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
+	emuSettings  = cfg.emuSettings & ~EMUSPEED_MASK; // Clear speed setting.
 	gGammaValue  = cfg.gammaValue;
 	gLang        = cfg.language;
 	gPaletteBank = cfg.palette;
@@ -37,7 +39,6 @@ void applyConfigData(void) {
 }
 
 void updateConfigData(void) {
-	strcpy(cfg.magic,"cfg");
 	cfg.emuSettings = emuSettings & ~EMUSPEED_MASK;	// Clear speed setting.
 	cfg.gammaValue  = gGammaValue;
 	cfg.language    = gLang;
@@ -56,7 +57,7 @@ void initSettings(void) {
 }
 
 bool updateSettingsFromNGP() {
-	if (g_BIOSBASE_COLOR == NULL && g_BIOSBASE_BNW == NULL) {
+	if (isRealBios == 0) {
 		return false;
 	}
 
@@ -109,23 +110,30 @@ bool updateSettingsFromNGP() {
 }
 
 int loadSettings() {
-	bytecopy_((u8 *)&cfg, (u8 *)SRAM+0x10000-sizeof(ConfigData), sizeof(ConfigData));
-	if (strstr(cfg.magic,"cfg")) {
+	if (readFile((u8 *)&cfg, sizeof(cfg), NGPID)) {
 		applyConfigData();
+		settingsChanged = false;
 		infoOutput("Settings loaded.");
+		installBIOS(biosSpace);
 		return 0;
 	}
 	else {
 		updateConfigData();
-		infoOutput("Error in settings file.");
+		infoOutput("No settings file found.");
 	}
 	return 1;
 }
 void saveSettings() {
 	updateConfigData();
 
-	bytecopy_((u8 *)SRAM+0x10000-sizeof(ConfigData), (u8 *)&cfg, sizeof(ConfigData));
-	infoOutput("Settings saved.");
+	if (writeFile((u8 *)&cfg, sizeof(cfg), NGPID, "Config")) {
+		settingsChanged = false;
+		infoOutput("Settings saved.");
+	}
+	else {
+		infoOutput("Could not save settings file.");
+	}
+	installBIOS(biosSpace);
 }
 
 int loadNVRAM() {
@@ -135,19 +143,36 @@ int loadNVRAM() {
 void saveNVRAM() {
 }
 
+int loadStateChk() {
+	if (getStateSize() < 0x10000
+		&& quickLoad()) {
+		infoOutput("Loaded State.");
+		return loadNVRAM();
+	}
+	return 0;
+}
+int saveStateChk() {
+	if (getStateSize() < 0x10000
+		&& quickSave()) {
+		infoOutput("Saved State.");
+		return 1;
+	}
+	return 0;
+}
+
 void loadState(void) {
-//	unpackState(testState);
-	infoOutput("Loaded state.");
+	loadStateChk();
+	installBIOS(biosSpace);
 }
 void saveState(void) {
-//	packState(testState);
-	infoOutput("Saved state.");
+	saveStateChk();
+	installBIOS(biosSpace);
 }
 
 /// Hold down the power button for ~40 frames.
 static void turnPowerOff(void) {
 	int i;
-	if (g_BIOSBASE_COLOR != NULL || g_BIOSBASE_BNW != NULL) {
+	if (isRealBios != 0) {
 		EMUinput = 0;
 		for (i = 0; i < 100; i++) {
 			run();
@@ -169,7 +194,7 @@ static void turnPowerOff(void) {
 /// Hold down the power button for ~40 frames.
 static void turnPowerOn(void) {
 	int i;
-	if (g_BIOSBASE_COLOR != NULL || g_BIOSBASE_BNW != NULL) {
+	if (isRealBios != 0) {
 		EMUinput = 0;
 		for (i = 0; i < 100; i++) {
 			run();
@@ -184,7 +209,7 @@ static void turnPowerOn(void) {
 //---------------------------------------------------------------------------------
 bool loadGame(const RomHeader *rh) {
 	if (rh) {
-		return loadROM((const u8 *)rh + sizeof(RomHeader), rh->filesize);
+		return loadROM(rh->romData, rh->filesize);
 	}
 	return true;
 }
@@ -228,6 +253,15 @@ void selectGame() {
 	}
 }
 
+void viewSStates() {
+	pauseEmulation = true;
+	ui13();
+	skipScroll();
+	loadStateMenu();
+	backOutOfMenu();
+	installBIOS(biosSpace);
+}
+
 //---------------------------------------------------------------------------------
 void ejectCart() {
 	gRomSize = 0x200000;
@@ -237,36 +271,42 @@ void ejectCart() {
 }
 
 //---------------------------------------------------------------------------------
-static int loadBIOS(void *dest) {
+void installBIOS(void *dest) {
+	const void *src = NULL;
+	if (g_BIOSBASE_COLOR != NULL && gMachine == HW_NGPCOLOR) {
+		src = g_BIOSBASE_COLOR;
+	}
+	else if (g_BIOSBASE_BNW != NULL && gMachine == HW_NGPMONO) {
+		src = g_BIOSBASE_BNW;
+	}
+	else {
+		isRealBios = 0;
+		installHleBios(dest);
+	}
+	if (src != NULL) {
+		isRealBios = 1;
+		memcpy(dest, src, 0x10000);
+		if (gMachine == HW_NGPCOLOR) {
+			patchColorBios(dest);
+		}
+	}
+}
+
+void loadBioses(void) {
 
 	int i;
 	for (i=0; i<3; i++) {
 		const RomHeader *rh = findBios(i);
 		if (rh != NULL && (rh->filesize == 0x10000)) {
-			memcpy(dest, (u8 *)rh + sizeof(RomHeader), 0x10000);
-			return 1;
+			if (rh->flags & 0x04) {
+				g_BIOSBASE_COLOR = rh->romData;
+			}
+			else {
+				g_BIOSBASE_BNW = rh->romData;
+			}
 		}
 	}
-//	memcpy(dest, (u8 *)rawBios, 0x10000);
-	return 0;
-}
-
-int loadColorBIOS(void) {
-	if (loadBIOS(biosSpace)) {
-		g_BIOSBASE_COLOR = biosSpace;
-		return 1;
-	}
-	g_BIOSBASE_COLOR = NULL;
-	return 0;
-}
-
-int loadBWBIOS(void) {
-	if (loadBIOS(biosSpace)) {
-		g_BIOSBASE_BNW = biosSpace;
-		return 1;
-	}
-	g_BIOSBASE_BNW = NULL;
-	return 0;
+	installBIOS(biosSpace);
 }
 
 //---------------------------------------------------------------------------------
@@ -288,6 +328,7 @@ void checkMachine() {
 		else {
 			gSOC = SOC_K2GE;
 		}
+		installBIOS(biosSpace);
 		machineInit();
 	}
 }
