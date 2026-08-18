@@ -156,7 +156,7 @@
 
 		<div class="upload-section">
 			<h3>Select NeoGeo Pocket Files</h3>
-			<input type="file" id="additionalFiles" class="file-input" multiple accept=".ngp,.ngc">
+			<input type="file" id="additionalFiles" class="file-input" multiple accept=".ngp,.ngc,.zip">
 		</div>
 
 		<div class="file-list" id="fileList">
@@ -184,6 +184,237 @@
 		// Store selected files
 		let selectedFiles = [];
 
+		const ZIP_SIGNATURES = {
+			CENSIG: 0x02014b50,
+			LOCSIG: 0x04034b50,
+			ENDSIG: 0x06054b50,
+			STORE: 0,
+			DEFLATE: 8
+		};
+
+		const COMPRESSION_METHODS = {
+			0: 'Stored',
+			8: 'Deflated'
+		};
+
+		class CentralFileHeader {
+			constructor() {
+				this.magic = 0;
+				this.versionMadeBy = 0;
+				this.versionNeededToExtract = 0;
+				this.generalPurposeBitFlag = 0;
+				this.compressionMethod = 0;
+				this.lastModDosDatetime = 0;
+				this.crc32 = 0;
+				this.cSize = 0;
+				this.ucSize = 0;
+				this.fileNameLength = 0;
+				this.extraFieldLength = 0;
+				this.fileCommentLength = 0;
+				this.diskNumberStart = 0;
+				this.internalFileAttributes = 0;
+				this.externalFileAttributes = 0;
+				this.relativeOffsetLocalHeader = 0;
+				this.fileName = '';
+			}
+		}
+
+		class LocalFileHeader {
+			constructor() {
+				this.magic = 0;
+				this.versionNeededToExtract = 0;
+				this.generalPurposeBitFlag = 0;
+				this.compressionMethod = 0;
+				this.lastModDosDatetime = 0;
+				this.crc32 = 0;
+				this.cSize = 0;
+				this.ucSize = 0;
+				this.fileNameLength = 0;
+				this.extraFieldLength = 0;
+			}
+		}
+
+		class ZipParser {
+			constructor(arrayBuffer) {
+				this.buffer = arrayBuffer;
+				this.view = new DataView(arrayBuffer);
+				this.files = [];
+				this.error = null;
+			}
+
+			readUInt32LE(offset) { return this.view.getUint32(offset, true); }
+			readUInt16LE(offset) { return this.view.getUint16(offset, true); }
+			readString(offset, length) {
+				const bytes = new Uint8Array(this.buffer, offset, length);
+				return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+			}
+
+			findCentralDirectoryOffset() {
+				const bufferLength = this.buffer.byteLength;
+				const endHeaderLength = 22;
+				const searchLimit = Math.max(0, bufferLength - 65557);
+
+				for (let i = bufferLength - endHeaderLength; i >= searchLimit; i--) {
+					if (this.readUInt32LE(i) === ZIP_SIGNATURES.ENDSIG) {
+						return this.readUInt32LE(i + 16);
+					}
+				}
+
+				return -1;
+			}
+
+			readCentralFileHeader(offset) {
+				if (offset + 46 > this.buffer.byteLength) {
+					return null;
+				}
+
+				const hdr = new CentralFileHeader();
+				let pos = offset;
+
+				hdr.magic = this.readUInt32LE(pos); pos += 4;
+				if (hdr.magic !== ZIP_SIGNATURES.CENSIG) {
+					return null;
+				}
+
+				hdr.versionMadeBy = this.readUInt16LE(pos); pos += 2;
+				hdr.versionNeededToExtract = this.readUInt16LE(pos); pos += 2;
+				hdr.generalPurposeBitFlag = this.readUInt16LE(pos); pos += 2;
+				hdr.compressionMethod = this.readUInt16LE(pos); pos += 2;
+				hdr.lastModDosDatetime = this.readUInt32LE(pos); pos += 4;
+				hdr.crc32 = this.readUInt32LE(pos); pos += 4;
+				hdr.cSize = this.readUInt32LE(pos); pos += 4;
+				hdr.ucSize = this.readUInt32LE(pos); pos += 4;
+				hdr.fileNameLength = this.readUInt16LE(pos); pos += 2;
+				hdr.extraFieldLength = this.readUInt16LE(pos); pos += 2;
+				hdr.fileCommentLength = this.readUInt16LE(pos); pos += 2;
+				hdr.diskNumberStart = this.readUInt16LE(pos); pos += 2;
+				hdr.internalFileAttributes = this.readUInt16LE(pos); pos += 2;
+				hdr.externalFileAttributes = this.readUInt32LE(pos); pos += 4;
+				hdr.relativeOffsetLocalHeader = this.readUInt32LE(pos); pos += 4;
+				hdr.fileName = this.readString(pos, hdr.fileNameLength);
+
+				return hdr;
+			}
+
+			parse() {
+				const cdirOffset = this.findCentralDirectoryOffset();
+				if (cdirOffset < 0) {
+					this.error = 'Could not find zip central directory';
+					return false;
+				}
+
+				try {
+					let offset = cdirOffset;
+					const bufferLength = this.buffer.byteLength;
+
+					while (offset + 46 <= bufferLength) {
+						const header = this.readCentralFileHeader(offset);
+						if (header === null) break;
+						this.files.push(header);
+						offset += 46 + header.fileNameLength + header.extraFieldLength + header.fileCommentLength;
+					}
+
+					return true;
+				}
+				catch (e) {
+					this.error = `Parse error: ${e.message}`;
+					return false;
+				}
+			}
+
+			readLocalFileHeader(offset) {
+				if (offset + 30 > this.buffer.byteLength) {
+					return null;
+				}
+
+				const hdr = new LocalFileHeader();
+				let pos = offset;
+
+				hdr.magic = this.readUInt32LE(pos); pos += 4;
+				if (hdr.magic !== ZIP_SIGNATURES.LOCSIG) {
+					return null;
+				}
+
+				hdr.versionNeededToExtract = this.readUInt16LE(pos); pos += 2;
+				hdr.generalPurposeBitFlag = this.readUInt16LE(pos); pos += 2;
+				hdr.compressionMethod = this.readUInt16LE(pos); pos += 2;
+				hdr.lastModDosDatetime = this.readUInt32LE(pos); pos += 4;
+				hdr.crc32 = this.readUInt32LE(pos); pos += 4;
+				hdr.cSize = this.readUInt32LE(pos); pos += 4;
+				hdr.ucSize = this.readUInt32LE(pos); pos += 4;
+				hdr.fileNameLength = this.readUInt16LE(pos); pos += 2;
+				hdr.extraFieldLength = this.readUInt16LE(pos); pos += 2;
+
+				return hdr;
+			}
+
+			async extractFile(cfHdr) {
+				const localHdr = this.readLocalFileHeader(cfHdr.relativeOffsetLocalHeader);
+				if (!localHdr) {
+					this.error = 'Could not read local file header';
+					return null;
+				}
+
+				const dataOffset = cfHdr.relativeOffsetLocalHeader + 30 + localHdr.fileNameLength + localHdr.extraFieldLength;
+				const hasDataDescriptor = (cfHdr.generalPurposeBitFlag & 0x0008) !== 0;
+				const compressedSize = hasDataDescriptor ? cfHdr.cSize : (localHdr.cSize || cfHdr.cSize);
+				const uncompressedSize = hasDataDescriptor ? cfHdr.ucSize : (localHdr.ucSize || cfHdr.ucSize);
+
+				if (cfHdr.compressionMethod === ZIP_SIGNATURES.STORE) {
+					if (dataOffset + uncompressedSize > this.buffer.byteLength) {
+						this.error = 'File data extends beyond zip file';
+						return null;
+					}
+					return new Uint8Array(this.buffer, dataOffset, uncompressedSize);
+				}
+
+				if (cfHdr.compressionMethod === ZIP_SIGNATURES.DEFLATE) {
+					if (dataOffset + compressedSize > this.buffer.byteLength) {
+						this.error = 'Compressed file data extends beyond zip file';
+						return null;
+					}
+
+					const compressedData = new Uint8Array(this.buffer, dataOffset, compressedSize);
+					try {
+						const stream = new ReadableStream({
+							start(controller) {
+								controller.enqueue(compressedData);
+								controller.close();
+							}
+						});
+						const decompressed = stream.pipeThrough(new DecompressionStream('deflate-raw'));
+						const reader = decompressed.getReader();
+						const chunks = [];
+						let totalBytes = 0;
+
+						while (true) {
+							const { done, value } = await reader.read();
+							if (done) break;
+							chunks.push(value);
+							totalBytes += value.length;
+						}
+
+						reader.releaseLock();
+						const result = new Uint8Array(totalBytes);
+						let offset = 0;
+						for (const chunk of chunks) {
+							result.set(chunk, offset);
+							offset += chunk.length;
+						}
+
+						return result;
+					}
+					catch (e) {
+						this.error = `Deflate failed: ${e.message}`;
+						return null;
+					}
+				}
+
+				this.error = `Unsupported compression method: ${cfHdr.compressionMethod}`;
+				return null;
+			}
+		}
+
 		// Format bytes to readable string
 		function formatBytes(bytes) {
 			if (bytes === 0) return '0 Bytes';
@@ -191,6 +422,24 @@
 			const sizes = ['Bytes', 'KB', 'MB', 'GB'];
 			const i = Math.floor(Math.log(bytes) / Math.log(k));
 			return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		}
+
+		function isSupportedRomName(filename) {
+			const name = (filename || '').toLowerCase();
+			return name.endsWith('.ngp') || name.endsWith('.ngc');
+		}
+
+		function normalizeSelectedFile(file) {
+			let flags = 0;
+			const lowerName = file.name.toLowerCase();
+			if (lowerName.includes('bios') && file.size === 0x10000) {
+				file.bios = true;
+				if (lowerName.includes('color')) {
+					flags |= 0x04;
+				}
+			}
+			file.flags = flags;
+			return file;
 		}
 
 		// Display selected files
@@ -215,7 +464,7 @@
 
 				const fileNameSpan = document.createElement('span');
 				fileNameSpan.className = 'file-name';
-				fileNameSpan.textContent = `${'File: '}${file.name}`;
+				fileNameSpan.textContent = `File: ${file.name}`;
 
 				const fileSizeSpan = document.createElement('span');
 				fileSizeSpan.textContent = formatBytes(file.size);
@@ -236,22 +485,71 @@
 			});
 		}
 
-		// Handle ROM file selection
-		function handleFileSelection(event) {
-			const files = event.target.files;
+		async function readZipArchive(file) {
+			const buffer = await file.arrayBuffer();
+			const parser = new ZipParser(buffer);
+			if (!parser.parse()) {
+				throw new Error(parser.error || 'Failed to read zip archive');
+			}
 
-			for (const file of files) {
-				let flags = 0;
-				const lowerName = file.name.toLowerCase();
-				if (lowerName.includes('bios')
-						&& file.size === 0x10000) {
-					file.bios = true;
+			const results = [];
+			for (const zipFile of parser.files) {
+				const name = (zipFile.fileName || '').split('/').pop() || zipFile.fileName;
+				if (!name || !isSupportedRomName(name)) {
+					continue;
+				}
+
+				const data = await parser.extractFile(zipFile);
+				if (!data) {
+					throw new Error(parser.error || `Failed to extract ${name}`);
+				}
+
+				const entry = {
+					name: name,
+					size: data.byteLength,
+					data: data,
+					flags: 0,
+					bios: false,
+					originalName: zipFile.fileName
+				};
+				const lowerName = name.toLowerCase();
+				if (lowerName.includes('bios') && data.byteLength === 0x10000) {
+					entry.bios = true;
 					if (lowerName.includes('color')) {
-						flags |= 0x04;
+						entry.flags |= 0x04;
 					}
 				}
-				file.flags = flags;
-				selectedFiles.push(file);
+				const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+				if (view.getUint8(0x23) === 0x10) {
+					entry.flags |= 0x04;
+				}
+				results.push(entry);
+			}
+
+			return results;
+		}
+
+		// Handle ROM file selection
+		async function handleFileSelection(event) {
+			const files = Array.from(event.target.files || []);
+
+			for (const file of files) {
+				const lowerName = file.name.toLowerCase();
+				try {
+					if (lowerName.endsWith('.zip')) {
+						const zipEntries = await readZipArchive(file);
+						for (const entry of zipEntries) {
+							selectedFiles.push(entry);
+						}
+					}
+					else if (isSupportedRomName(lowerName)) {
+						selectedFiles.push(normalizeSelectedFile(file));
+					}
+				}
+				catch (error) {
+					console.error('Error loading archive:', error);
+					showStatus(`Failed to load ${file.name}: ${error.message}`, 'error');
+				}
 			}
 
 			displayFileList();
@@ -277,27 +575,21 @@
 
 			// Set fields according to the structure
 			let offset = 0;
-
 			// identifier (u32)
 			headerView.setUint32(offset, identifier, true);
 			offset += 4;
-
 			// filesize (u32)
 			headerView.setUint32(offset, fileSize, true);
 			offset += 4;
-
 			// flags (u32)
 			headerView.setUint32(offset, flags, true);
 			offset += 4;
-
 			// spritefollow (u32)
 			headerView.setUint32(offset, spritefollow, true);
 			offset += 4;
-
 			// bios (u8)
 			headerView.setUint8(offset, bios);
 			offset += 1;
-
 			// reserved[15] - set to zero
 			for (let i = 0; i < 15; i++) {
 				headerView.setUint8(offset, 0);
@@ -322,8 +614,7 @@
 		function processImage(imageFile, destArray) {
 			return new Promise(function (resolve) {
 				const reader = new FileReader();
-				reader.onload = function(e) {
-
+				reader.onload = function() {
 					const img = new Image();
 					img.onload = function() {
 						// Create a canvas to decode the image
@@ -335,10 +626,8 @@
 
 						// Get image data (RGB format)
 						const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
 						const totalPixels = canvas.width * canvas.height;
-
-						const rgbBytes = new Uint8Array(totalPixels*2);
+						const rgbBytes = new Uint8Array(totalPixels * 2);
 						for (let i = 0; i < totalPixels; i++) {
 							const pixelIndex = i * 4; // RGBA has 4 components per pixel
 
@@ -352,17 +641,17 @@
 							b = ((b * a) / 255) + 255 - a;
 
 							// Convert to 15-bits BGR for the GBA
-							let bgrWord = ((b & 0xF8) << 7) | ((g & 0xF8)<<2) | (r>>3);
-							rgbBytes[i*2] = bgrWord ;
-							rgbBytes[i*2 + 1] = bgrWord >> 8;
+							const bgrWord = ((b & 0xF8) << 7) | ((g & 0xF8) << 2) | (r >> 3);
+							rgbBytes[i * 2] = bgrWord;
+							rgbBytes[i * 2 + 1] = bgrWord >> 8;
 						}
 						destArray.push(rgbBytes);
 						resolve();
 					};
 					img.src = reader.result;
-				}
+				};
 				reader.readAsDataURL(imageFile);
-			})
+			});
 		}
 
 		// Concatenate files with headers
@@ -385,23 +674,23 @@
 				finalArray.push(new Uint8Array(fileBuf));
 
 				// Handle splash screen
-				if (splashFileInput.files.length != 0) {
+				if (splashFileInput.files.length !== 0) {
 					const imgFile = splashFileInput.files[0];
-					const imgName = imgFile.name.toLowerCase()
-					if (imgName.endsWith(".raw") || imgName.endsWith(".bin")) {
+					const imgName = imgFile.name.toLowerCase();
+					if (imgName.endsWith('.raw') || imgName.endsWith('.bin')) {
 						const imageBuf = await imgFile.arrayBuffer();
 						finalArray.push(new Uint8Array(imageBuf));
 					}
-					else if (imgFile.type.startsWith("image/")) {
+					else if (imgFile.type.startsWith('image/')) {
 						await processImage(imgFile, finalArray);
 					}
 				}
 
 				// Process each file with appropriate header
 				for (const file of selectedFiles) {
-
 					// Read file as array buffer
-					const fileBuffer = await file.arrayBuffer();
+					const fileData = file.data instanceof Uint8Array ? file.data : new Uint8Array(await file.arrayBuffer());
+					const fileBuffer = fileData.buffer.slice(fileData.byteOffset, fileData.byteOffset + fileData.byteLength);
 					const fileView = new DataView(fileBuffer);
 					let emuFlags = file.flags;
 					emuFlags |= fileView.getUint8(0x23) === 0x10 ? 0x04 : 0x00;
