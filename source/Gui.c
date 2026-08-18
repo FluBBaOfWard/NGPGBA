@@ -17,7 +17,7 @@
 #include "K2GE/Version.h"
 #include "SN76496/Version.h"
 
-#define EMUVERSION "V0.6.0 2026-08-16"
+#define EMUVERSION "V0.6.0 2026-08-18"
 
 void hacksInit(void);
 
