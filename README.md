@@ -7,18 +7,18 @@ This is a SNK Neogeo Pocket (Color) emulator for the Nintendo GBA.
 ## How to use
 
 On Windows run NGPGBA.exe to add roms to the emulator, you can also add a real bios.
-Do no overwrite the original .gba file!
-On other platforms you can use the [HTML Builder](https://flubbaofward.github.io/NGPGBA/Builder.html) to add roms and bioses, always add the bios files before any normal roms.
+Do no overwrite the original .gba file! On other platforms you can use the
+[HTML Builder](https://flubbaofward.github.io/NGPGBA/Builder.html) to add roms
+and bioses (even zip files), always add the bios files before any normal roms.
 
 The header is defined in Emubase.h, it's 64 bytes long, the size field is in
-little endian, the 32bit id is 0x1A50474E (LE).
-The name field can be 31 bytes plus a terminating zero.
-There is an example header file included, "ngp.header".
+little endian, the 32bit id is 0x1A50474E (LE). The name field can be 31 bytes
+plus a terminating zero. There is an example header file included, "ngp.header".
 
-When the emulator starts, you press L+R to open up the menu.
-Now you can use the cross to navigate the menus, A to select an option, B to
- go back a step. To get maximum speed turn off sound and set Z80 CPU to 1/16
- speed, maybe even turn on overclock EWRAM.
+When the emulator starts, you press L+R to open up the menu. Now you can use
+the cross to navigate the menus, A to select an option, B to go back a step.
+To get maximum speed turn off sound and set Z80 CPU to 1/16 speed, maybe even
+turn on EWRAM Overclock.
 
 ## Menu
 
@@ -62,7 +62,7 @@ Now you can use the cross to navigate the menus, A to select an option, B to
   * 200%: Game can run up to double speed.
   * Max: Games can run up to 4 times normal speed.
   * 50%: Game runs at half speed.
-* Autoload State: Toggle Savestate autoloading. Automagically load the
+* Autoload State: Toggle Savestate autoloading. Automagitally load the
  savestate associated with the current game.
 * Autosave Settings: This will save settings when leaving menu if any changes
  are made.

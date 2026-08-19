@@ -1,7 +1,7 @@
 NGPGBA revision history
 -=-=-=-=-=-=-=-=-=-=-=-
 
-V0.6.0 - 2026-08-18 (FluBBa)
+V0.6.0 - 2026-08-19 (FluBBa)
 	Added saving/loading of config/States.
 	Added zip support to HTML builder.
 
